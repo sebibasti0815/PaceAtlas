@@ -1,0 +1,517 @@
+<Window
+    x:Class="PaceAtlas.WinUIPrototype.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Pace Atlas · ME/CFS Verlauf">
+    <Grid Background="#EEF3F8">
+        <Grid.Resources>
+            <SolidColorBrush x:Key="RunningIntervalBrush" Color="#FFEEED" />
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Background="#20334C" Padding="22,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+                    <Button Click="ShowAbout_Click" Padding="0" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Info ...">
+                        <Image Source="Assets/pace-atlas.png" Width="56" Height="56" />
+                    </Button>
+                    <StackPanel Spacing="4" VerticalAlignment="Center">
+                        <TextBlock Text="Pace Atlas" FontSize="23" FontWeight="SemiBold" Foreground="White" />
+                        <TextBlock x:Name="AppSubtitle" Text="ME/CFS Verlauf" Foreground="#CEE0EB" />
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                  <Border BorderBrush="#96B9CB" BorderThickness="1" CornerRadius="6" Padding="10,4">
+                   <StackPanel Spacing="2">
+                    <TextBlock Text="Pacing Timer" Foreground="White" FontSize="12" FontWeight="SemiBold" />
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <TextBlock Text="Aktiv (Min.):" Foreground="White" VerticalAlignment="Center" />
+                    <NumberBox x:Name="PacingActiveMinutes" Width="68" Minimum="2" Maximum="300"
+                               SpinButtonPlacementMode="Compact" ValueChanged="PacingMinutes_Changed" />
+                    <TextBlock Text="Pause (Min.):" Foreground="White" VerticalAlignment="Center" Margin="6,0,0,0" />
+                    <NumberBox x:Name="PacingPauseMinutes" Width="68" Minimum="1" Maximum="120"
+                               SpinButtonPlacementMode="Compact" ValueChanged="PacingMinutes_Changed" />
+                    <Button x:Name="PacingStartButton" Width="38" Content="zZz" Click="PacingStart_Click"
+                            ToolTipService.ToolTip="Pacing starten" />
+                    <Button x:Name="PacingBreakButton" Width="38" Content="Ⅱ" Click="PacingBreak_Click"
+                            ToolTipService.ToolTip="Pause machen" />
+                    <TextBlock x:Name="PacingStatus" Width="108" Foreground="White" VerticalAlignment="Center"
+                               Text="Timer aus" />
+                    </StackPanel>
+                   </StackPanel>
+                  </Border>
+                  <ComboBox x:Name="LanguageChoice" Width="93" VerticalAlignment="Center"
+                            SelectionChanged="LanguageChoice_SelectionChanged" ToolTipService.ToolTip="Sprache / Language">
+                    <ComboBoxItem Tag="de">
+                      <Image Source="Assets/flag-de.png" Width="30" Height="19" />
+                    </ComboBoxItem>
+                    <ComboBoxItem Tag="en">
+                      <Image Source="Assets/flag-us.png" Width="30" Height="19" />
+                    </ComboBoxItem>
+                  </ComboBox>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="16,12,16,16" RowSpacing="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" MinHeight="320" />
+                <RowDefinition Height="235" />
+            </Grid.RowDefinitions>
+
+            <Border x:Name="MainContentBorder" Background="White" CornerRadius="12" Padding="20,14"
+                    BorderBrush="#D5E2EA" BorderThickness="1" SizeChanged="MainContentBorder_SizeChanged">
+                <TabView x:Name="MainTabs" IsAddTabButtonVisible="False" CanReorderTabs="True"
+                         SelectionChanged="MainTabs_SelectionChanged"
+                         TabDragCompleted="MainTabs_TabDragCompleted">
+                  <TabView.Resources>
+                    <SolidColorBrush x:Key="TabViewSelectionIndicatorForeground" Color="#167789" />
+                    <SolidColorBrush x:Key="TabViewItemHeaderForegroundSelected" Color="#20334C" />
+                    <SolidColorBrush x:Key="TabViewItemHeaderBackground" Color="#E2EDF3" />
+                    <SolidColorBrush x:Key="TabViewItemHeaderBackgroundPointerOver" Color="#D6E7EF" />
+                    <SolidColorBrush x:Key="TabViewItemHeaderBackgroundSelected" Color="White" />
+                    <SolidColorBrush x:Key="TabViewItemHeaderBackgroundSelectedPointerOver" Color="White" />
+                  </TabView.Resources>
+                    <TabViewItem x:Name="StateTab" Header="Zustand erfassen" IsClosable="False">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                <ScrollViewer x:Name="FormScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel x:Name="FormContent" Spacing="12" Margin="0,8,0,0">
+                        <TextBlock Text="Zustand erfassen" FontSize="20" FontWeight="SemiBold" />
+                        <Border x:Name="StateEditingBanner" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
+                            <TextBlock x:Name="StateEditingText" Foreground="#174B57" TextWrapping="Wrap" />
+                        </Border>
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <TextBlock Text="Zeit:" VerticalAlignment="Center" />
+                                <CalendarDatePicker x:Name="StateDate" Width="150" PlaceholderText="TT.MM.JJJJ" />
+                                <TextBox x:Name="StateTime" Width="108" PlaceholderText="HH:mm" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+                                <TextBlock Text="Allgemein:" VerticalAlignment="Center" />
+                                <ComboBox x:Name="Overall" MinWidth="205" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+                                <TextBlock Text="PEM:" VerticalAlignment="Center" />
+                                <ComboBox x:Name="Pem" MinWidth="110" />
+                            </StackPanel>
+                            <CheckBox x:Name="Crash" Grid.Column="3" Content="Crash" VerticalAlignment="Center" />
+                            <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+                                <TextBlock Text="Puls:" VerticalAlignment="Center" />
+                                <NumberBox x:Name="Pulse" Minimum="0" Maximum="250" Value="0"
+                                           Width="100" SpinButtonPlacementMode="Compact" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Symptome" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                                <Button Content="Alle: keine" Click="MarkNone_Click" />
+                                <Button Content="Alle: nicht beurteilt" Click="MarkUnassessed_Click" />
+                            </StackPanel>
+                        </Grid>
+                        <Grid x:Name="SymptomGrid" ColumnSpacing="12" RowSpacing="8" SizeChanged="Fields_SizeChanged" />
+                        <TextBlock Text="Schmerzorte" FontSize="14" FontWeight="SemiBold" />
+                        <Grid x:Name="PainGrid" ColumnSpacing="8" RowSpacing="2" SizeChanged="PainGrid_SizeChanged" />
+                    </StackPanel>
+                </ScrollViewer>
+                                <StackPanel Grid.Row="1" Spacing="8" Margin="0,8,0,0">
+                        <TextBox x:Name="Note" Header="Notiz" PlaceholderText="Was ist dir sonst aufgefallen?"
+                                 AcceptsReturn="True" TextWrapping="Wrap" Height="74" />
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Button x:Name="StateSaveButton" Content="Zustand speichern" Click="Save_Click"
+                                    Background="#167789" Foreground="White" />
+                            <Button Content="Neuer Eintrag" Click="Reset_Click" />
+                            <TextBlock x:Name="Status" VerticalAlignment="Center" Foreground="#316073" />
+                        </StackPanel>
+                </StackPanel>
+                </Grid>
+                    </TabViewItem>
+                    <TabViewItem x:Name="IntervalTab" Header="Aktivität, Ruhe und Schlaf" IsClosable="False">
+                        <Grid>
+                            <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel Spacing="12" Margin="0,8,0,0">
+                                <TextBlock Text="Zeitraum erfassen" FontSize="20" FontWeight="SemiBold" />
+                                <Border x:Name="IntervalEditingBanner" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
+                                    <TextBlock x:Name="IntervalEditingText" Foreground="#174B57" TextWrapping="Wrap" />
+                                </Border>
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                    <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                        <TextBlock Text="Typ:" VerticalAlignment="Center" />
+                                        <ComboBox x:Name="IntervalKind" MinWidth="145" SelectionChanged="IntervalKind_SelectionChanged" />
+                                        <TextBlock Text="Beginn:" VerticalAlignment="Center" />
+                                        <CalendarDatePicker x:Name="IntervalStartDate" Width="150" PlaceholderText="TT.MM.JJJJ" />
+                                        <TextBox x:Name="IntervalStartTime" Width="108" PlaceholderText="HH:mm" />
+                                        <TextBlock Text="Ende:" VerticalAlignment="Center" />
+                                        <CalendarDatePicker x:Name="IntervalEndDate" Width="150" PlaceholderText="TT.MM.JJJJ" />
+                                        <TextBox x:Name="IntervalEndTime" Width="108" PlaceholderText="HH:mm" />
+                                        <CheckBox x:Name="IntervalRunning" Content="Läuft noch – Ende später eintragen"
+                                                  VerticalAlignment="Center" Checked="IntervalRunning_Changed" Unchecked="IntervalRunning_Changed" />
+                                    </StackPanel>
+                                </ScrollViewer>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                  <TextBlock x:Name="IntervalDimensionsTitle" Text="Belastungsarten (Mehrfachauswahl)" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                  <Button Content="…" Click="ManageDimensions_Click" />
+                                </StackPanel>
+                                <ItemsControl x:Name="IntervalDimensions">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapGrid Orientation="Horizontal" ItemWidth="175" ItemHeight="40" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                                <ComboBox x:Name="IntervalIntensity" Header="Intensität" MinWidth="190" HorizontalAlignment="Left" />
+                                <ComboBox x:Name="SleepRecovery" Header="Erholung nach dem Schlaf" MinWidth="205" HorizontalAlignment="Left" Visibility="Collapsed" />
+                                <TextBlock Text="Akustischer Schutz" FontWeight="SemiBold" />
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <CheckBox x:Name="IntervalNc" Content="NC-Kopfhörer" Tag="NC-Kopfhörer" />
+                                    <CheckBox x:Name="IntervalLoop" Content="Loop" Tag="Loop" />
+                                    <CheckBox x:Name="IntervalCalmer" Content="Calmer" Tag="Calmer" />
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                        <StackPanel Grid.Row="1" Spacing="8" Margin="0,8,0,0">
+                                <TextBox x:Name="IntervalNote" Header="Notiz" PlaceholderText="Was ist dir sonst aufgefallen?"
+                                         AcceptsReturn="True" TextWrapping="Wrap" Height="74" />
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <Button x:Name="IntervalSaveButton" Content="Zeitraum speichern" Click="SaveInterval_Click" Background="#167789" Foreground="White" />
+                                    <Button Content="Neuer Eintrag" Click="ResetInterval_Click" />
+                                    <TextBlock x:Name="IntervalStatus" VerticalAlignment="Center" Foreground="#316073" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </TabViewItem>
+                    <TabViewItem x:Name="MeasureTab" Header="Maßnahme" IsClosable="False">
+                        <Grid>
+                            <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="210" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                                <StackPanel Spacing="12" Margin="0,8,0,0">
+                                    <TextBlock Text="Maßnahme erfassen" FontSize="20" FontWeight="SemiBold" />
+                                    <Border x:Name="MeasureEditingBanner" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
+                                        <TextBlock x:Name="MeasureEditingText" Foreground="#174B57" TextWrapping="Wrap" />
+                                    </Border>
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <TextBlock Text="Zeit:" VerticalAlignment="Center" />
+                                        <CalendarDatePicker x:Name="MeasureDate" Width="150" PlaceholderText="TT.MM.JJJJ" />
+                                        <TextBox x:Name="MeasureTime" Width="108" PlaceholderText="HH:mm" />
+                                        <TextBlock Text="Maßnahme:" VerticalAlignment="Center" />
+                                        <ComboBox x:Name="MeasureName" Width="190" />
+                                        <Button Content="…" Click="ManageMeasures_Click" />
+                                        <TextBlock Text="Dosis (optional):" VerticalAlignment="Center" />
+                                        <TextBox x:Name="MeasureDose" Width="150" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                            <StackPanel Grid.Row="1" Spacing="8" Margin="0,8,0,0">
+                                <TextBox x:Name="MeasureNote" Header="Notiz" PlaceholderText="Was ist dir sonst aufgefallen?"
+                                         AcceptsReturn="True" TextWrapping="Wrap" Height="74" />
+                                <StackPanel Orientation="Horizontal" Spacing="12">
+                                    <Button x:Name="MeasureSaveButton" Content="Maßnahme speichern" Click="SaveMeasure_Click" Background="#167789" Foreground="White" />
+                                    <Button Content="Neuer Eintrag" Click="ResetMeasure_Click" />
+                                    <TextBlock x:Name="MeasureStatus" VerticalAlignment="Center" Foreground="#316073" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </TabViewItem>
+                    <TabViewItem x:Name="MedicationTab" Header="Medikamente und Supplemente" IsClosable="False">
+                      <TabView x:Name="MedicationTabs" IsAddTabButtonVisible="False" CanReorderTabs="True"
+                               TabDragCompleted="MedicationTabs_TabDragCompleted">
+                        <TabView.Resources>
+                          <SolidColorBrush x:Key="TabViewSelectionIndicatorForeground" Color="#167789" />
+                          <SolidColorBrush x:Key="TabViewItemHeaderForegroundSelected" Color="#20334C" />
+                          <SolidColorBrush x:Key="TabViewItemHeaderBackground" Color="#E2EDF3" />
+                          <SolidColorBrush x:Key="TabViewItemHeaderBackgroundPointerOver" Color="#D6E7EF" />
+                          <SolidColorBrush x:Key="TabViewItemHeaderBackgroundSelected" Color="White" />
+                          <SolidColorBrush x:Key="TabViewItemHeaderBackgroundSelectedPointerOver" Color="White" />
+                        </TabView.Resources>
+                        <TabViewItem x:Name="IntakeTab" Header="Tagesprotokoll" IsClosable="False">
+                          <Grid>
+                            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                            <TextBlock Text="Tagesprotokoll" FontSize="20" FontWeight="SemiBold" Margin="0,8,0,8" />
+                            <Grid Grid.Row="1" Margin="0,8,0,10">
+                              <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                              <StackPanel Orientation="Horizontal" Spacing="16">
+                                <CalendarDatePicker x:Name="IntakeDate" Header="Einnahmen am" Width="170" PlaceholderText="TT.MM.JJJJ" DateChanged="IntakeDate_DateChanged" />
+                                <TextBlock VerticalAlignment="Bottom" Margin="0,0,0,7"
+                                           Text="Offen bedeutet: keine Angabe zur tatsächlichen Einnahme." />
+                              </StackPanel>
+                              <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Bottom">
+                                <Button Content="Alles genommen" Click="AllTaken_Click" />
+                                <Button Content="Alles offen" Click="AllPending_Click" />
+                              </StackPanel>
+                            </Grid>
+                            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto">
+                              <Grid>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                                <Grid x:Name="IntakeHeader" />
+                                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                  <StackPanel x:Name="IntakeRows" Spacing="2" />
+                                </ScrollViewer>
+                              </Grid>
+                            </ScrollViewer>
+                            <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
+                              <Button Content="Einnahmen für diesen Tag speichern" Click="SaveIntakes_Click" Background="#167789" Foreground="White" />
+                              <TextBlock x:Name="IntakeStatus" VerticalAlignment="Center" Foreground="#316073" />
+                            </StackPanel>
+                          </Grid>
+                        </TabViewItem>
+                        <TabViewItem x:Name="StockTab" Header="Packungen und Vorrat" IsClosable="False">
+                          <Grid>
+                            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                            <TextBlock Text="Packungen und Vorrat" FontSize="20" FontWeight="SemiBold" Margin="0,8,0,8" />
+                            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10" Margin="0,8,0,8">
+                              <TextBox x:Name="StockManufacturer" Header="Hersteller" Width="160" />
+                              <TextBox x:Name="StockSupplier" Header="Lieferant" Width="160" />
+                              <NumberBox x:Name="StockPackUnits" Header="Inhalt je Packung" Width="140" Minimum="0" SpinButtonPlacementMode="Compact" />
+                              <NumberBox x:Name="StockPackPrice" Header="Preis €" Width="120" Minimum="0" SpinButtonPlacementMode="Compact" />
+                              <Button Content="Packungsdaten speichern" VerticalAlignment="Bottom" Click="SaveStockProduct_Click" Background="#167789" Foreground="White" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10" Margin="0,0,0,8">
+                              <NumberBox x:Name="StockPurchasePacks" Header="Gekaufte Packungen" Width="160" Minimum="0" SpinButtonPlacementMode="Compact" />
+                              <Button Content="Nachkauf erfassen" VerticalAlignment="Bottom" Click="RecordPurchase_Click" Background="#167789" Foreground="White" />
+                              <NumberBox x:Name="StockCounted" Header="Gezählter Bestand" Width="160" Minimum="0" SpinButtonPlacementMode="Compact" />
+                              <Button Content="Bestand setzen" VerticalAlignment="Bottom" Click="SetStock_Click" Background="#167789" Foreground="White" />
+                            </StackPanel>
+                            <StackPanel Grid.Row="3" Margin="0,0,0,8" Spacing="2">
+                              <TextBlock x:Name="StockSummary" TextWrapping="Wrap" />
+                              <TextBlock x:Name="StockStatus" Foreground="#316073" />
+                            </StackPanel>
+                            <ScrollViewer Grid.Row="4" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                              <Grid>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                                <Grid x:Name="StockHeader" />
+                                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                  <ListView x:Name="StockList" SelectionChanged="StockList_SelectionChanged"
+                                            ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.HorizontalScrollMode="Disabled">
+                                    <ListView.ItemContainerStyle>
+                                      <Style TargetType="ListViewItem"><Setter Property="MinHeight" Value="27" /><Setter Property="Padding" Value="0" /></Style>
+                                    </ListView.ItemContainerStyle>
+                                  </ListView>
+                                </ScrollViewer>
+                              </Grid>
+                            </ScrollViewer>
+                          </Grid>
+                        </TabViewItem>
+                        <TabViewItem x:Name="PlanTab" Header="Einnahmeplan" IsClosable="False">
+                        <Grid>
+                            <Grid.RowDefinitions><RowDefinition Height="2*" /><RowDefinition Height="Auto" /><RowDefinition Height="3*" /></Grid.RowDefinitions>
+                            <Grid Grid.Row="0" MinHeight="100" Margin="0,8,0,0">
+                                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                                <TextBlock Text="Gespeicherter Einnahmeplan" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,6" />
+                                <Grid x:Name="PlanHeader" Grid.Row="1" />
+                                  <ListView x:Name="PlanList" Grid.Row="2" SelectionChanged="PlanList_SelectionChanged"
+                                            ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                                    <ListView.ItemContainerStyle>
+                                      <Style TargetType="ListViewItem"><Setter Property="MinHeight" Value="27" /><Setter Property="Padding" Value="0" /></Style>
+                                    </ListView.ItemContainerStyle>
+                                  </ListView>
+                            </Grid>
+                            <Border Grid.Row="1" Margin="0,9,0,0" Background="#F2F7FA" BorderBrush="#D1E0E9"
+                                    BorderThickness="0,1,0,1" CornerRadius="5" Padding="12,8">
+                                <TextBlock Text="Einnahme bearbeiten" FontSize="18" FontWeight="SemiBold" />
+                            </Border>
+                            <ScrollViewer Grid.Row="2" Background="White" VerticalScrollBarVisibility="Auto">
+                                <StackPanel Spacing="12" Margin="0,12,0,8">
+                                    <Border x:Name="PlanEditingBanner" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
+                                        <TextBlock x:Name="PlanEditingText" Foreground="#174B57" TextWrapping="Wrap" />
+                                    </Border>
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <TextBox x:Name="PlanTime" Header="Uhrzeit (HH:mm)" Width="150" />
+                                        <TextBox x:Name="PlanName" Header="Präparat" Width="240" />
+                                        <TextBox x:Name="PlanQuantity" Header="Anzahl" Width="100" />
+                                        <ComboBox x:Name="PlanForm" Header="Form" Width="180" />
+                                        <TextBox x:Name="PlanDose" Header="Dosierung" Width="145" />
+                                        <CalendarDatePicker x:Name="PlanStartDate" Header="Ab wann" Width="175" PlaceholderText="TT.MM.JJJJ" />
+                                        <CalendarDatePicker x:Name="PlanEndDate" Header="Bis wann" Width="175" PlaceholderText="TT.MM.JJJJ" IsEnabled="False" />
+                                        <CheckBox x:Name="PlanOngoing" Content="Läuft noch" IsChecked="True" VerticalAlignment="Bottom" Margin="0,0,0,6"
+                                                  Checked="PlanOngoing_Changed" Unchecked="PlanOngoing_Changed" />
+                                    </StackPanel>
+                                    <TextBlock Text="Warum? (Mehrfachauswahl)" FontWeight="SemiBold" />
+                                    <ItemsControl x:Name="PlanGoals">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate><WrapGrid Orientation="Horizontal" ItemWidth="230" ItemHeight="38" /></ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <TextBox x:Name="NewGoalName" Header="Grund ergänzen" Width="220" />
+                                        <Button Content="Hinzufügen" VerticalAlignment="Bottom" Click="AddGoal_Click" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
+                                        <Button x:Name="PlanSaveButton" Content="Eintrag speichern" Click="SavePlan_Click" Background="#167789" Foreground="White" />
+                                        <Button Content="Neuer Eintrag" Click="ResetPlan_Click" />
+                                        <Button Content="Eintrag löschen" Click="DeletePlan_Click" />
+                                        <TextBlock x:Name="PlanStatus" VerticalAlignment="Center" Foreground="#316073" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                        </TabViewItem>
+                      </TabView>
+                    </TabViewItem>
+                    <TabViewItem x:Name="AnalysisTab" Header="Auswertung" IsClosable="False">
+                      <Grid x:Name="AnalysisLayout" Loaded="AnalysisLayout_Loaded" RowSpacing="10" Margin="0,8,0,0">
+                          <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                          <Grid x:Name="AnalysisHeader" ColumnSpacing="12" VerticalAlignment="Center" SizeChanged="AnalysisHeader_SizeChanged">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                            <TextBlock Text="Auswertung:" VerticalAlignment="Center" />
+                            <ComboBox x:Name="AnalysisPeriod" Grid.Column="1" Width="170" SelectionChanged="AnalysisPeriod_Changed" />
+                            <CheckBox x:Name="CarryCondition" Grid.Column="2" Content="Zustand fortführen" VerticalAlignment="Center"
+                                      Checked="CarryCondition_Changed" Unchecked="CarryCondition_Changed" />
+                            <ComboBox x:Name="CarryDuration" Grid.Column="3" Width="125" VerticalAlignment="Center"
+                                      SelectionChanged="CarryDuration_Changed" />
+                            <TextBlock x:Name="AnalysisCounts" Grid.Column="4" VerticalAlignment="Center" TextWrapping="Wrap" />
+                          </Grid>
+                          <TabView x:Name="AnalysisVisualTabs" Grid.Row="1" IsAddTabButtonVisible="False">
+                          <TabViewItem Header="Verlauf" IsClosable="False">
+                          <Grid RowSpacing="8">
+                            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                            <TextBlock x:Name="AnalysisSummary" TextWrapping="Wrap" Margin="8,0" />
+                            <Border x:Name="AnalysisChartBorder" Grid.Row="1" BorderBrush="#D5E2EA" BorderThickness="1" CornerRadius="8" Background="White" Padding="8"
+                                    SizeChanged="AnalysisChartBorder_SizeChanged">
+                            <Canvas x:Name="AnalysisChart" MinHeight="120" Background="White" SizeChanged="AnalysisChart_SizeChanged">
+                              <Canvas.Resources>
+                                <SolidColorBrush x:Key="ChartAxisBrush" Color="#D2DCE6" />
+                                <SolidColorBrush x:Key="ChartLineBrush" Color="#2B8FB3" />
+                                <SolidColorBrush x:Key="ChartPemBrush" Color="#E89E39" />
+                                <SolidColorBrush x:Key="ChartCrashBrush" Color="#DE4B50" />
+                              </Canvas.Resources>
+                            </Canvas>
+                          </Border>
+                          </Grid>
+                          </TabViewItem>
+                          <TabViewItem Header="Heatmap · Tage" IsClosable="False">
+                            <Grid RowSpacing="8">
+                              <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                              <TextBlock x:Name="HeatmapLegend" TextWrapping="Wrap" Margin="8,0" />
+                              <TextBlock x:Name="HeatmapLimitNotice" Grid.Row="1" TextWrapping="Wrap" Margin="8,0" Foreground="#9A5600" Visibility="Collapsed" />
+                              <ScrollViewer x:Name="DailyHeatmapViewport" Grid.Row="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                                            SizeChanged="HeatmapViewport_SizeChanged"
+                                            BorderBrush="#D5E2EA" BorderThickness="1" Background="White">
+                                <Canvas x:Name="AnalysisHeatmap" Background="White" />
+                              </ScrollViewer>
+                            </Grid>
+                          </TabViewItem>
+                          <TabViewItem Header="Heatmap · Wochendurchschnitt" IsClosable="False">
+                            <Grid RowSpacing="8">
+                              <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                              <TextBlock x:Name="WeeklyHeatmapLegend" TextWrapping="Wrap" Margin="8,0" />
+                              <ScrollViewer x:Name="WeeklyHeatmapViewport" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                                            SizeChanged="HeatmapViewport_SizeChanged"
+                                            BorderBrush="#D5E2EA" BorderThickness="1" Background="White">
+                                <Canvas x:Name="WeeklyHeatmap" Background="White" />
+                              </ScrollViewer>
+                            </Grid>
+                          </TabViewItem>
+                          <TabViewItem Header="Automatische Einordnung" IsClosable="False">
+                        <Border BorderBrush="#D5E2EA" BorderThickness="1" CornerRadius="8" Padding="12">
+                          <Grid RowSpacing="10">
+                            <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                            <TabView x:Name="AnalysisTabs" Grid.Row="0" IsAddTabButtonVisible="False">
+                              <TabViewItem Header="Lokal" IsClosable="False">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                  <TextBlock x:Name="LocalAssessment" TextWrapping="Wrap" Margin="8" />
+                                </ScrollViewer>
+                              </TabViewItem>
+                              <TabViewItem Header="KI" IsClosable="False">
+                                <Grid RowSpacing="8">
+                                  <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                                  <TextBlock x:Name="AiInfo" TextWrapping="Wrap" Margin="8,4,8,0" />
+                                  <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                    <RichTextBlock x:Name="AiResult" TextWrapping="Wrap" Margin="8" />
+                                  </ScrollViewer>
+                                </Grid>
+                              </TabViewItem>
+                            </TabView>
+                            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10">
+                              <Button x:Name="AnalyzeAiButton" Content="Mit KI analysieren" Click="AnalyzeAi_Click"
+                                      Background="#167789" Foreground="White" />
+                              <Button Content="Verbindung ..." Click="ConfigureAi_Click" />
+                            </StackPanel>
+                          </Grid>
+                        </Border>
+                          </TabViewItem>
+                          </TabView>
+                      </Grid>
+                    </TabViewItem>
+                </TabView>
+            </Border>
+
+            <Border x:Name="EntriesPanel" Grid.Row="1" Background="White" CornerRadius="12"
+                    Padding="20,14" BorderBrush="#D5E2EA" BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <TextBlock Text="Bisheriger Verlauf" FontSize="19" FontWeight="SemiBold" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                            <CheckBox x:Name="RunningOnlyFilter" Content="Nur laufende" VerticalAlignment="Center"
+                                      Checked="RunningOnlyFilter_Changed" Unchecked="RunningOnlyFilter_Changed" />
+                            <CheckBox x:Name="HideIntakesFilter" Content="Medikamente/Einnahmen ausblenden" VerticalAlignment="Center"
+                                      Checked="RunningOnlyFilter_Changed" Unchecked="RunningOnlyFilter_Changed" />
+                            <Button x:Name="EndRunningButton" Content="Laufenden Zeitraum jetzt beenden"
+                                    IsEnabled="False" Click="EndRunning_Click" />
+                        </StackPanel>
+                        <Button x:Name="ToggleEntriesButton" Grid.Column="2" Width="34" Height="34" Margin="12,0,0,0"
+                                Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                VerticalAlignment="Center" Click="ToggleEntries_Click"
+                                ToolTipService.ToolTip="Bisherigen Verlauf ausklappen">
+                            <Grid Width="18" Height="18">
+                                <Path x:Name="ExpandEntriesIcon" Data="M 2,12 L 9,5 L 16,12"
+                                      Stroke="#20334C" StrokeThickness="2" StrokeLineJoin="Round" />
+                                <Path x:Name="CollapseEntriesIcon" Data="M 2,5 L 9,12 L 16,5"
+                                      Stroke="#20334C" StrokeThickness="2" StrokeLineJoin="Round" Visibility="Collapsed" />
+                            </Grid>
+                        </Button>
+                    </Grid>
+                    <TextBlock x:Name="TodaySummary" Grid.Row="1" FontSize="13" Margin="0,8,0,0" TextWrapping="Wrap" Foreground="#35546A" />
+                    <ScrollViewer Grid.Row="2" Margin="0,8,0,0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                      <Grid>
+                        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                        <Grid x:Name="EntryHeader" />
+                        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                        <ListView x:Name="EntryList" SelectionChanged="EntryList_SelectionChanged"
+                                  RightTapped="EntryList_RightTapped" DoubleTapped="EntryList_DoubleTapped"
+                                  ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.HorizontalScrollMode="Disabled">
+                          <ListView.ContextFlyout>
+                            <MenuFlyout Opening="EntryMenu_Opening">
+                              <MenuFlyoutItem x:Name="EditEntryMenu" Text="Bearbeiten" Click="EditEntry_Click" />
+                              <MenuFlyoutItem x:Name="EndEntryMenu" Text="Laufenden Zeitraum jetzt beenden" Click="EndRunning_Click" />
+                              <MenuFlyoutItem x:Name="DeleteEntryMenu" Text="Löschen" Click="DeleteEntry_Click" />
+                              <MenuFlyoutSeparator />
+                              <MenuFlyoutItem Text="CSV exportieren" Click="ExportEntries_Click" />
+                              <MenuFlyoutItem Text="Backup erstellen" Click="BackupEntries_Click" />
+                              <MenuFlyoutItem Text="Backup einspielen" Click="RestoreEntries_Click" />
+                            </MenuFlyout>
+                          </ListView.ContextFlyout>
+                          <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                              <Setter Property="MinHeight" Value="30" />
+                              <Setter Property="Padding" Value="0" />
+                            </Style>
+                          </ListView.ItemContainerStyle>
+                        </ListView>
+                        </ScrollViewer>
+                      </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

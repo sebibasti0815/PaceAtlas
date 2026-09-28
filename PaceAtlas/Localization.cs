@@ -1,0 +1,131 @@
+using System.Globalization;
+
+namespace PaceAtlas;
+
+// Stored identifiers are fixed regardless of the language of the interface.
+internal static class Localization
+{
+    public static string SystemLanguage => CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "de" ? "de" : "en";
+    private static readonly Dictionary<string, string> English = new(StringComparer.Ordinal)
+    {
+        ["PaceAtlas · ME/CFS Verlauf"] = "PaceAtlas · ME/CFS Tracker",
+        ["Zustand erfassen"] = "Record condition", ["Aktivität, Ruhe und Schlaf"] = "Activity, rest and sleep",
+        ["Maßnahme"] = "Intervention", ["Zustand"] = "Condition", ["Medikamente und Supplemente"] = "Medication and supplements",
+        ["Einnahmeplan"] = "Medication schedule", ["Tagesprotokoll"] = "Daily log",
+        ["Packungen und Vorrat"] = "Packages and inventory", ["Datenliste"] = "Entries", ["Auswertung"] = "Analysis", ["Automatische Einordnung"] = "Automated assessment", ["Lokal"] = "Local", ["Mit KI analysieren"] = "Analyze with AI", ["Verbindung ..."] = "Connection ...",
+        ["Zeit:"] = "Time:", ["Allgemein:"] = "Overall:", ["Puls (optional):"] = "Pulse (optional):",
+        ["Symptome"] = "Symptoms", ["Schmerzorte"] = "Pain locations",
+        ["Erschöpfung"] = "Fatigue", ["Schmerzen"] = "Pain", ["Geräuschempfindlichkeit"] = "Sound sensitivity",
+        ["Ohrgeräusche"] = "Tinnitus",
+        ["Lichtempfindlichkeit"] = "Light sensitivity", ["Atemprobleme"] = "Breathing difficulties",
+        ["Schwindel/Kreislauf"] = "Dizziness/circulation", ["Herzrasen"] = "Racing heart",
+        ["Zittern"] = "Trembling", ["Kältegefühl/Schüttelfrost"] = "Feeling cold/chills",
+        ["Angst/Unruhe"] = "Anxiety/restlessness", ["Nicht erholsamer Schlaf"] = "Unrefreshing sleep",
+        ["Sehkraft"] = "Vision", ["Finger"] = "Fingers", ["Hände"] = "Hands", ["Unterarme"] = "Forearms",
+        ["Oberarme"] = "Upper arms", ["Kopf"] = "Head", ["Nacken"] = "Neck", ["Rücken"] = "Back",
+        ["Beine"] = "Legs", ["Füße"] = "Feet", ["Sonstige"] = "Other",
+        ["gut"] = "good", ["leicht eingeschränkt"] = "slightly impaired", ["mittel"] = "moderate",
+        ["schlecht"] = "poor", ["sehr schlecht"] = "very poor", ["nein"] = "no",
+        ["vermutet"] = "suspected", ["erkannt"] = "confirmed", ["keine"] = "none", ["leicht"] = "mild",
+        ["stark"] = "severe", ["extrem"] = "extreme", ["sehr stark"] = "very severe",
+        ["nicht bewertet"] = "not rated", ["nicht beurteilt"] = "not assessed", ["gering"] = "low", ["deutlich"] = "substantial",
+        ["Alle: nicht beurteilt"] = "All: not assessed", ["Alle: keine"] = "All: none",
+        ["Alle Symptome: keine"] = "All symptoms: none",
+        ["Typ:"] = "Type:", ["Beginn:"] = "Start:", ["Ende:"] = "End:",
+        ["Belastungsarten / Ruheformen (Mehrfachauswahl):"] = "Types of activity / rest (select multiple):",
+        ["Auswahl verwalten ..."] = "Manage options ...",
+        ["Intensität:"] = "Intensity:", ["Erholung nach dem Schlaf:"] = "Recovery after sleep:",
+        ["Akustischer Schutz:"] = "Hearing protection:", ["NC-Kopfhörer"] = "Noise-cancelling headphones",
+        ["Loop-Ohrstöpsel"] = "Loop earplugs", ["Calmer-Ohrstöpsel"] = "Calmer earplugs",
+        ["Aktivität"] = "Activity", ["Ruhe"] = "Rest", ["Schlaf"] = "Sleep", ["läuft"] = "ongoing",
+        ["Läuft – Ende später eintragen"] = "Ongoing – enter end later",
+        ["Aktivität jetzt beenden"] = "End activity now",
+        ["Laufenden Zeitraum jetzt beenden"] = "End ongoing interval now",
+        ["Der Beginn eines laufenden Zeitraums darf nicht in der Zukunft liegen."] = "The start of an ongoing interval cannot be in the future.",
+        ["Bitte eine laufende Aktivität in der Datenliste auswählen."] = "Select an ongoing activity in the entries list.",
+        ["Der Beginn einer laufenden Aktivität darf nicht in der Zukunft liegen."] = "The start of an ongoing activity cannot be in the future.",
+        ["Benzodiazepin"] = "Benzodiazepine",
+        ["Körperlich"] = "Physical", ["Kognitiv"] = "Cognitive", ["Sozial"] = "Social",
+        ["Akustisch"] = "Auditory", ["Visuell"] = "Visual", ["Emotional/Stress"] = "Emotional/stress",
+        ["Fahrt/Transport"] = "Travel/transport", ["Hingelegt"] = "Lying down", ["Reizarm"] = "Low stimulation",
+        ["Augen geschlossen"] = "Eyes closed", ["Geschlafen"] = "Slept",
+        ["Dosis (optional):"] = "Dose (optional):", ["Maßnahme:"] = "Intervention:", ["Uhrzeit:"] = "Time:", ["Präparat:"] = "Product:",
+        ["Im gespeicherten Eintrag fehlte die Anzahl; angezeigt wird der aktuelle Planwert."] = "The saved entry did not include a quantity; the current schedule value is shown.",
+        ["Im gespeicherten Eintrag fehlte die Form; angezeigt wird der aktuelle Planwert."] = "The saved entry did not include a form; the current schedule value is shown.",
+        ["Dosis:"] = "Dose:", ["Anzahl:"] = "Quantity:", ["Form:"] = "Form:",
+        ["Warum ..."] = "Why ...", ["Plan speichern"] = "Save schedule", ["Aus Plan entfernen"] = "Remove from schedule",
+        ["Kapsel"] = "Capsule", ["Tablette"] = "Tablet", ["Pflaster"] = "Patch",
+        ["Einnahmen am:"] = "Intakes on:", ["Offen bedeutet: keine Angabe zur tatsächlichen Einnahme."] = "Pending means no intake has been recorded.",
+        ["Alles genommen"] = "Mark all taken", ["Alles offen"] = "Mark all pending",
+        ["Offen"] = "Pending", ["Genommen"] = "Taken", ["Ausgelassen"] = "Skipped",
+        ["Uhrzeit"] = "Time", ["Präparat"] = "Product", ["Dosis"] = "Dose", ["Anzahl"] = "Quantity",
+        ["Form"] = "Form", ["Warum"] = "Why", ["Geplante Dosis"] = "Planned dose",
+        ["Einnahme"] = "Intake", ["Tatsächliche Dosis"] = "Actual dose", ["Tatsächl. Anzahl"] = "Actual quantity",
+        ["Einnahmen für diesen Tag speichern"] = "Save intakes for this day",
+        ["Hersteller:"] = "Manufacturer:", ["Lieferant:"] = "Supplier:",
+        ["Inhalt je Packung:"] = "Units per package:", ["Preis €:"] = "Price €:",
+        ["Gekaufte Packungen:"] = "Packages purchased:", ["Gezählter Bestand (Einheiten):"] = "Counted stock (units):",
+        ["Packungsdaten speichern"] = "Save package details", ["Nachkauf erfassen"] = "Record purchase",
+        ["Bestand setzen"] = "Set stock", ["Buchungen anzeigen"] = "Show transactions",
+        ["Hersteller"] = "Manufacturer", ["Lieferant"] = "Supplier", ["Packung"] = "Package",
+        ["Preis €"] = "Price €", ["Bestand"] = "Stock", ["7 Tage"] = "7 days", ["Hinweis"] = "Notice",
+        ["Zeit"] = "Time", ["Typ"] = "Type", ["Inhalt"] = "Details", ["Notiz"] = "Note",
+        ["Notiz:"] = "Note:", ["Neu"] = "New", ["Zustand speichern"] = "Save condition",
+        ["Zeitraum speichern"] = "Save interval", ["Maßnahme speichern"] = "Save intervention",
+        ["Bearbeiten"] = "Edit", ["Löschen"] = "Delete", ["CSV exportieren"] = "Export CSV",
+        ["Backup erstellen"] = "Create backup", ["Backup einspielen"] = "Restore backup",
+        ["Auswertung:"] = "Analysis:", ["30 Tage"] = "30 days", ["3 Monate"] = "3 months",
+        ["1 Jahr"] = "1 year", ["Gesamt"] = "All time",
+        ["Behandlungsziele auswählen"] = "Select treatment goals", ["Warum? · Behandlungsziele"] = "Why? · Treatment goals",
+        ["Behandlungsziele verwalten"] = "Manage treatment goals", ["Ziele verwalten ..."] = "Manage goals ...",
+        ["Übernehmen"] = "Apply", ["Abbrechen"] = "Cancel", ["Neues Ziel:"] = "New goal:",
+        ["Hinzufügen"] = "Add", ["Ziel löschen"] = "Delete goal", ["Fertig"] = "Done",
+        ["Vorratsbuchungen"] = "Stock transactions", ["Tag"] = "Day", ["Art"] = "Type",
+        ["Einheiten ±"] = "Units ±", ["Packungen"] = "Packages", ["Kosten €"] = "Cost €",
+        ["Buchung löschen"] = "Delete transaction", ["Wiederherstellen"] = "Restore",
+        ["Behandlungsziel löschen"] = "Delete treatment goal",
+        ["Bitte zuerst die Bearbeitung mit Neu beenden."] = "Finish editing with New first.",
+        ["Das Ende muss nach dem Beginn liegen."] = "The end must be later than the start.",
+        ["Bitte mindestens eine Belastungsart oder Ruheform wählen."] = "Select at least one activity or form of rest.",
+        ["Bitte zuerst ein Präparat in der Vorratsliste auswählen."] = "Select a product in the inventory first.",
+        ["Bitte zuerst ein Präparat auswählen."] = "Select a product first.",
+        ["Bitte die Einnahme im Tagesprotokoll ändern oder löschen."] = "Edit or delete this intake in the daily log.",
+        ["Diese Buchung löschen? Bestand und Ausgaben werden neu berechnet."] = "Delete this transaction? Stock and expenses will be recalculated.",
+        ["Die Änderungen am bisherigen Präparat sind noch nicht gespeichert. Jetzt speichern?"] = "Changes to the current product have not been saved. Save now?",
+        ["Bitte einen neuen, eindeutigen Namen eingeben."] = "Enter a new, unique name.",
+        ["Bitte Präparat, geplante Dosis, eine positive Anzahl und die Form eingeben."] = "Enter a product, planned dose, positive quantity and form.",
+        ["Bitte zuerst eine Zeile im Einnahmeplan auswählen."] = "Select a row in the medication schedule first.",
+        ["Dieses Präparat aus dem täglichen Plan entfernen? Bereits gespeicherte Einnahmen bleiben erhalten."] = "Remove this product from the daily schedule? Recorded intakes will be kept.",
+        ["Bitte für jede bestätigte Einnahme die tatsächliche Dosis angeben."] = "Enter the actual dose for every confirmed intake.",
+        ["Bitte für jede bestätigte Einnahme eine positive tatsächliche Anzahl eingeben."] = "Enter a positive actual quantity for every confirmed intake.",
+        ["Einnahmen für diesen Tag gespeichert."] = "Intakes for this day saved.",
+        ["Diesen Eintrag dauerhaft löschen?"] = "Permanently delete this entry?",
+        ["Das Backup ersetzt sämtliche aktuellen Einträge. Fortfahren?"] = "The backup will replace all current entries. Continue?",
+        ["Antidepressiv"] = "Antidepressant", ["Angststörung"] = "Anxiety disorder",
+        ["Antioxidant"] = "Antioxidant", ["Herzfrequenz"] = "Heart rate", ["Bluthochdruck"] = "High blood pressure",
+        ["ME/CFS (Mitochondrien)"] = "ME/CFS (mitochondria)", ["Leaky Gut"] = "Leaky gut",
+        ["Antihistamin"] = "Antihistamine", ["ME/CFS (allg. Schmerzen)"] = "ME/CFS (general pain)",
+        ["ME/CFS (Muskelschwäche)"] = "ME/CFS (muscle weakness)", ["ME/CFS (Erschöpfung)"] = "ME/CFS (fatigue)",
+        ["ME/CFS (Verdauung)"] = "ME/CFS (digestion)", ["entzündungshemmend"] = "Anti-inflammatory",
+        ["Borreliose"] = "Lyme disease", ["Darmaufbau"] = "Gut health", ["Wassereinlagerung"] = "Fluid retention",
+        ["ME/CFS (allg.)"] = "ME/CFS (general)", ["Gewicht"] = "Weight", ["Schwindel"] = "Dizziness",
+        ["Schlafstörung"] = "Sleep disorder",
+        ["Bald leer"] = "Running low", ["nicht erfasst"] = "not recorded",
+        ["Hier erscheint dein Verlauf."] = "Your trend appears here.",
+        ["● Zustand     ● PEM vermutet/erkannt     ● Crash"] = "● Condition     ● PEM suspected/confirmed     ● Crash"
+    };
+
+    public static string Translate(string value, string language) => language == "en" && English.TryGetValue(value, out var english) ? english : value;
+    public static string Canonical(string value) => value switch
+    {
+        "Taken" or "Genommen" or "taken" => "taken", "Skipped" or "Ausgelassen" or "skipped" => "skipped",
+        "Pending" or "Offen" or "pending" => "pending",
+        _ => English.FirstOrDefault(p => p.Value == value).Key ?? value
+    };
+    public static string StatusLabel(string value, string language) => Translate(Canonical(value) switch
+    {
+        "taken" => "Genommen", "skipped" => "Ausgelassen", _ => "Offen"
+    }, language);
+    public static bool IsTaken(string value) => Canonical(value) == "taken";
+    public static bool IsSkipped(string value) => Canonical(value) == "skipped";
+}
