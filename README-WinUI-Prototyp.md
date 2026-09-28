@@ -22,13 +22,17 @@ Das WinUI-Projekt ist für Windows x64 konfiguriert.
 
 ## Windows-Setup erstellen
 
-Unter Windows Inno Setup 6 und die oben genannte .NET/WinUI-Buildumgebung installieren. Die beiden signierten Microsoft-Laufzeitinstaller gemäß `installer/prerequisites/README.md` ablegen. Anschließend im Hauptordner ausführen:
+Unter Windows Inno Setup 6 und die oben genannte .NET/WinUI-Buildumgebung installieren. Die beiden signierten Microsoft-Laufzeitinstaller gemäß `installer/prerequisites/README.md` ablegen. In Visual Studio die Solution-Konfiguration **Installer|x64** wählen und „Projektmappe erstellen“ ausführen. Sie baut WinUI und Core und ruft anschließend `installer/build-installer.ps1` auf. Debug|x64 und Release|x64 erstellen weiterhin ausschließlich die Anwendung. Alternativ im Hauptordner ausführen:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\installer\build-installer.ps1
 ```
 
 Das Skript veröffentlicht die WinUI-Anwendung als frameworkabhängige x64-Version, prüft die Signaturen der Laufzeitinstaller und erzeugt `artifacts\installer\PaceAtlas-Setup-<Version>-win-x64.exe`. Das Setup installiert .NET Desktop Runtime 10 und Windows App SDK Runtime 1.8, erstellt einen Startmenüeintrag und bietet optional eine Desktopverknüpfung. Installation und Deinstallation erfordern Administratorrechte. Eine Deinstallation entfernt die Programmdateien und Verknüpfungen, aber keine persönlichen Daten unter `%LOCALAPPDATA%\PaceAtlas` oder Einstellungen unter `%LOCALAPPDATA%\PaceAtlas.WinUIPrototype`. Beim Wechsel auf einen anderen Rechner die Daten gesondert übertragen.
+
+### Updates anbieten
+
+Das Repository `https://github.com/sebibasti0815/PaceAtlas` ist in der Anwendung fest hinterlegt. Über den Info-Dialog (App-Symbol links oben oder Tray → Info) lässt sich sofort prüfen. Außerdem prüft die Anwendung beim Start höchstens einmal täglich; der letzte Prüfzeitpunkt liegt unter `%LOCALAPPDATA%\PaceAtlas.WinUIPrototype\update-settings.json`. Die Prüfung ruft die öffentlichen GitHub-Releases ab und wählt aus den letzten 100 veröffentlichten, regulären Releases das höchste Versions-Tag, statt sich auf GitHubs zeitlich neueste Release zu verlassen. Das Release-Tag muss die Versionsnummer tragen, etwa `v0.3.2` oder `0.3.2`. Hänge die vom Buildskript erzeugte Datei `PaceAtlas-Setup-<Version>-win-x64.exe` als Release-Asset an; bei abweichendem Dateinamen öffnet die Anwendung stattdessen die Release-Seite. Bei einer neueren Version fragt sie vor dem Öffnen im Standardbrowser. Installation und Datenübernahme geschehen nicht automatisch. Die Prüfung benötigt für öffentliche Releases keine GitHub-Anmeldung.
 
 Falls das Fenster beim Start nicht erscheint, zeigt die Anwendung nun erkannte Startfehler in einem eigenen Dialog an und schreibt sie zusätzlich nach `%LOCALAPPDATA%\PaceAtlas.WinUIPrototype\startup-error.log`.
 

@@ -10,15 +10,20 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Release|x64 = Release|x64
+		Installer|x64 = Installer|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{1F6F2AF9-06F4-4ED7-AC64-66A5E6838935}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{1F6F2AF9-06F4-4ED7-AC64-66A5E6838935}.Debug|x64.Build.0 = Debug|Any CPU
 		{1F6F2AF9-06F4-4ED7-AC64-66A5E6838935}.Release|x64.ActiveCfg = Release|Any CPU
 		{1F6F2AF9-06F4-4ED7-AC64-66A5E6838935}.Release|x64.Build.0 = Release|Any CPU
+		{1F6F2AF9-06F4-4ED7-AC64-66A5E6838935}.Installer|x64.ActiveCfg = Release|Any CPU
+		{1F6F2AF9-06F4-4ED7-AC64-66A5E6838935}.Installer|x64.Build.0 = Release|Any CPU
 		{067182DD-F445-4C96-AF28-89B5E110526C}.Debug|x64.ActiveCfg = Debug|x64
 		{067182DD-F445-4C96-AF28-89B5E110526C}.Debug|x64.Build.0 = Debug|x64
 		{067182DD-F445-4C96-AF28-89B5E110526C}.Release|x64.ActiveCfg = Release|x64
 		{067182DD-F445-4C96-AF28-89B5E110526C}.Release|x64.Build.0 = Release|x64
+		{067182DD-F445-4C96-AF28-89B5E110526C}.Installer|x64.ActiveCfg = Installer|x64
+		{067182DD-F445-4C96-AF28-89B5E110526C}.Installer|x64.Build.0 = Installer|x64
 	EndGlobalSection
 EndGlobal

@@ -44,14 +44,19 @@ public sealed partial class MainWindow : Window
         {
             var version = typeof(MainWindow).Assembly.GetName().Version?.ToString(3) ?? "?";
             var english = selectedLanguage == "en";
+            var aboutContent = new StackPanel { Spacing = 12 };
+            aboutContent.Children.Add(new TextBlock { Text = $"Pace Atlas\nVersion {version}\nME/CFS", TextWrapping = TextWrapping.Wrap });
             var dialog = new ContentDialog
             {
                 XamlRoot = ((FrameworkElement)Content).XamlRoot,
                 Title = english ? "About Pace Atlas" : "Info zu Pace Atlas",
-                Content = new TextBlock { Text = $"Pace Atlas\n{(english ? "Version" : "Version")} {version}\nME/CFS", TextWrapping = TextWrapping.Wrap },
+                Content = aboutContent,
+                PrimaryButtonText = english ? "Check for updates" : "Auf Updates prüfen",
                 CloseButtonText = english ? "Close" : "Schließen"
             };
-            await dialog.ShowAsync();
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)
+                await CheckForUpdatesAsync(true);
         }
         finally { aboutOpen = false; }
     }
@@ -242,6 +247,7 @@ public sealed partial class MainWindow : Window
         UpdateEditingIndicators();
         todaySummaryTimer.Tick += (_, _) => RefreshTodaySummary();
         todaySummaryTimer.Start();
+        ((FrameworkElement)Content).Loaded += (_, _) => _ = CheckForUpdatesAsync(false);
     }
 
     private static void ConfigureTabColors(TabView view)
