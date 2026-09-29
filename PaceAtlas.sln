@@ -4,7 +4,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaceAtlas.Core", "PaceAtlas.Core\PaceAtlas.Core.csproj", "{1F6F2AF9-06F4-4ED7-AC64-66A5E6838935}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaceAtlas.WinUIPrototype", "PaceAtlas.WinUIPrototype\PaceAtlas.WinUIPrototype.csproj", "{067182DD-F445-4C96-AF28-89B5E110526C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaceAtlas.WinUI", "PaceAtlas.WinUI\PaceAtlas.WinUI.csproj", "{067182DD-F445-4C96-AF28-89B5E110526C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

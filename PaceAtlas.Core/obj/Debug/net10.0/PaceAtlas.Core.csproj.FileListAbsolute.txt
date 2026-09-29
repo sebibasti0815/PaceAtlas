@@ -1,0 +1,13 @@
+L:\source\repos\PaceAtlas\PaceAtlas.Core\bin\Debug\net10.0\PaceAtlas.Core.deps.json
+L:\source\repos\PaceAtlas\PaceAtlas.Core\bin\Debug\net10.0\PaceAtlas.Core.dll
+L:\source\repos\PaceAtlas\PaceAtlas.Core\bin\Debug\net10.0\PaceAtlas.Core.pdb
+L:\source\repos\PaceAtlas\PaceAtlas.Core\obj\Debug\net10.0\PaceAtlas.Core.csproj.AssemblyReference.cache
+L:\source\repos\PaceAtlas\PaceAtlas.Core\obj\Debug\net10.0\PaceAtlas.Core.GeneratedMSBuildEditorConfig.editorconfig
+L:\source\repos\PaceAtlas\PaceAtlas.Core\obj\Debug\net10.0\PaceAtlas.Core.AssemblyInfoInputs.cache
+L:\source\repos\PaceAtlas\PaceAtlas.Core\obj\Debug\net10.0\PaceAtlas.Core.AssemblyInfo.cs
+L:\source\repos\PaceAtlas\PaceAtlas.Core\obj\Debug\net10.0\PaceAtlas.Core.csproj.CoreCompileInputs.cache
+L:\source\repos\PaceAtlas\PaceAtlas.Core\obj\Debug\net10.0\PaceAtlas.Core.dll
+L:\source\repos\PaceAtlas\PaceAtlas.Core\obj\Debug\net10.0\refint\PaceAtlas.Core.dll
+L:\source\repos\PaceAtlas\PaceAtlas.Core\obj\Debug\net10.0\PaceAtlas.Core.pdb
+L:\source\repos\PaceAtlas\PaceAtlas.Core\obj\Debug\net10.0\ref\PaceAtlas.Core.dll
+L:\source\repos\PaceAtlas\PaceAtlas.Core\obj\Debug\net10.0\PaceAtla.72506F08.Up2Date

@@ -4,7 +4,7 @@ Lokales ME/CFS-Verlaufsprotokoll für Windows. .NET 10, WinForms, SQLite.
 
 ## Start
 
-Unter Windows mit installiertem .NET-10-SDK im Projektordner `dotnet run` ausführen. Alle Ordner aus dem ZIP zusammen entpacken: `PaceAtlas` referenziert die gemeinsame Bibliothek im benachbarten Ordner `PaceAtlas.Core`. Für eine eigenständige EXE: `dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true`. Die EXE liegt unter `bin/Release/net10.0-windows/win-x64/publish/`. Der getrennte WinUI-Vergleichsprototyp ist in `README-WinUI-Prototyp.md` beschrieben.
+Unter Windows mit installiertem .NET-10-SDK im Projektordner `dotnet run` ausführen. Alle Ordner aus dem ZIP zusammen entpacken: `PaceAtlas` referenziert die gemeinsame Bibliothek im benachbarten Ordner `PaceAtlas.Core`. Für eine eigenständige EXE: `dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true`. Die EXE liegt unter `bin/Release/net10.0-windows/win-x64/publish/`. Die aktuelle WinUI-Anwendung ist in `README.md` im Hauptverzeichnis beschrieben.
 
 ## Bedienung
 

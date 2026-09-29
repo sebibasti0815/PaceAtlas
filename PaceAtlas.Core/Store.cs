@@ -63,6 +63,16 @@ public sealed class MeasureData
 {
     public string Name { get; set; } = "";
     public string Dose { get; set; } = "";
+    public bool TrackProgress { get; set; }
+    public List<string> ReasonSymptoms { get; set; } = new();
+    public string ReasonOther { get; set; } = "";
+    public string Goal { get; set; } = "";
+    public string Baseline { get; set; } = "";
+    public DateTime? ReviewDate { get; set; }
+    public string Status { get; set; } = "active";
+    public string Outcome { get; set; } = "";
+    public string ReviewNote { get; set; } = "";
+    public DateTime? ReviewedAt { get; set; }
 }
 public sealed class SavedAiAnalysis
 {
@@ -318,7 +328,7 @@ public sealed class Store
     }
     public List<string> ChoiceOptions(string key, IEnumerable<string> defaults)
     {
-        if (key is not ("measures" or "activity_dimensions" or "rest_dimensions")) throw new ArgumentException("Unknown choice list", nameof(key));
+        if (key is not ("measures" or "activity_dimensions" or "rest_dimensions" or "symptoms" or "pain_locations" or "hearing_protection")) throw new ArgumentException("Unknown choice list", nameof(key));
         using var db = Open(); using var command = db.CreateCommand();
         command.CommandText = "SELECT value FROM app_settings WHERE key=$key";
         command.Parameters.AddWithValue("$key", key);
@@ -329,7 +339,7 @@ public sealed class Store
     }
     public void SetChoiceOptions(string key, IEnumerable<string> values)
     {
-        if (key is not ("measures" or "activity_dimensions" or "rest_dimensions")) throw new ArgumentException("Unknown choice list", nameof(key));
+        if (key is not ("measures" or "activity_dimensions" or "rest_dimensions" or "symptoms" or "pain_locations" or "hearing_protection")) throw new ArgumentException("Unknown choice list", nameof(key));
         var names = values.Select(s => s.Trim()).Where(s => s.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         using var db = Open(); using var command = db.CreateCommand();
         command.CommandText = "INSERT INTO app_settings(key,value) VALUES($key,$value) ON CONFLICT(key) DO UPDATE SET value=excluded.value";

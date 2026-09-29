@@ -156,14 +156,16 @@ public sealed class MainForm : Form
     private readonly Label goalSummary = new() { AutoSize = true, Margin = new Padding(8, 10, 0, 0) };
     private List<string> selectedGoals = new();
     private readonly DateTimePicker intakeDay = new() { Format = DateTimePickerFormat.Short, Width = 150 };
+    private readonly ComboBox intakeBulkTime = new() { Width = 105, DropDownStyle = ComboBoxStyle.DropDownList };
+    private Button? intakeBulkTakeButton;
     private readonly DataGridView planGrid = new() { Dock = DockStyle.Fill, ReadOnly = true, AllowUserToAddRows = false, AllowUserToDeleteRows = false, SelectionMode = DataGridViewSelectionMode.FullRowSelect, MultiSelect = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, RowHeadersVisible = false };
     private readonly DataGridView planGridRight = new() { Dock = DockStyle.Fill, ReadOnly = true, AllowUserToAddRows = false, AllowUserToDeleteRows = false, SelectionMode = DataGridViewSelectionMode.FullRowSelect, MultiSelect = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, RowHeadersVisible = false };
     private readonly TabControl topTabs = new BufferedTabControl { Dock = DockStyle.Fill };
     private readonly TabControl medicationTabs = new BufferedTabControl { Dock = DockStyle.Fill };
     private readonly DataGridView intakeGrid = new() { Dock = DockStyle.Fill, AllowUserToAddRows = false, AllowUserToDeleteRows = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, RowHeadersVisible = false };
     private readonly DataGridView productGrid = new() { Dock = DockStyle.Fill, ReadOnly = true, AllowUserToAddRows = false, AllowUserToDeleteRows = false, SelectionMode = DataGridViewSelectionMode.FullRowSelect, MultiSelect = false, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, RowHeadersVisible = false };
-    private readonly TextBox manufacturer = new() { Width = 190 };
-    private readonly TextBox supplier = new() { Width = 190 };
+    private readonly TextBox manufacturer = new() { Width = 190, AutoCompleteMode = AutoCompleteMode.SuggestAppend, AutoCompleteSource = AutoCompleteSource.CustomSource };
+    private readonly TextBox supplier = new() { Width = 190, AutoCompleteMode = AutoCompleteMode.SuggestAppend, AutoCompleteSource = AutoCompleteSource.CustomSource };
     private readonly NumericUpDown packUnits = new() { DecimalPlaces = 2, Maximum = 1000000, Width = 110 };
     private readonly NumericUpDown packPrice = new() { DecimalPlaces = 2, Maximum = 1000000, Width = 110 };
     private readonly NumericUpDown purchasePacks = new() { DecimalPlaces = 0, Minimum = 1, Maximum = 10000, Value = 1, Width = 95 };
@@ -268,7 +270,7 @@ public sealed class MainForm : Form
         // Plan form is editable; preserve user-entered text while translating its suggestions.
         var currentForm = planForm.Text;
         planForm.Items.Clear();
-        planForm.Items.AddRange(new[] { "Kapsel", "Tablette", "mg", "ml", "Spray", "Pflaster" }.Select(T).Cast<object>().ToArray());
+        planForm.Items.AddRange(new[] { "Kapsel", "Tablette", "mg", "g", "ml", "Beutel", "Spray", "Pflaster", "Gel" }.Select(T).Cast<object>().ToArray());
         planForm.Text = T(Localization.Canonical(currentForm));
         foreach (var view in new[] { planGrid, planGridRight })
             foreach (DataGridViewRow row in view.Rows)
@@ -860,10 +862,11 @@ public sealed class MainForm : Form
                     view.GridColor = Pale;
                     view.BorderStyle = BorderStyle.None;
                     view.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+                    view.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
                     view.EnableHeadersVisualStyles = false;
-                    view.ColumnHeadersDefaultCellStyle.BackColor = Pale;
+                    view.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(224, 236, 242);
                     view.ColumnHeadersDefaultCellStyle.ForeColor = Ink;
-                    view.ColumnHeadersDefaultCellStyle.SelectionBackColor = Pale;
+                    view.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(224, 236, 242);
                     view.ColumnHeadersDefaultCellStyle.SelectionForeColor = Ink;
                     view.DefaultCellStyle.BackColor = Surface;
                     view.DefaultCellStyle.ForeColor = Ink;
@@ -1023,6 +1026,8 @@ public sealed class MainForm : Form
                     SortDescending = view.SortedColumn is null && tableSettings.TryGetValue(name, out var previousSort) ? previousSort.SortDescending : view.SortOrder == SortOrder.Descending
                 };
             }
+            if (tableSettings.TryGetValue("stockHistory", out var historySettings))
+                settings.Tables["stockHistory"] = historySettings;
             Directory.CreateDirectory(Store.Folder);
             var temporary = WindowSettingsPath + ".tmp";
             File.WriteAllText(temporary, JsonSerializer.Serialize(settings));
@@ -1194,7 +1199,7 @@ public sealed class MainForm : Form
         dimensionOptionsButton = dimensionButton;
         dimensionButton.Dock = DockStyle.Right;
         dimensionBar.Controls.Add(dimensionButton);
-        dimensionBar.Controls.Add(new Label { Text = "Belastungsarten / Ruheformen (Mehrfachauswahl):", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft });
+        dimensionBar.Controls.Add(new Label { Text = "Belastungsarten / Ruheformen:", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft });
         activityFields.Controls.Add(dimensionBar);
         activityFields.Controls.Add(Row(Label("Intensität:"), intensity));
         intervalLayout.Controls.Add(activityFields, 0, 1);
@@ -1243,7 +1248,7 @@ public sealed class MainForm : Form
         planQuantity.Items.AddRange(["0,5", "1", "1,5", "2", "2,5", "3", "4", "5", "6", "7", "8", "9", "10", "15", "20", "30"]);
         planQuantity.Text = "1";
         blankPlanTime = planTime.Value.ToString("HH:mm");
-        planForm.Items.AddRange(["Kapsel", "Tablette", "mg", "ml", "Spray", "Pflaster"]);
+        planForm.Items.AddRange(["Kapsel", "Tablette", "mg", "g", "ml", "Beutel", "Spray", "Pflaster", "Gel"]);
         planOngoing.CheckedChanged += (_, _) => planEnd.Enabled = !planOngoing.Checked;
         planStart.ValueChanged += (_, _) => planStart.Tag = null;
         planLayout.Controls.Add(Row(Label("Uhrzeit:"), planTime, Label("Präparat:"), planName, Label("Dosis:"), planDose,
@@ -1276,7 +1281,10 @@ public sealed class MainForm : Form
         var dayToolbar = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
         dayToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         dayToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 420));
-        dayToolbar.Controls.Add(Row(Label("Einnahmen am:"), intakeDay,
+        intakeBulkTakeButton = Button("Eingenommen", TakeSelectedIntakeTime);
+        intakeBulkTakeButton.Enabled = false;
+        dayToolbar.Controls.Add(Row(Label("Einnahmen am:"), intakeDay, Label("Uhrzeit:"), intakeBulkTime,
+            intakeBulkTakeButton,
             new Label { Text = "Offen bedeutet: keine Angabe zur tatsächlichen Einnahme.", AutoSize = true, Margin = new Padding(16, 9, 0, 0) }), 0, 0);
         var bulkActions = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
         bulkActions.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
@@ -1555,6 +1563,8 @@ public sealed class MainForm : Form
     private void RefreshInventory()
     {
         var stocks = store.ProductStocks();
+        SetStockCompletions(manufacturer, stocks.Select(stock => stock.Product.Manufacturer));
+        SetStockCompletions(supplier, stocks.Select(stock => stock.Product.Supplier));
         productGrid.Rows.Clear();
         foreach (var item in stocks)
         {
@@ -1578,6 +1588,14 @@ public sealed class MainForm : Form
             : $"Recorded purchases: €{store.TotalPurchases():0.00} · Estimated weekly cost: €{weeklyCost:0.00} (where package prices are available).\n" +
               (lowCount == 0 ? "No recorded stock below one week's supply." : $"Low stock: {lowCount} product(s) have at most seven days of supply remaining.");
         stockPage.Text = lowCount == 0 ? T("Packungen und Vorrat") : language == "de" ? $"Vorrat ({lowCount} knapp)" : $"Inventory ({lowCount} low)";
+    }
+    private static void SetStockCompletions(TextBox box, IEnumerable<string> values)
+    {
+        var suggestions = new AutoCompleteStringCollection();
+        suggestions.AddRange(values.Where(value => !string.IsNullOrWhiteSpace(value))
+            .Select(value => value.Trim()).Distinct(StringComparer.CurrentCultureIgnoreCase)
+            .OrderBy(value => value, StringComparer.CurrentCultureIgnoreCase).ToArray());
+        box.AutoCompleteCustomSource = suggestions;
     }
     private void SelectProduct()
     {
@@ -1625,9 +1643,15 @@ public sealed class MainForm : Form
             AllowUserToAddRows = false, AllowUserToDeleteRows = false, AllowUserToResizeRows = false,
             ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing,
             SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, RowHeadersVisible = false };
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, RowHeadersVisible = false,
+            EnableHeadersVisualStyles = false, ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None };
+        history.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(224, 236, 242);
         foreach (var title in new[] { "Tag", "Art", "Einheiten ±", "Packungen", "Kosten €" }) history.Columns.Add(title, title);
         foreach (DataGridViewColumn column in history.Columns) column.HeaderText = T(column.HeaderText);
+        if (tableSettings.TryGetValue("stockHistory", out var remembered))
+            foreach (DataGridViewColumn column in history.Columns)
+                if (remembered.ColumnWeights.TryGetValue(column.Name, out var weight) && weight > 0 && float.IsFinite(weight))
+                    column.FillWeight = weight;
         void Reload()
         {
             history.Rows.Clear();
@@ -1647,6 +1671,8 @@ public sealed class MainForm : Form
         dialog.Controls.Add(history); dialog.Controls.Add(bar);
         LocalizeDialog(dialog);
         Reload(); dialog.ShowDialog(this);
+        tableSettings["stockHistory"] = new GridSettings { ColumnWeights = history.Columns.Cast<DataGridViewColumn>()
+            .ToDictionary(column => column.Name, column => column.FillWeight) };
     }
     private void EditMedicationPlan(DataGridView view)
     {
@@ -1891,6 +1917,16 @@ public sealed class MainForm : Form
             }
             RestoreTableSort(intakeGrid);
             intakeGrid.ClearSelection();
+            var selectedTime = intakeBulkTime.SelectedItem?.ToString();
+            var times = intakeGrid.Rows.Cast<DataGridViewRow>()
+                .Select(row => (row.Tag as MedicationPlan)?.Time ?? "")
+                .Where(time => !string.IsNullOrWhiteSpace(time)).Distinct(StringComparer.Ordinal)
+                .OrderBy(time => time, StringComparer.Ordinal).ToArray();
+            intakeBulkTime.Items.Clear();
+            intakeBulkTime.Items.AddRange(times);
+            if (times.Length > 0)
+                intakeBulkTime.SelectedItem = selectedTime is not null && times.Contains(selectedTime) ? selectedTime : times[0];
+            if (intakeBulkTakeButton is not null) intakeBulkTakeButton.Enabled = times.Length > 0;
         }
         catch (Exception ex) { Error(ex); }
     }
@@ -1913,6 +1949,19 @@ public sealed class MainForm : Form
         intakeGrid.EndEdit();
         foreach (DataGridViewRow row in intakeGrid.Rows)
             if (row.Tag is MedicationPlan) row.Cells["status"].Value = status;
+    }
+    private void TakeSelectedIntakeTime()
+    {
+        var time = intakeBulkTime.SelectedItem?.ToString();
+        if (time is null)
+        {
+            MessageBox.Show(this, language == "de" ? "Bitte zuerst eine Uhrzeit auswählen." : "Select a time first.");
+            return;
+        }
+        intakeGrid.EndEdit();
+        foreach (DataGridViewRow row in intakeGrid.Rows)
+            if (row.Tag is MedicationPlan plan && plan.Time == time)
+                row.Cells["status"].Value = Localization.StatusLabel("taken", language);
     }
     private void SaveMedicationDay()
     {
