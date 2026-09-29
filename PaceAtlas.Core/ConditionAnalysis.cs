@@ -12,7 +12,7 @@ public static class ConditionAnalysis
     {
         TimeSpan total = TimeSpan.Zero;
         DateTime? coveredUntil = null;
-        foreach (var sleep in sleeps.Where(e => e.Kind == "Schlaf" && e.End is not null && e.End > threshold)
+        foreach (var sleep in sleeps.Where(e => IsSleep(e) && e.End is not null && e.End > threshold)
                      .Select(e => (Start: e.Start < threshold ? threshold : e.Start, End: e.End!.Value))
                      .OrderBy(e => e.Start))
         {
@@ -29,6 +29,18 @@ public static class ConditionAnalysis
             }
         }
         return total;
+    }
+
+    public static bool IsSleep(Entry entry)
+    {
+        if (entry.Kind == "Schlaf") return true;
+        if (entry.Kind != "Ruhe") return false;
+        try
+        {
+            var data = System.Text.Json.JsonSerializer.Deserialize<IntervalData>(entry.Data);
+            return data?.Dimensions.Any(name => name is "Geschlafen" or "Schlaf") == true;
+        }
+        catch (System.Text.Json.JsonException) { return false; }
     }
 
     public static string BuildAssessment(IReadOnlyList<(DateTime Start, StateData Data)> states,

@@ -123,7 +123,7 @@ public sealed partial class MainWindow
             analysisStates.Add((entry.Start, data));
         }
         var intervals = entries.Count(e => (e.Kind is "Ruhe" or "Aktivität") && e.Start >= threshold);
-        var sleepCount = entries.Count(e => e.Kind == "Schlaf" && e.End is not null && e.End > threshold);
+        var sleepCount = entries.Count(e => ConditionAnalysis.IsSleep(e) && e.End is not null && e.End > threshold);
         var sleepHours = ConditionAnalysis.TotalSleepTime(entries, threshold).TotalHours;
         var pemCount = analysisStates.Count(s => s.Data.Pem == 2);
         var crashCount = analysisStates.Count(s => s.Data.Crash);
@@ -140,6 +140,7 @@ public sealed partial class MainWindow
         RefreshSymptomPatterns();
         RefreshActivityMatrix();
         RefreshLoadAnalysis();
+        RefreshSymptomTrend();
     }
 
     private void UpdateAnalysisSummary()

@@ -27,8 +27,13 @@
                     <Button Click="ShowAbout_Click" Padding="0" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Info ...">
                         <Image Source="Assets/pace-atlas.png" Width="56" Height="56" />
                     </Button>
-                    <TextBlock Grid.Column="1" Text="Pace Atlas" FontSize="23" FontWeight="SemiBold"
-                               Foreground="White" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                        <TextBlock Text="Pace Atlas" FontSize="23" FontWeight="SemiBold" Foreground="White" />
+                        <Path x:Name="SymptomTrendNeedle" Data="M 8,0 L 15,13 L 10,11 L 10,24 L 6,24 L 6,11 L 1,13 Z"
+                              Fill="#D8E2E9" Width="16" Height="24" Stretch="None" HorizontalAlignment="Center">
+                            <Path.RenderTransform><RotateTransform x:Name="SymptomTrendRotation" CenterX="8" CenterY="12" Angle="90" /></Path.RenderTransform>
+                        </Path>
+                    </StackPanel>
                     <StackPanel x:Name="AppSubtitle" Grid.Column="2" Spacing="1"
                                 VerticalAlignment="Center" Margin="8,0,12,0">
                         <TextBlock x:Name="MottoQuestion" Text="„Kann ich das, was ich tue, zweimal hintereinander tun?“"
@@ -141,6 +146,11 @@
                             </StackPanel>
                         </Grid>
                         <Grid x:Name="SymptomGrid" ColumnSpacing="12" RowSpacing="8" SizeChanged="Fields_SizeChanged" />
+                        <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                            <TextBlock Text="Welches Symptom schränkt dich gerade am meisten ein? (optional)"
+                                       VerticalAlignment="Center" TextWrapping="Wrap" />
+                            <ComboBox x:Name="MostLimitingSymptom" Width="280" VerticalAlignment="Center" />
+                        </StackPanel>
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <TextBlock Text="Schmerzorte" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
                             <Button Content="…" Click="ManagePainLocations_Click" ToolTipService.ToolTip="Schmerzorte bearbeiten" />
@@ -160,7 +170,7 @@
                 </StackPanel>
                 </Grid>
                     </TabViewItem>
-                    <TabViewItem x:Name="IntervalTab" Header="Aktivität, Ruhe und Schlaf" IsClosable="False">
+                    <TabViewItem x:Name="IntervalTab" Header="Aktivität und Ruhe" IsClosable="False">
                         <Grid>
                             <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -183,6 +193,11 @@
                                                   VerticalAlignment="Center" Checked="IntervalRunning_Changed" Unchecked="IntervalRunning_Changed" />
                                     </StackPanel>
                                 </ScrollViewer>
+                                <StackPanel x:Name="ActivityTemplatePanel" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                    <TextBlock Text="Aktivität:" VerticalAlignment="Center" />
+                                    <ComboBox x:Name="ActivityTemplateChoice" MinWidth="225" SelectionChanged="ActivityTemplateChoice_Changed" />
+                                    <Button Content="…" Click="ManageActivityTemplates_Click" ToolTipService.ToolTip="Aktivitäten verwalten" />
+                                </StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="10">
                                   <TextBlock x:Name="IntervalDimensionsTitle" Text="Belastungsarten" FontWeight="SemiBold" VerticalAlignment="Center" />
                                   <Button Content="…" Click="ManageDimensions_Click" />
@@ -195,7 +210,7 @@
                                     </ItemsControl.ItemsPanel>
                                 </ItemsControl>
                                 <ComboBox x:Name="IntervalIntensity" Header="Intensität" MinWidth="190" HorizontalAlignment="Left" />
-                                <ComboBox x:Name="SleepRecovery" Header="Erholung nach dem Schlaf" MinWidth="205" HorizontalAlignment="Left" Visibility="Collapsed" />
+                                <ComboBox x:Name="SleepRecovery" Header="Ruhequalität" MinWidth="205" HorizontalAlignment="Left" Visibility="Collapsed" />
                                 <StackPanel Orientation="Horizontal" Spacing="10">
                                     <TextBlock Text="Schutzmaßnahmen" FontWeight="SemiBold" VerticalAlignment="Center" />
                                     <Button Content="…" Click="ManageHearingProtection_Click" ToolTipService.ToolTip="Schutzmaßnahmen bearbeiten" />
@@ -521,7 +536,7 @@
                               </StackPanel>
                             </Grid>
                           </TabViewItem>
-                          <TabViewItem Header="Symptommuster" IsClosable="False">
+                          <TabViewItem Header="Einzelsymptom" IsClosable="False">
                             <Grid RowSpacing="10" Margin="8,4,8,8">
                               <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                               <TextBlock x:Name="SymptomPatternNote" TextWrapping="Wrap" />
@@ -549,6 +564,19 @@
                                 </StackPanel>
                               </ScrollViewer>
                             </Grid>
+                          </TabViewItem>
+                          <TabViewItem Header="Mehrfachsymptome" IsClosable="False">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="8,8,24,8">
+                              <StackPanel Spacing="12">
+                                <TextBlock Text="Prägende Symptome" FontSize="16" FontWeight="SemiBold" />
+                                <TextBlock x:Name="DominantSymptomsNote" TextWrapping="Wrap" />
+                                <StackPanel x:Name="DominantSymptomsRows" Spacing="5" />
+                                <TextBlock Text="Eigene Einschätzung" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,0" />
+                                <TextBlock Text="Am stärksten einschränkende Symptome" FontSize="16" FontWeight="SemiBold" />
+                                <TextBlock x:Name="LimitingSymptomsNote" TextWrapping="Wrap" />
+                                <StackPanel x:Name="LimitingSymptomsRows" Spacing="5" />
+                              </StackPanel>
+                            </ScrollViewer>
                           </TabViewItem>
                           <TabViewItem Header="PEM-Risiken" IsClosable="False">
                             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="8,8,24,8">

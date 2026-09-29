@@ -337,6 +337,21 @@ public sealed class Store
         try { return JsonSerializer.Deserialize<List<string>>(value) ?? defaults.ToList(); }
         catch (JsonException) { return defaults.ToList(); }
     }
+    public List<ActivityTemplate> ActivityTemplates()
+    {
+        using var db = Open(); using var command = db.CreateCommand();
+        command.CommandText = "SELECT value FROM app_settings WHERE key='activity_templates'";
+        var value = command.ExecuteScalar() as string;
+        try { return value is null ? new() : JsonSerializer.Deserialize<List<ActivityTemplate>>(value) ?? new(); }
+        catch (JsonException) { return new(); }
+    }
+    public void SetActivityTemplates(IEnumerable<ActivityTemplate> templates)
+    {
+        using var db = Open(); using var command = db.CreateCommand();
+        command.CommandText = "INSERT INTO app_settings(key,value) VALUES('activity_templates',$value) ON CONFLICT(key) DO UPDATE SET value=excluded.value";
+        command.Parameters.AddWithValue("$value", JsonSerializer.Serialize(templates));
+        command.ExecuteNonQuery();
+    }
     public void SetChoiceOptions(string key, IEnumerable<string> values)
     {
         if (key is not ("measures" or "activity_dimensions" or "rest_dimensions" or "symptoms" or "pain_locations" or "hearing_protection")) throw new ArgumentException("Unknown choice list", nameof(key));

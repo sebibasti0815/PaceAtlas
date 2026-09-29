@@ -27,6 +27,7 @@ public sealed partial class MainWindow
     private void RefreshSymptomPatterns()
     {
         if (updatingPatternChoices || PatternSymptom is null || PatternFrequency is null) return;
+        RefreshLimitingSymptoms();
         var selected = PatternSymptom.SelectedIndex;
         if (SymptomNames.Length == 0)
         {
@@ -76,8 +77,8 @@ public sealed partial class MainWindow
         var culture = CultureInfo.GetCultureInfo(english ? "en-US" : "de-DE");
         PatternPatternNote();
         PatternOverviewNote.Text = english
-            ? "All symptoms in the selected period, independent of the symptom chosen in Symptom patterns. Only symptoms recorded at least once are shown. Severity sorts by average severity when present; total severity adds the recorded values. Unassessed values are excluded."
-            : "Alle Symptome im gewählten Zeitraum, unabhängig von der Auswahl in Symptommuster. Nur mindestens einmal erfasste Symptome werden angezeigt. Schwere sortiert nach mittlerer Stärke beim Auftreten, Gesamtbelastung nach der Summe der erfassten Stärken. Nicht beurteilte Werte bleiben außen vor.";
+            ? "All symptoms in the selected period, independent of the symptom chosen under Single symptom. Only symptoms recorded at least once are shown. Severity sorts by average severity when present; total severity adds the recorded values. Unassessed values are excluded."
+            : "Alle Symptome im gewählten Zeitraum, unabhängig von der Auswahl unter Einzelsymptom. Nur mindestens einmal erfasste Symptome werden angezeigt. Schwere sortiert nach mittlerer Stärke beim Auftreten, Gesamtbelastung nach der Summe der erfassten Stärken. Nicht beurteilte Werte bleiben außen vor.";
         PatternFrequency.Children.Clear();
         var ranked = SymptomNames.Select(name =>
         {
@@ -179,6 +180,89 @@ public sealed partial class MainWindow
         void PatternPatternNote() => SymptomPatternNote.Text = english
             ? "The following analyses refer to the selected symptom and the period chosen above. Unassessed values are excluded; 0 means explicitly absent."
             : "Die folgenden Auswertungen beziehen sich auf das gewählte Symptom und den oben eingestellten Zeitraum. Nicht beurteilte Werte bleiben außen vor; 0 bedeutet ausdrücklich keine Beschwerden.";
+    }
+
+    private void RefreshLimitingSymptoms()
+    {
+        if (LimitingSymptomsRows is null) return;
+        var english = selectedLanguage == "en";
+        RefreshDominantSymptoms();
+        LimitingSymptomsRows.Children.Clear();
+        var answered = analysisStates.Select(state => state.Data.MostLimitingSymptom)
+            .Where(name => !string.IsNullOrWhiteSpace(name)).Select(name => name!).ToArray();
+        LimitingSymptomsNote.Text = english
+            ? $"{answered.Length} of {analysisStates.Count} condition entries answer which symptom was most limiting. Each answer counts once. Entries without an answer are excluded; this is your own assessment, not a severity score."
+            : $"{answered.Length} von {analysisStates.Count} Zustandseinträgen beantworten, welches Symptom am stärksten eingeschränkt hat. Jede Antwort zählt einmal. Einträge ohne Antwort bleiben außen vor; dies ist deine eigene Einschätzung, kein berechneter Schwerewert.";
+        if (answered.Length == 0)
+        {
+            LimitingSymptomsRows.Children.Add(new TextBlock { Text = english
+                ? "No answer to this question in the selected period yet."
+                : "Im gewählten Zeitraum wurde diese Frage noch nicht beantwortet." });
+            return;
+        }
+        foreach (var group in answered.GroupBy(name => name, StringComparer.OrdinalIgnoreCase)
+                     .OrderByDescending(group => group.Count()).ThenBy(group => T(group.Key), StringComparer.CurrentCultureIgnoreCase))
+        {
+            var count = group.Count();
+            var percent = 100.0 * count / answered.Length;
+            LimitingSymptomsRows.Children.Add(PatternRow(T(group.Key),
+                english ? $"{count} of {answered.Length} answers ({percent:0}%)"
+                    : $"{count} von {answered.Length} Antworten ({percent:0} %)", percent));
+        }
+    }
+
+    private void RefreshDominantSymptoms()
+    {
+        if (DominantSymptomsRows is null) return;
+        var english = selectedLanguage == "en";
+        DominantSymptomsRows.Children.Clear();
+        DominantSymptomsNote.Text = english
+            ? "Based on all condition entries in the selected period, including those without a personal answer. Ranked by the sum of recorded severities (1–4). Present/assessed, severe entries (3–4) and the longest series of present entries no more than 24 hours apart are shown separately. A series does not prove continuous symptoms between entries."
+            : "Alle Zustandseinträge im gewählten Zeitraum zählen, auch ohne persönliche Antwort. Sortiert nach der Summe erfasster Stärken (1–4). Vorhanden/beurteilt, Einträge mit Stärke 3–4 und die längste Serie aufeinanderfolgender Einträge mit höchstens 24 Stunden Abstand stehen daneben. Eine Serie belegt keine durchgehenden Beschwerden zwischen den Einträgen.";
+        var names = SymptomNames.Concat(analysisStates.SelectMany(state => state.Data.Symptoms.Keys))
+            .Distinct(StringComparer.OrdinalIgnoreCase);
+        var ranked = names.Select(name =>
+        {
+            var values = analysisStates.Select(state => (state.Start, Severity: state.Data.SymptomSeverity(name))).ToArray();
+            var assessed = values.Count(value => value.Severity >= 0);
+            var present = values.Count(value => value.Severity > 0);
+            var severe = values.Count(value => value.Severity >= 3);
+            var sum = values.Sum(value => Math.Max(0, value.Severity));
+            var longest = 0;
+            var current = 0;
+            DateTime? previous = null;
+            foreach (var value in values)
+            {
+                if (value.Severity > 0)
+                {
+                    current = previous is not null && value.Start - previous.Value <= TimeSpan.FromHours(24)
+                        ? current + 1 : 1;
+                    longest = Math.Max(longest, current);
+                    previous = value.Start;
+                }
+                else
+                {
+                    current = 0;
+                    previous = null;
+                }
+            }
+            return new { Name = name, Assessed = assessed, Present = present, Severe = severe, Sum = sum, Longest = longest };
+        }).Where(item => item.Present > 0).OrderByDescending(item => item.Sum)
+            .ThenByDescending(item => item.Present).ThenBy(item => T(item.Name), StringComparer.CurrentCultureIgnoreCase).ToArray();
+        if (ranked.Length == 0)
+        {
+            DominantSymptomsRows.Children.Add(new TextBlock { Text = english
+                ? "No symptoms recorded in the selected period."
+                : "Im gewählten Zeitraum wurden keine Symptome erfasst." });
+            return;
+        }
+        foreach (var item in ranked)
+        {
+            var detail = english
+                ? $"{item.Present}/{item.Assessed} present · {item.Severe} severe · longest series: {item.Longest} · severity sum: {item.Sum}"
+                : $"{item.Present}/{item.Assessed} vorhanden · {item.Severe} mit Stärke 3–4 · längste Serie: {item.Longest} · Stärkensumme: {item.Sum}";
+            DominantSymptomsRows.Children.Add(PatternRow(T(item.Name), detail, 100.0 * item.Sum / ranked[0].Sum));
+        }
     }
 
     private static SolidColorBrush PatternBrush(string hex) => new(Windows.UI.Color.FromArgb(255,

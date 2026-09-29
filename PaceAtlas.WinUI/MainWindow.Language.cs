@@ -22,11 +22,16 @@ public sealed partial class MainWindow
         ["Ohrgeräusche"] = "Tinnitus",
         ["Aktiv (Min.):"] = "Active (min):", ["Pause (Min.):"] = "Break (min):",
         ["Zeitraum erfassen"] = "Record interval", ["Maßnahme erfassen"] = "Record intervention",
+        ["Aktivität und Ruhe"] = "Activity and rest", ["Aktivität:"] = "Activity:",
+        ["Aktivitäten verwalten"] = "Manage activities", ["Ruhequalität"] = "Rest quality",
         ["Belastungsarten"] = "Activity types",
         ["Ruheformen (Mehrfachauswahl)"] = "Rest types (select multiple)",
         ["Intensität"] = "Intensity", ["Akustischer Schutz"] = "Hearing protection", ["Schutzmaßnahmen"] = "Protective measures",
         ["Erholung nach dem Schlaf"] = "Recovery after sleep",
         ["Grund / betroffene Symptome (optional)"] = "Reason / affected symptoms (optional)",
+        ["Welches Symptom schränkt dich gerade am meisten ein? (optional)"] =
+            "Which symptom limits you most right now? (optional)",
+        ["Keine Angabe"] = "No answer",
         ["Anderer Grund (optional)"] = "Other reason (optional)",
         ["Anderer Grund (optional):"] = "Other reason (optional):",
         ["Nur wenn kein Symptom passt"] = "Only if no symptom fits",
@@ -57,6 +62,9 @@ public sealed partial class MainWindow
         ["Medikamente/Einnahmen ausblenden"] = "Hide medication/intakes",
         ["KI"] = "AI", ["Automatische Einordnung"] = "Automated assessment",
         ["Verlauf"] = "Trend",
+        ["Einzelsymptom"] = "Single symptom", ["Mehrfachsymptome"] = "Multiple symptoms",
+        ["Am stärksten einschränkende Symptome"] = "Most limiting symptoms",
+        ["Prägende Symptome"] = "Prominent symptoms", ["Eigene Einschätzung"] = "Your own assessment",
         ["Heatmap · Tage"] = "Heatmap · days", ["Heatmap · Wochendurchschnitt"] = "Heatmap · weekly average",
         ["Zustand fortführen"] = "Carry condition forward", ["24 Stunden"] = "24 hours", ["48 Stunden"] = "48 hours",
         ["Auswertung:"] = "Analysis:", ["7 Tage"] = "7 days", ["30 Tage"] = "30 days",
@@ -202,10 +210,11 @@ public sealed partial class MainWindow
     {
         SelectVisual(Overall, ["gut", "leicht eingeschränkt", "mittel", "schlecht", "sehr schlecht"], false);
         SelectTranslated(Pem, ["nein", "vermutet", "erkannt"], selectedLanguage);
-        SelectTranslated(IntervalKind, ["Aktivität", "Ruhe", "Schlaf"], selectedLanguage);
+        SelectTranslated(IntervalKind, ["Aktivität", "Ruhe"], selectedLanguage);
         SelectVisual(IntervalIntensity, ["gering", "mittel", "hoch", "sehr hoch"], true);
         SelectTranslated(SleepRecovery, ["nicht bewertet", "keine", "etwas", "mittel", "deutlich"], selectedLanguage);
         foreach (var box in symptoms.Values) SelectVisual(box, Severities, false, symptom: true);
+        RefreshLimitingSymptomOptions();
         PopulatePlanForms();
         foreach (var row in intakeRows)
         {
@@ -268,10 +277,14 @@ public sealed partial class MainWindow
         {
             LocalizeChoices();
             LocalizeTree(Content);
+            RefreshActivityTemplateChoice();
             RefreshSortableHeaderCaptions();
             if (EntryList.ContextFlyout is MenuFlyout menu)
                 foreach (var item in menu.Items.OfType<MenuFlyoutItem>())
                     item.Text = Localized(item, item.Text);
+            RenderGoals();
+            RenderPlans();
+            RenderIntakes();
             RenderStock();
             DisplayEntries();
             LocalizeAnalysisPeriod();

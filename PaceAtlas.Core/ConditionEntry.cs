@@ -28,6 +28,8 @@ public sealed class StateData
         return Math.Clamp(value, -1, 4);
     }
     public List<string> PainLocations { get; set; } = new();
+    // Optional self-report. Null means the question was left unanswered.
+    public string? MostLimitingSymptom { get; set; }
     public int? Pulse { get; set; }
 }
 
@@ -36,6 +38,15 @@ public sealed class IntervalData
     public List<string> Dimensions { get; set; } = new();
     public List<string> HearingProtection { get; set; } = new();
     public int Intensity { get; set; } = 1;
+    public int Recovery { get; set; }
+}
+
+public sealed class ActivityTemplate
+{
+    public string Name { get; set; } = "";
+    public List<string> Dimensions { get; set; } = new();
+    public int Intensity { get; set; } = 2;
+    public List<string> HearingProtection { get; set; } = new();
 }
 
 public sealed class SleepData

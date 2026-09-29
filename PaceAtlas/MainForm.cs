@@ -1504,10 +1504,21 @@ public sealed class MainForm : Form
     private void SaveState()
     {
         if (editingId != 0 && editingKind != "Zustand") { MessageBox.Show(this, T("Bitte zuerst die Bearbeitung mit Neu beenden.")); return; }
-        Save(ConditionEntryFactory.Create(stateTime.Value, overall.SelectedIndex, pem.SelectedIndex,
+        var entry = ConditionEntryFactory.Create(stateTime.Value, overall.SelectedIndex, pem.SelectedIndex,
             crash.Checked, pulse.Value == 0 ? null : (int)pulse.Value,
             symptoms.ToDictionary(pair => pair.Key, pair => pair.Value.SelectedIndex - 1),
-            painChecks.Where(pair => pair.Value.Checked).Select(pair => pair.Key), stateNote.Text, editingId));
+            painChecks.Where(pair => pair.Value.Checked).Select(pair => pair.Key), stateNote.Text, editingId);
+        if (editingId != 0 && store.All().FirstOrDefault(item => item.Id == editingId) is { } oldEntry)
+        {
+            var previous = Parse<StateData>(oldEntry.Data).MostLimitingSymptom;
+            var data = Parse<StateData>(entry.Data);
+            if (previous is not null && data.SymptomSeverity(previous) > 0)
+            {
+                data.MostLimitingSymptom = previous;
+                entry.Data = Json(data);
+            }
+        }
+        Save(entry);
     }
     private void SaveInterval()
     {

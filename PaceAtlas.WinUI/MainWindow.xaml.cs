@@ -329,6 +329,7 @@ public sealed partial class MainWindow : Window
             choices.Goals = store.GoalOptions();
             choices.Activities = store.ChoiceOptions("activity_dimensions", ActivityNames);
             choices.Rests = store.ChoiceOptions("rest_dimensions", RestNames);
+            LoadActivityTemplates();
             ReloadMedicationData();
         }
         catch (Exception ex)
@@ -980,6 +981,7 @@ public sealed partial class MainWindow : Window
         IntervalKind.SelectedIndex = 0;
         IntervalIntensity.SelectedIndex = 1;
         SleepRecovery.SelectedIndex = 0;
+        ActivityTemplateChoice.SelectedIndex = 0;
         foreach (var check in protectionChecks) check.IsChecked = false;
         foreach (var check in intervalDimensionChecks) check.IsChecked = false;
         IntervalNote.Text = "";
@@ -1287,7 +1289,7 @@ public sealed partial class MainWindow : Window
 
     private void InitializeIntervals()
     {
-        IntervalKind.ItemsSource = new[] { "Aktivität", "Ruhe", "Schlaf" };
+        IntervalKind.ItemsSource = new[] { "Aktivität", "Ruhe" };
         IntervalIntensity.ItemsSource = new[] { "gering", "mittel", "hoch", "sehr hoch" };
         SleepRecovery.ItemsSource = new[] { "nicht bewertet", "keine", "etwas", "mittel", "deutlich" };
         IntervalIntensity.SelectedIndex = 1;
@@ -1309,13 +1311,13 @@ public sealed partial class MainWindow : Window
         // are still displayed. Otherwise the visible selection can differ from this list.
         IntervalDimensions.ItemsSource = null;
         intervalDimensionChecks.Clear();
-        bool sleep = IntervalKind.SelectedIndex == 2;
-        IntervalDimensionsTitle.Visibility = IntervalDimensions.Visibility =
-            IntervalIntensity.Visibility = sleep ? Visibility.Collapsed : Visibility.Visible;
-        SleepRecovery.Visibility = sleep ? Visibility.Visible : Visibility.Collapsed;
+        bool rest = IntervalKind.SelectedIndex == 1;
+        ActivityTemplatePanel.Visibility = rest ? Visibility.Collapsed : Visibility.Visible;
+        IntervalIntensity.Visibility = rest ? Visibility.Collapsed : Visibility.Visible;
+        SleepRecovery.Visibility = rest ? Visibility.Visible : Visibility.Collapsed;
         IntervalDimensionsTitle.Text = IntervalKind.SelectedIndex == 1
             ? T("Ruheformen (Mehrfachauswahl)") : T("Belastungsarten");
-        foreach (var name in (IntervalKind.SelectedIndex == 1 ? choices.Rests : sleep ? [] : choices.Activities)
+        foreach (var name in (rest ? choices.Rests : choices.Activities)
             .OrderBy(n => n, StringComparer.Create(CultureInfo.GetCultureInfo("de-DE"), true)))
             intervalDimensionChecks.Add(new CheckBox { Content = T(name), Tag = name, IsChecked = selected.Contains(name) });
         IntervalDimensions.ItemsSource = intervalDimensionChecks.ToArray();
@@ -1351,8 +1353,9 @@ public sealed partial class MainWindow : Window
             IntervalStatus.Text = "Das Ende muss nach dem Beginn liegen.";
             return;
         }
-        string kind = new[] { "Aktivität", "Ruhe", "Schlaf" }[Math.Clamp(IntervalKind.SelectedIndex, 0, 2)];
-        if (editingEntryId != 0 && (editingEntryKind is "Aktivität" or "Ruhe" or "Schlaf") && editingEntryKind != kind)
+        string kind = IntervalKind.SelectedIndex == 1 ? "Ruhe" : "Aktivität";
+        if (editingEntryId != 0 && (editingEntryKind is "Aktivität" or "Ruhe" or "Schlaf") && editingEntryKind != kind &&
+            !(editingEntryKind == "Schlaf" && kind == "Ruhe"))
         {
             IntervalStatus.Text = selectedLanguage == "en"
                 ? "You are editing a different interval type. Choose the original type or press New entry."
@@ -1361,10 +1364,10 @@ public sealed partial class MainWindow : Window
         }
         var protection = protectionChecks
             .Where(check => check.IsChecked == true).Select(check => check.Tag?.ToString() ?? check.Content.ToString()!).ToList();
-        if (editingEntryId != 0 && editingEntryKind == kind &&
+        if (editingEntryId != 0 && (editingEntryKind == kind || editingEntryKind == "Schlaf" && kind == "Ruhe") &&
             entries.FirstOrDefault(e => e.Id == editingEntryId) is { } previousInterval)
         {
-            var oldProtection = kind == "Schlaf"
+            var oldProtection = previousInterval.Kind == "Schlaf"
                 ? (JsonSerializer.Deserialize<SleepData>(previousInterval.Data)?.HearingProtection ?? [])
                 : (JsonSerializer.Deserialize<IntervalData>(previousInterval.Data)?.HearingProtection ?? []);
             foreach (var oldName in oldProtection)
@@ -1373,18 +1376,17 @@ public sealed partial class MainWindow : Window
         }
         var dimensions = IntervalDimensions.Items.OfType<CheckBox>().Where(check => check.IsChecked == true)
             .Select(check => check.Tag?.ToString() ?? check.Content.ToString()!).ToList();
-        if (kind != "Schlaf" && dimensions.Count == 0)
+        if (dimensions.Count == 0)
         {
             IntervalStatus.Text = "Bitte mindestens eine Belastungsart oder Ruheform wählen.";
             return;
         }
-        var data = kind == "Schlaf"
-            ? JsonSerializer.Serialize(new SleepData { Recovery = SleepRecovery.SelectedIndex, HearingProtection = protection })
-            : JsonSerializer.Serialize(new IntervalData { Dimensions = dimensions,
-                Intensity = IntervalIntensity.SelectedIndex + 1, HearingProtection = protection });
+        var data = JsonSerializer.Serialize(new IntervalData { Dimensions = dimensions,
+            Intensity = IntervalIntensity.SelectedIndex + 1, HearingProtection = protection,
+            Recovery = kind == "Ruhe" ? SleepRecovery.SelectedIndex : 0 });
         try
         {
-            store.Save(new Entry { Id = editingEntryKind == kind ? editingEntryId : 0,
+            store.Save(new Entry { Id = editingEntryKind == kind || editingEntryKind == "Schlaf" && kind == "Ruhe" ? editingEntryId : 0,
                 Kind = kind, Start = start, End = running ? null : end,
                 Data = data, Note = IntervalNote.Text });
             ResetInterval_Click(sender, e);
@@ -1433,7 +1435,9 @@ public sealed partial class MainWindow : Window
             field.Children.Add(choice);
             SymptomGrid.Children.Add(field);
             symptoms.Add(name, choice);
+            choice.SelectionChanged += (_, _) => RefreshLimitingSymptomOptions();
         }
+        RefreshLimitingSymptomOptions();
 
         for (int i = 0; i < PainNames.Length; i++)
         {
@@ -1459,6 +1463,20 @@ public sealed partial class MainWindow : Window
             < 1200 => 8,
             _ => 10
         });
+    }
+
+    private void RefreshLimitingSymptomOptions(string? selected = null)
+    {
+        if (MostLimitingSymptom is null) return;
+        selected ??= (MostLimitingSymptom.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+        var names = symptoms.Where(pair => pair.Value.SelectedIndex > 1)
+            .Select(pair => pair.Key).OrderBy(name => T(name), StringComparer.CurrentCultureIgnoreCase).ToArray();
+        MostLimitingSymptom.Items.Clear();
+        MostLimitingSymptom.Items.Add(new ComboBoxItem { Content = T("Keine Angabe"), Tag = "" });
+        foreach (var name in names)
+            MostLimitingSymptom.Items.Add(new ComboBoxItem { Content = T(name), Tag = name });
+        MostLimitingSymptom.SelectedItem = MostLimitingSymptom.Items.OfType<ComboBoxItem>()
+            .FirstOrDefault(item => item.Tag?.ToString() == selected) ?? MostLimitingSymptom.Items[0];
     }
 
     private void Fields_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -1542,6 +1560,7 @@ public sealed partial class MainWindow : Window
         Pulse.Value = 0;
         Note.Text = "";
         foreach (var field in symptoms.Values) field.SelectedIndex = 0;
+        RefreshLimitingSymptomOptions("");
         foreach (var check in painChecks.Values) check.IsChecked = false;
     }
 
@@ -1578,17 +1597,20 @@ public sealed partial class MainWindow : Window
                 symptoms.ToDictionary(pair => pair.Key, pair => pair.Value.SelectedIndex - 1),
                 painChecks.Where(pair => pair.Value.IsChecked == true).Select(pair => pair.Key), Note.Text);
             entry.Id = editingEntryKind == "Zustand" ? editingEntryId : 0;
+            var newData = JsonSerializer.Deserialize<StateData>(entry.Data) ?? new();
+            var limiting = (MostLimitingSymptom.SelectedItem as ComboBoxItem)?.Tag?.ToString();
+            newData.MostLimitingSymptom = limiting is not null &&
+                newData.SymptomSeverity(limiting) > 0 ? limiting : null;
             if (entry.Id != 0 && entries.FirstOrDefault(e => e.Id == entry.Id) is { } original)
             {
                 var oldData = JsonSerializer.Deserialize<StateData>(original.Data) ?? new();
-                var newData = JsonSerializer.Deserialize<StateData>(entry.Data) ?? new();
                 foreach (var name in oldData.Symptoms.Keys)
                     if (!newData.Symptoms.ContainsKey(name)) newData.Symptoms[name] = oldData.SymptomSeverity(name);
                 foreach (var location in oldData.PainLocations)
                     if (!painChecks.ContainsKey(location) && !newData.PainLocations.Contains(location))
                         newData.PainLocations.Add(location);
-                entry.Data = JsonSerializer.Serialize(newData);
             }
+            entry.Data = JsonSerializer.Serialize(newData);
             store.Save(entry);
             ClearEditing();
             ResetForm();
@@ -1686,6 +1708,7 @@ public sealed partial class MainWindow : Window
             Note.Text = entry.Note;
             foreach (var (name, field) in symptoms)
                 field.SelectedIndex = Math.Clamp(data.SymptomSeverity(name) + 1, 0, Severities.Length - 1);
+            RefreshLimitingSymptomOptions(data.MostLimitingSymptom ?? "");
             foreach (var (name, check) in painChecks)
                 check.IsChecked = data.PainLocations.Contains(name);
         }
@@ -1717,7 +1740,7 @@ public sealed partial class MainWindow : Window
         else if (entry.Kind is "Aktivität" or "Ruhe" or "Schlaf")
         {
             MainTabs.SelectedItem = IntervalTab;
-            IntervalKind.SelectedIndex = entry.Kind == "Schlaf" ? 2 : entry.Kind == "Ruhe" ? 1 : 0;
+            IntervalKind.SelectedIndex = entry.Kind is "Schlaf" or "Ruhe" ? 1 : 0;
             IntervalStartDate.Date = new DateTimeOffset(entry.Start);
             IntervalStartTime.Text = entry.Start.ToString("HH:mm", CultureInfo.InvariantCulture);
             var end = entry.End ?? DateTime.Now.AddMinutes(1);
@@ -1729,12 +1752,16 @@ public sealed partial class MainWindow : Window
             {
                 var data = JsonSerializer.Deserialize<SleepData>(entry.Data) ?? new();
                 SleepRecovery.SelectedIndex = Math.Clamp(data.Recovery, 0, 4);
+                if (!choices.Rests.Contains("Geschlafen", StringComparer.OrdinalIgnoreCase)) choices.Rests.Add("Geschlafen");
+                IntervalKind_SelectionChanged(IntervalKind, null!);
+                foreach (var check in intervalDimensionChecks) check.IsChecked = check.Tag?.ToString() == "Geschlafen";
                 SetHearingProtection(data.HearingProtection);
             }
             else
             {
                 var data = JsonSerializer.Deserialize<IntervalData>(entry.Data) ?? new();
                 IntervalIntensity.SelectedIndex = Math.Clamp(data.Intensity - 1, 0, 3);
+                SleepRecovery.SelectedIndex = Math.Clamp(data.Recovery, 0, 4);
                 foreach (var name in data.Dimensions)
                 {
                     var list = entry.Kind == "Ruhe" ? choices.Rests : choices.Activities;
@@ -2021,7 +2048,7 @@ public sealed partial class MainWindow : Window
                     if (entry.Kind == "Schlaf")
                     {
                         var sleep = JsonSerializer.Deserialize<SleepData>(entry.Data);
-                        details = T("Schlaf") + " · " + (selectedLanguage == "en" ? "Recovery: " : "Erholung: ") +
+                        details = T("Geschlafen") + " · " + (selectedLanguage == "en" ? "Recovery: " : "Erholung: ") +
                             T(new[] { "nicht bewertet", "keine", "etwas", "mittel", "deutlich" }[
                                 Math.Clamp(sleep?.Recovery ?? 0, 0, 4)]);
                     }
@@ -2030,18 +2057,22 @@ public sealed partial class MainWindow : Window
                         var interval = JsonSerializer.Deserialize<IntervalData>(entry.Data);
                         intensityLevel = Math.Clamp(interval?.Intensity ?? 1, 1, 4);
                         details = string.Join(", ", (interval?.Dimensions ?? []).Select(T));
+                        if (entry.Kind == "Ruhe")
+                            details += " · " + (selectedLanguage == "en" ? "Recovery: " : "Erholung: ") +
+                                T(new[] { "nicht bewertet", "keine", "etwas", "mittel", "deutlich" }[
+                                    Math.Clamp(interval?.Recovery ?? 0, 0, 4)]);
                     }
                 }
                 catch (JsonException) { details = entry.Kind; }
                 var intervalRow = TableRow([(entry.Start.ToString("dd.MM.yyyy HH:mm"), 180),
                     (entry.End is DateTime end ? end.ToString("dd.MM.yyyy HH:mm") : "läuft", 180),
-                    (entry.Kind, 115), (details, 400), (entry.Note, 340)], compact: true, table: "entries",
-                    badges: entry.Kind == "Schlaf"
+                    (entry.Kind == "Schlaf" ? "Ruhe" : entry.Kind, 115), (details, 400), (entry.Note, 340)], compact: true, table: "entries",
+                    badges: entry.Kind is "Schlaf" or "Ruhe"
                         ? entry.End is null ? [("◷", VisualScaleBrush(3))] : null
                         : entry.End is null
                             ? [("◷", VisualScaleBrush(3)), (BarScale(intensityLevel), VisualScaleBrush(intensityLevel - 1, true))]
                             : [(BarScale(intensityLevel), VisualScaleBrush(intensityLevel - 1, true))],
-                    contentDescription: entry.Kind == "Schlaf" ? details :
+                    contentDescription: entry.Kind is "Schlaf" or "Ruhe" ? details :
                         (details.Length == 0 ? "" : details + " · ") +
                         (selectedLanguage == "en" ? "Intensity: " : "Intensität: ") +
                         T(new[] { "gering", "mittel", "hoch", "sehr hoch" }[intensityLevel - 1]));
@@ -2060,6 +2091,10 @@ public sealed partial class MainWindow : Window
                 3 => "schlecht", 4 => "sehr schlecht", _ => "unbekannt"
             };
             var stateDetails = (selectedLanguage == "en" ? "Overall: " : "Allgemein: ") + T(condition);
+            var symptomCount = data is null ? 0 : data.Symptoms.Keys.Count(name => data.SymptomSeverity(name) > 0);
+            stateDetails += selectedLanguage == "en"
+                ? $" · {symptomCount} {(symptomCount == 1 ? "symptom" : "symptoms")}" 
+                : $" · {symptomCount} {(symptomCount == 1 ? "Symptom" : "Symptome")}";
             if (data is { Pem: > 0 })
                 stateDetails += " · PEM: " + T(data.Pem == 1 ? "vermutet" : "erkannt");
             if (data?.Crash == true) stateDetails += " · Crash";
