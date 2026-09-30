@@ -124,6 +124,10 @@ public sealed partial class MainWindow
         if (observations.Count > 20)
             LoadActivityRows.Children.Add(new TextBlock { Text = english ?
                 "Showing 20 activities in the selected order." : "20 Aktivitäten in der gewählten Sortierung werden angezeigt." });
+        ConfigurePanelFeedback(LoadDurationRows);
+        ConfigurePanelFeedback(LoadIntensityRows);
+        ConfigurePanelFeedback(LoadCumulativeRows);
+        ConfigurePanelFeedback(LoadActivityRows);
 
         LoadGroup Summarize(string label, int order, LoadObservation[] group)
         {
@@ -167,6 +171,9 @@ public sealed partial class MainWindow
 
         void AddTableRow(StackPanel panel, string[] cells, int[] widths, bool header = false, string? section = null)
         {
+            if (header && section is not null) panel.Tag = section;
+            if (!header && panel.Tag is string tableSection &&
+                !MatchesTableFilters("load:" + tableSection, cells)) return;
             var grid = new Grid { Background = new SolidColorBrush(header ?
                 Color.FromArgb(255, 224, 236, 242) :
                 panel.Children.Count % 2 == 0 ? Color.FromArgb(255, 246, 249, 251) : Color.FromArgb(255, 255, 255, 255)) };
@@ -179,7 +186,7 @@ public sealed partial class MainWindow
                     var column = i;
                     var sort = loadSort[section];
                     var caption = cells[i] + (sort.Column == i ? (sort.Descending ? "  ↓" : "  ↑") : "");
-                    var heading = new Border { Padding = new Thickness(8, 6, 12, 6),
+                    var heading = new Border { Padding = new Thickness(8, 6, 32, 6),
                         Child = new TextBlock { Text = caption, TextWrapping = TextWrapping.NoWrap,
                             TextTrimming = TextTrimming.CharacterEllipsis,
                             FontWeight = Microsoft.UI.Text.FontWeights.SemiBold },
@@ -201,6 +208,39 @@ public sealed partial class MainWindow
                 {
                     var column = i;
                     var key = "load:" + section;
+                    var filterButton = new Button { Content = new FontIcon { Glyph = "\uE721", FontSize = 13 }, Width = 25, Height = 26,
+                        HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Center,
+                        Padding = new Thickness(0), Margin = new Thickness(0, 0, 10, 0),
+                        Background = new SolidColorBrush(Color.FromArgb(255, 224, 236, 242)),
+                        BorderThickness = new Thickness(0) };
+                    ToolTipService.SetToolTip(filterButton, N("Diese Spalte durchsuchen", "Filter this column"));
+                    var filterBox = new TextBox { Width = 240, PlaceholderText = N("Suchbegriff", "Search term") };
+                    if (tableFilters.TryGetValue(key, out var active) && active.TryGetValue(i, out var term))
+                        filterBox.Text = term;
+                    filterButton.Foreground = new SolidColorBrush(active is not null && active.ContainsKey(i)
+                        ? Color.FromArgb(255, 16, 111, 128) : Color.FromArgb(255, 45, 65, 78));
+                    var flyout = new Flyout();
+                    var content = new StackPanel { Spacing = 6 };
+                    content.Children.Add(filterBox);
+                    var clear = new Button { Content = N("Filter löschen", "Clear filter") };
+                    clear.Click += (_, _) => filterBox.Text = "";
+                    content.Children.Add(clear);
+                    flyout.Content = content;
+                    filterButton.Flyout = flyout;
+                    filterBox.TextChanged += (_, _) =>
+                    {
+                        if (!tableFilters.TryGetValue(key, out var terms))
+                            tableFilters[key] = terms = new Dictionary<int, string>();
+                        if (string.IsNullOrWhiteSpace(filterBox.Text)) terms.Remove(column);
+                        else terms[column] = filterBox.Text.Trim();
+                        filterButton.Foreground = new SolidColorBrush(terms.ContainsKey(column)
+                            ? Color.FromArgb(255, 16, 111, 128) : Color.FromArgb(255, 45, 65, 78));
+                        foreach (var dataRow in panel.Children.OfType<Grid>().Skip(1))
+                            if (dataRow.Tag is string[] values)
+                                dataRow.Visibility = MatchesTableFilters(key, values) ? Visibility.Visible : Visibility.Collapsed;
+                    };
+                    Grid.SetColumn(filterButton, i);
+                    grid.Children.Add(filterButton);
                     var grip = new Thumb { Width = 9, HorizontalAlignment = HorizontalAlignment.Right,
                         VerticalAlignment = VerticalAlignment.Stretch,
                         Background = new SolidColorBrush(Color.FromArgb(255, 224, 236, 242)) };
@@ -210,6 +250,7 @@ public sealed partial class MainWindow
                     grid.Children.Add(grip);
                 }
             }
+            if (!header) grid.Tag = cells;
             panel.Children.Add(grid);
         }
     }

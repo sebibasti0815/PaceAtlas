@@ -126,13 +126,15 @@ public sealed partial class MainWindow
             ActivityMatrixTable.Children.Add(new TextBlock { Text = english
                 ? "No positive symptom values in these condition entries."
                 : "In diesen Zustandseinträgen wurden keine Symptome mit Stärke über 0 erfasst." });
+        ConfigurePanelFeedback(ActivityMatrixTable);
     }
 
     private Grid MatrixRow(string symptom, string total, string[] values, int[] widths, bool header, string tableKey,
         string[]? sortKeys = null)
     {
         var headerBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 224, 236, 242));
-        var grid = new Grid { MinHeight = 34, Background = header ? headerBrush : null };
+        var grid = new Grid { MinHeight = 34, Background = header ? headerBrush :
+            new SolidColorBrush(Windows.UI.Color.FromArgb(255, 247, 250, 252)) };
         foreach (var width in widths) grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(width) });
         var labels = new[] { symptom, total }.Concat(values).ToArray();
         for (var index = 0; index < labels.Length; index++)
@@ -156,7 +158,7 @@ public sealed partial class MainWindow
                 cell = heading;
             }
             else cell = new Border { Padding = new Thickness(9, 6, 9, 6),
-                Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 247, 250, 252)),
+                Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent),
                 Child = new TextBlock { Text = labels[index], TextWrapping = TextWrapping.Wrap } };
             Grid.SetColumn(cell, index);
             grid.Children.Add(cell);

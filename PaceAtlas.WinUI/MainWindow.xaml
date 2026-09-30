@@ -313,7 +313,15 @@
                             </StackPanel>
                         </Grid>
                     </TabViewItem>
-                    <TabViewItem x:Name="MedicationTab" Header="Medikamente und Supplemente" IsClosable="False">
+                    <TabViewItem x:Name="MedicationTab" IsClosable="False">
+                      <TabViewItem.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+                          <TextBlock x:Name="MedicationTabTitle" Text="Medikamente und Supplemente" VerticalAlignment="Center" />
+                          <Border x:Name="MedicationDueIcon" Width="18" Height="18" CornerRadius="9" Background="#C62828" Visibility="Collapsed" VerticalAlignment="Center">
+                            <TextBlock Text="!" FontSize="14" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0" />
+                          </Border>
+                        </StackPanel>
+                      </TabViewItem.Header>
                       <TabView x:Name="MedicationTabs" IsAddTabButtonVisible="False" CanReorderTabs="True"
                                TabDragCompleted="MedicationTabs_TabDragCompleted">
                         <TabView.Resources>
@@ -324,7 +332,15 @@
                           <SolidColorBrush x:Key="TabViewItemHeaderBackgroundSelected" Color="White" />
                           <SolidColorBrush x:Key="TabViewItemHeaderBackgroundSelectedPointerOver" Color="White" />
                         </TabView.Resources>
-                        <TabViewItem x:Name="IntakeTab" Header="Tagesprotokoll" IsClosable="False">
+                        <TabViewItem x:Name="IntakeTab" IsClosable="False">
+                          <TabViewItem.Header>
+                            <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
+                              <TextBlock x:Name="IntakeTabTitle" Text="Tagesprotokoll" VerticalAlignment="Center" />
+                              <Border x:Name="IntakeDueIcon" Width="18" Height="18" CornerRadius="9" Background="#C62828" Visibility="Collapsed" VerticalAlignment="Center">
+                                <TextBlock Text="!" FontSize="14" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0" />
+                              </Border>
+                            </StackPanel>
+                          </TabViewItem.Header>
                           <Grid>
                             <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                             <TextBlock Text="Tagesprotokoll" FontSize="20" FontWeight="SemiBold" Margin="0,8,0,8" />
@@ -454,7 +470,7 @@
                                   </Button>
                                 </Grid>
                                 <Grid x:Name="PlanHeader" Grid.Row="1" />
-                                <ListView x:Name="PlanList" Grid.Row="2" SelectionChanged="PlanList_SelectionChanged"
+                                <ListView x:Name="PlanList" Grid.Row="2" SelectionChanged="PlanList_SelectionChanged" DoubleTapped="PlanList_DoubleTapped"
                                           ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                                   <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem"><Setter Property="MinHeight" Value="27" /><Setter Property="Padding" Value="0" /></Style>
@@ -462,6 +478,145 @@
                                 </ListView>
                             </Grid>
                         </Grid>
+                        </TabViewItem>
+                      </TabView>
+                    </TabViewItem>
+                    <TabViewItem x:Name="NutritionTab" Header="Ernährung" IsClosable="False">
+                      <TabView x:Name="NutritionTabs" IsAddTabButtonVisible="False">
+                        <TabViewItem Header="Mahlzeiten" IsClosable="False">
+                          <Grid RowSpacing="10" Margin="0,8,0,0">
+                            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                            <TextBlock Text="Mahlzeit planen oder erfassen" FontSize="20" FontWeight="SemiBold" />
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                              <Grid RowSpacing="12" ColumnSpacing="16">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="2*" /></Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                                <StackPanel Grid.Column="0" Spacing="8">
+                                  <TextBlock Text="Zutaten" FontSize="18" FontWeight="SemiBold" />
+                                  <ListView x:Name="MealIngredientsList" Height="320" SelectionMode="Single" SelectionChanged="MealIngredients_SelectionChanged" DoubleTapped="MealIngredients_DoubleTapped" />
+                                  <Button x:Name="MealRemoveFoodButton" Content="Ausgewählte Zutat entfernen" Click="MealRemoveFood_Click" HorizontalAlignment="Left" IsEnabled="False" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Spacing="10" Width="740" HorizontalAlignment="Left">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                  <CalendarDatePicker x:Name="MealDate" Header="Datum" Width="170" PlaceholderText="TT.MM.JJJJ" />
+                                  <TextBox x:Name="MealTime" Header="Uhrzeit (HH:mm)" Width="130" />
+                                  <TextBox x:Name="MealName" Header="Mahlzeit / Getränk" Width="400" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                  <AutoSuggestBox x:Name="MealFoodSearch" Header="Zutat" Width="420" PlaceholderText="Lebensmittel suchen"
+                                                  TextChanged="MealFoodSearch_TextChanged" SuggestionChosen="MealFoodSearch_SuggestionChosen" />
+                                  <NumberBox x:Name="MealFoodGrams" Header="Menge in g / ml" Width="150" Minimum="0.1" SpinButtonPlacementMode="Compact" />
+                                  <Button x:Name="MealAddFoodButton" Content="Zutat hinzufügen" Click="MealAddFood_Click" VerticalAlignment="Bottom" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                  <Button x:Name="MealUpdateFoodButton" Content="Zutat ändern" Click="MealAddFood_Click" Visibility="Collapsed" Background="#167789" Foreground="White" />
+                                  <Button x:Name="MealCancelFoodEditButton" Content="Zutat-Bearbeitung abbrechen" Click="MealCancelFoodEdit_Click" Visibility="Collapsed" />
+                                </StackPanel>
+                                <Border Background="#F1F7FA" Padding="12" CornerRadius="6" Width="720" HorizontalAlignment="Left">
+                                  <TextBlock x:Name="MealAssessment" TextWrapping="Wrap" />
+                                </Border>
+                                <TextBox x:Name="MealNote" Header="Notiz / Zubereitung" Width="720" HorizontalAlignment="Left" TextWrapping="Wrap" AcceptsReturn="True" Height="75" />
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                  <Button Content="Als geplant speichern" Click="SavePlannedMeal_Click" Background="#167789" Foreground="White" />
+                                  <Button Content="Als gegessen speichern" Click="SaveConsumedMeal_Click" />
+                                  <Button Content="Als Vorlage speichern" Click="SaveMealTemplate_Click" />
+                                  <Button Content="Neue Mahlzeit" Click="ResetMeal_Click" />
+                                </StackPanel>
+                                <TextBlock x:Name="MealStatusText" Width="720" HorizontalAlignment="Left" Foreground="#316073" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Spacing="10">
+                                <TextBlock Text="Gespeicherte Mahlzeiten und Vorlagen · Doppelklick zum Bearbeiten" FontSize="18" FontWeight="SemiBold" />
+                                <ListView x:Name="MealHistoryList" Height="210" DoubleTapped="MealHistory_DoubleTapped" />
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                  <Button Content="Auswahl als gegessen übernehmen" Click="ConsumeSelectedMeal_Click" />
+                                  <Button Content="Auswahl entfernen" Click="DeleteSelectedMeal_Click" />
+                                </StackPanel>
+                              </StackPanel>
+                              </Grid>
+                            </ScrollViewer>
+                          </Grid>
+                        </TabViewItem>
+                        <TabViewItem Header="Lebensmittel" IsClosable="False">
+                          <Grid RowSpacing="10" Margin="0,8,0,0">
+                            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                            <TextBlock Text="Lebensmittel und Werte je 100 g" FontSize="20" FontWeight="SemiBold" />
+                            <TextBlock Grid.Row="1" Text="Tabellenwerte aus dem gescannten Arztplan: Namen und Zahlen bitte vor Verwendung prüfen. Persönliche Regeln haben Vorrang vor der GL-Einstufung." TextWrapping="Wrap" />
+                            <Grid Grid.Row="2" RowSpacing="4">
+                              <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                              <Grid RowSpacing="9" ColumnSpacing="16">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                                <TextBox x:Name="FoodName" Header="Bezeichnung" />
+                                <TextBox x:Name="FoodNote" Grid.Column="1" Header="Eigene Notiz / Zubereitung" TextWrapping="Wrap" />
+                                <Grid Grid.Row="1" ColumnSpacing="10">
+                                  <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                  <NumberBox x:Name="FoodCarbs" Header="Kohlenhydrate / 100 g" Minimum="0" />
+                                  <NumberBox x:Name="FoodGi" Grid.Column="1" Header="Glykämischer Index" Minimum="0" />
+                                  <NumberBox x:Name="FoodGl" Grid.Column="2" Header="Glykämische Last / 100 g" Minimum="0" />
+                                </Grid>
+                                <TextBox x:Name="FoodSource" Grid.Row="1" Grid.Column="1" Header="Quelle" />
+                                <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="10">
+                                  <Button Content="Lebensmittel speichern" Click="SaveFood_Click" Background="#167789" Foreground="White" />
+                                  <Button Content="Neues Lebensmittel" Click="NewFood_Click" />
+                                  <Button x:Name="DeleteFoodButton" Content="Lebensmittel entfernen" Click="DeleteFood_Click" IsEnabled="False" />
+                                </StackPanel>
+                                <TextBlock x:Name="FoodEditorStatus" Grid.Row="3" Grid.ColumnSpan="2" Foreground="#316073" TextWrapping="Wrap" />
+                              </Grid>
+                              <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                              <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                              <Grid x:Name="FoodHeader" />
+                              <ListView x:Name="FoodCatalogList" Grid.Row="1" SelectionChanged="FoodCatalog_SelectionChanged" DoubleTapped="FoodCatalog_DoubleTapped" ScrollViewer.VerticalScrollBarVisibility="Auto" MinHeight="160">
+                                <ListView.ItemContainerStyle><Style TargetType="ListViewItem"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="27" /><Setter Property="Padding" Value="0" /></Style></ListView.ItemContainerStyle>
+                              </ListView>
+                              </Grid></ScrollViewer>
+                            </Grid>
+                          </Grid>
+                        </TabViewItem>
+                        <TabViewItem Header="Regeln" IsClosable="False">
+                          <Grid RowSpacing="10" Margin="0,8,0,0">
+                            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                            <TextBlock Text="Persönliche Ernährungsregeln" FontSize="20" FontWeight="SemiBold" />
+                            <TextBlock Grid.Row="1" Text="Ein Suchbegriff gilt für passende Lebensmittelnamen. Höhere Priorität setzt allgemeinere Regeln außer Kraft. Regeln aus dem Arztplan sind bearbeitbar." TextWrapping="Wrap" />
+                            <Grid Grid.Row="2" RowSpacing="4">
+                              <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                              <Grid RowSpacing="9" ColumnSpacing="16">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                                <TextBox x:Name="RulePattern" Header="Suchbegriff" />
+                                <TextBox x:Name="RuleNote" Grid.Column="1" Header="Bedingung / Begründung" TextWrapping="Wrap" />
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10">
+                                <ComboBox x:Name="RuleDecision" Header="Einstufung" Width="260">
+                                  <ComboBoxItem Content="Verboten" Tag="exclude" />
+                                  <ComboBoxItem Content="Vermeiden" Tag="avoid" />
+                                  <ComboBoxItem Content="Bedingt erlaubt" Tag="conditional" />
+                                  <ComboBoxItem Content="Erlaubt" Tag="allow" />
+                                </ComboBox>
+                                <NumberBox x:Name="RulePriority" Header="Priorität" Width="150" Minimum="0" Maximum="100" Value="10" />
+                                </StackPanel>
+                                <TextBox x:Name="RuleSource" Grid.Row="1" Grid.Column="1" Header="Quelle" />
+                                <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="10">
+                                  <Button Content="Regel speichern" Click="SaveFoodRule_Click" Background="#167789" Foreground="White" />
+                                  <Button Content="Neue Regel" Click="NewFoodRule_Click" />
+                                  <Button Content="Regel entfernen" Click="DeleteFoodRule_Click" />
+                                </StackPanel>
+                                <TextBlock x:Name="RuleEditorStatus" Grid.Row="3" Grid.ColumnSpan="2" Foreground="#316073" TextWrapping="Wrap" />
+                              </Grid>
+                              <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                              <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                              <Grid x:Name="RuleHeader" />
+                              <ListView x:Name="FoodRulesList" Grid.Row="1" DoubleTapped="FoodRule_DoubleTapped" ScrollViewer.VerticalScrollBarVisibility="Auto" MinHeight="160">
+                                <ListView.ItemContainerStyle><Style TargetType="ListViewItem"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="27" /><Setter Property="Padding" Value="0" /></Style></ListView.ItemContainerStyle>
+                              </ListView>
+                              </Grid></ScrollViewer>
+                            </Grid>
+                          </Grid>
+                        </TabViewItem>
+                        <TabViewItem Header="Auswertung" IsClosable="False">
+                          <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel Spacing="10" Margin="0,8,0,0">
+                            <TextBlock Text="Ernährung und späterer Zustand" FontSize="20" FontWeight="SemiBold" />
+                            <TextBlock Text="Zeitliche Nähe zeigt keine Ursache. Nur als gegessen gespeicherte Mahlzeiten werden verglichen; fehlende Zustandseinträge bleiben sichtbar." TextWrapping="Wrap" />
+                            <StackPanel x:Name="FoodAnalysisRows" Spacing="5" />
+                          </StackPanel></ScrollViewer>
                         </TabViewItem>
                       </TabView>
                     </TabViewItem>

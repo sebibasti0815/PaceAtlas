@@ -190,6 +190,13 @@ public sealed partial class MainWindow : Window
     private readonly List<IntakeRecord> intakes = new();
     private readonly List<StockProduct> products = new();
     private readonly List<IntakeRow> intakeRows = new();
+    private readonly Dictionary<ListView, List<(Grid Row, Brush? Base)>> listFeedbackRows = new();
+    private Grid? hoveredListRow;
+    private readonly Dictionary<StackPanel, List<(Grid Row, Brush? Base)>> panelFeedbackRows = new();
+    private Grid? selectedPanelRow;
+    private Grid? hoveredPanelRow;
+    private IntakeRow? selectedIntakeRow;
+    private IntakeRow? hoveredIntakeRow;
     private readonly List<StockProduct> displayedProducts = new();
     private long editingStockProductId;
     private bool renderingStock;
@@ -218,15 +225,45 @@ public sealed partial class MainWindow : Window
     private int painColumns;
     private readonly Dictionary<string, (int Column, bool Descending)> tableSort = new()
     {
-        ["entries"] = (0, true), ["plans"] = (0, false), ["stock"] = (0, false), ["intakes"] = (0, false)
+        ["entries"] = (0, true), ["plans"] = (0, false), ["stock"] = (0, false), ["intakes"] = (0, false),
+        ["foods"] = (0, false), ["rules"] = (0, false)
     };
     private readonly Dictionary<string, int[]> columnWidths = new()
     {
         ["entries"] = [180, 180, 115, 400, 340],
         ["plans"] = [85, 205, 125, 85, 76, 125, 125, 290],
         ["stock"] = [170, 76, 145, 145, 95, 95, 95, 90, 170],
-        ["intakes"] = [85, 190, 145, 95, 76, 110, 165, 155]
+        ["intakes"] = [85, 190, 145, 95, 76, 110, 165, 155],
+        ["foods"] = [280, 130, 105, 130, 230, 250],
+        ["rules"] = [230, 145, 95, 380, 230]
     };
+    private readonly Dictionary<string, Dictionary<int, string>> tableFilters = new();
+
+    private bool MatchesTableFilters(string table, params string[] cells) =>
+        !tableFilters.TryGetValue(table, out var filters) || filters.All(filter =>
+            filter.Key < cells.Length && cells[filter.Key].Contains(filter.Value, StringComparison.CurrentCultureIgnoreCase));
+
+    private string[]? TableFilterChoices(string table, int column) => (table, column) switch
+    {
+        ("entries", 2) => ["Zustand", "Aktivität", "Ruhe", "Maßnahme", "Einnahme", "Mahlzeit"],
+        ("intakes", 5) => ["Offen", "Genommen", "Ausgelassen"],
+        ("rules", 1) => ["Verboten", "Vermeiden", "Bedingt erlaubt", "Erlaubt"],
+        _ => null
+    };
+
+    private void RefreshFilteredTable(string table)
+    {
+        switch (table)
+        {
+            case "entries": DisplayEntries(); break;
+            case "plans": RenderPlans(); break;
+            case "stock": RenderStock(); break;
+            case "intakes": SortIntakeRows(); break;
+            case "foods": RenderFoodCatalog(); break;
+            case "rules": RenderFoodRules(); break;
+        }
+        RefreshSortableHeaderCaptions();
+    }
 
     private bool entriesExpanded;
     private bool planExpanded;
@@ -279,6 +316,7 @@ public sealed partial class MainWindow : Window
         ConfigureTabColors(MedicationTabs);
         ConfigureTabColors(AnalysisTabs);
         ConfigureTabColors(AnalysisVisualTabs);
+        ConfigureTabColors(NutritionTabs);
         Overall.ItemsSource = new[] { "gut", "leicht eingeschränkt", "mittel", "schlecht", "sehr schlecht" };
         Pem.ItemsSource = new[] { "nein", "vermutet", "erkannt" };
         EntryList.ItemsSource = visibleEntries;
@@ -293,10 +331,11 @@ public sealed partial class MainWindow : Window
         InitializeAnalysis();
         ResetForm();
         LoadEntries();
+        InitializeNutrition();
         AttachStatusLocalization();
         ApplyUiLanguage();
         UpdateEditingIndicators();
-        todaySummaryTimer.Tick += (_, _) => RefreshTodaySummary();
+        todaySummaryTimer.Tick += (_, _) => { RefreshTodaySummary(); RefreshMedicationDueIndicators(); };
         todaySummaryTimer.Start();
         ((FrameworkElement)Content).Loaded += (_, _) => _ = CheckForUpdatesAsync(false);
     }
@@ -446,6 +485,35 @@ public sealed partial class MainWindow : Window
         return grid;
     }
 
+    private void AddEntryDetails(Grid row, string detail)
+    {
+        row.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        row.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        var label = row.Children.OfType<TextBlock>().First(child => Grid.GetColumn(child) == 3);
+        row.Children.Remove(label);
+        var content = new Grid();
+        content.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        content.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        var details = new TextBlock { Text = detail, TextWrapping = TextWrapping.Wrap,
+            Margin = new Thickness(8, 2, 12, 8), Visibility = Visibility.Collapsed };
+        Grid.SetColumn(details, 3); Grid.SetColumnSpan(details, 2); Grid.SetRow(details, 1);
+        row.Children.Add(details);
+        var toggle = new Button { Content = "▸", Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent),
+            BorderThickness = new Thickness(0), Padding = new Thickness(5, 1, 3, 1),
+            VerticalAlignment = VerticalAlignment.Center };
+        ToolTipService.SetToolTip(toggle, N("Details anzeigen", "Show details"));
+        toggle.Click += (_, _) =>
+        {
+            details.Visibility = details.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+            toggle.Content = details.Visibility == Visibility.Visible ? "▾" : "▸";
+            ToolTipService.SetToolTip(toggle, details.Visibility == Visibility.Visible
+                ? N("Details ausblenden", "Hide details") : N("Details anzeigen", "Show details"));
+        };
+        content.Children.Add(toggle);
+        Grid.SetColumn(label, 1); content.Children.Add(label);
+        Grid.SetColumn(content, 3); row.Children.Add(content);
+    }
+
     private void LoadColumnWidths()
     {
         try
@@ -488,13 +556,16 @@ public sealed partial class MainWindow : Window
     {
         var header = table switch
         {
-            "entries" => EntryHeader, "plans" => PlanHeader, "stock" => StockHeader, _ => IntakeHeader
+            "entries" => EntryHeader, "plans" => PlanHeader, "stock" => StockHeader,
+            "foods" => FoodHeader, "rules" => RuleHeader, _ => IntakeHeader
         };
         var rows = table switch
         {
             "entries" => visibleEntries.Cast<Grid>().ToArray(),
             "plans" => PlanList.Items.Cast<Grid>().ToArray(),
             "stock" => StockList.Items.Cast<Grid>().ToArray(),
+            "foods" => FoodCatalogList.Items.Cast<Grid>().ToArray(),
+            "rules" => FoodRulesList.Items.Cast<Grid>().ToArray(),
             _ => intakeRows.Select(row => row.Visual).ToArray()
         };
         foreach (var grid in rows.Prepend((Grid)header.Children[0]))
@@ -512,13 +583,57 @@ public sealed partial class MainWindow : Window
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(columnWidths[table][i]) });
             var selected = tableSort[table];
             var title = cells[i].Text + (selected.Column == i ? (selected.Descending ? "  ↓" : "  ↑") : "");
-            var heading = new Border { Padding = new Thickness(7, 6, 12, 6), Background = headerBrush,
+            var heading = new Border { Padding = new Thickness(7, 6, 31, 6), Background = headerBrush,
                 Child = new TextBlock { Text = title, Tag = cells[i].Text, TextWrapping = TextWrapping.NoWrap,
                     TextTrimming = TextTrimming.CharacterEllipsis,
                     FontWeight = Microsoft.UI.Text.FontWeights.SemiBold } };
             heading.Tapped += (_, _) => SortTable(table, column);
             Grid.SetColumn(heading, i);
             grid.Children.Add(heading);
+            var filterButton = new Button { Content = new FontIcon { Glyph = "\uE721", FontSize = 13 }, Width = 25, Height = 26,
+                HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Center,
+                Padding = new Thickness(0), Margin = new Thickness(0, 0, 10, 0),
+                Background = headerBrush, BorderThickness = new Thickness(0), Tag = i };
+            ToolTipService.SetToolTip(filterButton, N("Diese Spalte durchsuchen", "Filter this column"));
+            var filterBox = new TextBox { Width = 240, PlaceholderText = N("Suchbegriff", "Search term") };
+            var term = tableFilters.TryGetValue(table, out var active) && active.TryGetValue(i, out var saved)
+                ? saved : "";
+            var filterFlyout = new Flyout();
+            var filterPanel = new StackPanel { Spacing = 6 };
+            var choices = TableFilterChoices(table, i);
+            ComboBox? choiceBox = null;
+            if (choices is null)
+            {
+                filterBox.Text = term;
+                filterPanel.Children.Add(filterBox);
+            }
+            else
+            {
+                choiceBox = new ComboBox { Width = 240 };
+                choiceBox.Items.Add(N("Alle", "All"));
+                foreach (var choice in choices) choiceBox.Items.Add(T(choice));
+                choiceBox.SelectedIndex = Math.Max(0, Array.FindIndex(choices,
+                    choice => T(choice).Equals(term, StringComparison.CurrentCultureIgnoreCase)) + 1);
+                filterPanel.Children.Add(choiceBox);
+            }
+            void SetFilter(string value)
+            {
+                if (!tableFilters.TryGetValue(table, out var terms))
+                    tableFilters[table] = terms = new Dictionary<int, string>();
+                if (string.IsNullOrWhiteSpace(value)) terms.Remove(column);
+                else terms[column] = value.Trim();
+                RefreshFilteredTable(table);
+            }
+            var clear = new Button { Content = N("Filter löschen", "Clear filter") };
+            clear.Click += (_, _) => { if (choiceBox is null) filterBox.Text = ""; else choiceBox.SelectedIndex = 0; };
+            filterPanel.Children.Add(clear);
+            filterFlyout.Content = filterPanel;
+            filterButton.Flyout = filterFlyout;
+            if (choiceBox is null) filterBox.TextChanged += (_, _) => SetFilter(filterBox.Text);
+            else choiceBox.SelectionChanged += (_, _) => SetFilter(choiceBox.SelectedIndex <= 0
+                ? "" : choiceBox.SelectedItem?.ToString() ?? "");
+            Grid.SetColumn(filterButton, i);
+            grid.Children.Add(filterButton);
             var grip = new Thumb { Width = 9, HorizontalAlignment = HorizontalAlignment.Right,
                 VerticalAlignment = VerticalAlignment.Stretch, Background = headerBrush };
             grip.DragDelta += (_, args) =>
@@ -550,13 +665,16 @@ public sealed partial class MainWindow : Window
             case "plans": RenderPlans(); break;
             case "stock": RenderStock(); break;
             case "intakes": SortIntakeRows(); break;
+            case "foods": RenderFoodCatalog(); break;
+            case "rules": RenderFoodRules(); break;
         }
     }
 
     private void RefreshSortableHeaderCaptions()
     {
         foreach (var (table, host) in new[] { ("entries", EntryHeader), ("plans", PlanHeader),
-                     ("stock", StockHeader), ("intakes", IntakeHeader) })
+                     ("stock", StockHeader), ("intakes", IntakeHeader),
+                     ("foods", FoodHeader), ("rules", RuleHeader) })
         {
             if (host.Children.FirstOrDefault() is not Grid headerGrid) continue;
             foreach (var heading in headerGrid.Children.OfType<Border>().Select((border, index) => (border, index)))
@@ -565,6 +683,15 @@ public sealed partial class MainWindow : Window
                 var sort = tableSort[table];
                 caption.Text = T(canonical) + (sort.Column == heading.index
                     ? (sort.Descending ? "  ↓" : "  ↑") : "");
+            }
+            foreach (var button in headerGrid.Children.OfType<Button>())
+            {
+                var column = (int)button.Tag;
+                button.Foreground = new SolidColorBrush(tableFilters.TryGetValue(table, out var filters) &&
+                    filters.ContainsKey(column) ? Windows.UI.Color.FromArgb(255, 16, 111, 128) :
+                    Windows.UI.Color.FromArgb(255, 45, 65, 78));
+                button.FontWeight = tableFilters.TryGetValue(table, out var current) && current.ContainsKey(column)
+                    ? Microsoft.UI.Text.FontWeights.Bold : Microsoft.UI.Text.FontWeights.Normal;
             }
         }
     }
@@ -583,6 +710,10 @@ public sealed partial class MainWindow : Window
             "Einnahme", "Tatsächliche Dosis", "Tatsächl. Anzahl" };
         IntakeHeader.Children.Add(SortableHeader("intakes", headings.Select((text, index) =>
             (text, columnWidths["intakes"][index])).ToArray()));
+        FoodHeader.Children.Add(SortableHeader("foods", [("Bezeichnung", 280), ("KH / 100 g", 130),
+            ("GI", 105), ("GL / 100 g", 130), ("Quelle", 230), ("Notiz", 250)]));
+        RuleHeader.Children.Add(SortableHeader("rules", [("Suchbegriff", 230), ("Einstufung", 145),
+            ("Priorität", 95), ("Bedingung / Begründung", 380), ("Quelle", 230)]));
     }
 
     private static void SaveJson<T>(string path, T value)
@@ -615,14 +746,89 @@ public sealed partial class MainWindow : Window
             4 => plan.Form, 5 => plan.StartDate, 6 => plan.EndDate ?? "9999-12-31",
             _ => string.Join(", ", plan.Goals)
         };
+        var filtered = plans.Where(plan => MatchesTableFilters("plans", plan.Time, plan.Name, plan.Dose,
+            plan.Quantity, plan.Form, plan.StartDate == "0001-01-01" ? T("bisher") : plan.StartDate,
+            plan.EndDate ?? T("Läuft noch"), string.Join(", ", plan.Goals)));
         displayedPlans.AddRange(descending
-            ? plans.OrderByDescending(Key, StringComparer.CurrentCultureIgnoreCase).ThenBy(plan => plan.Id)
-            : plans.OrderBy(Key, StringComparer.CurrentCultureIgnoreCase).ThenBy(plan => plan.Id));
+            ? filtered.OrderByDescending(Key, StringComparer.CurrentCultureIgnoreCase).ThenBy(plan => plan.Id)
+            : filtered.OrderBy(Key, StringComparer.CurrentCultureIgnoreCase).ThenBy(plan => plan.Id));
         PlanList.ItemsSource = displayedPlans.Select(plan => TableRow([
             (plan.Time, 85), (plan.Name, 205), (plan.Dose, 125), (plan.Quantity, 85),
             (plan.Form, 120), (plan.StartDate == "0001-01-01" ? T("bisher") : DateOnly.ParseExact(plan.StartDate, "yyyy-MM-dd", CultureInfo.InvariantCulture).ToString("dd.MM.yyyy"), 125),
             (plan.EndDate is null ? T("Läuft noch") : DateOnly.ParseExact(plan.EndDate, "yyyy-MM-dd", CultureInfo.InvariantCulture).ToString("dd.MM.yyyy"), 125),
             (string.Join(", ", plan.Goals), 290)], table: "plans")).ToArray();
+        ConfigureListFeedback(PlanList);
+    }
+
+    private void ConfigureListFeedback(ListView list)
+    {
+        var rows = list.Items.OfType<Grid>().Select(row => (Row: row, Base: row.Background)).ToList();
+        listFeedbackRows[list] = rows;
+        foreach (var (row, _) in rows)
+        {
+            row.Background ??= new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+            row.Tapped += (_, _) => list.SelectedItem = row;
+            row.PointerEntered += (_, _) => { hoveredListRow = row; UpdateListFeedback(list); };
+            row.PointerExited += (_, _) =>
+            {
+                if (ReferenceEquals(hoveredListRow, row)) hoveredListRow = null;
+                UpdateListFeedback(list);
+            };
+        }
+        UpdateListFeedback(list);
+    }
+
+    private void UpdateListFeedback(ListView list)
+    {
+        if (!listFeedbackRows.TryGetValue(list, out var rows)) return;
+        foreach (var (row, original) in rows)
+        {
+            var selected = ReferenceEquals(list.SelectedItem, row);
+            var hovered = ReferenceEquals(hoveredListRow, row);
+            var red = original is SolidColorBrush brush && brush.Color.R > brush.Color.G + 12 &&
+                brush.Color.R > brush.Color.B + 12;
+            row.Background = selected
+                ? new SolidColorBrush(red ? Windows.UI.Color.FromArgb(255, 255, 195, 195) :
+                    Windows.UI.Color.FromArgb(255, 216, 234, 243))
+                : hovered
+                    ? new SolidColorBrush(red ? Windows.UI.Color.FromArgb(255, 255, 216, 216) :
+                        Windows.UI.Color.FromArgb(255, 239, 246, 250))
+                    : original ?? new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+        }
+    }
+
+    private void ConfigurePanelFeedback(StackPanel panel)
+    {
+        var rows = panel.Children.OfType<Grid>().Skip(1).Select(row => (Row: row, Base: row.Background)).ToList();
+        panelFeedbackRows[panel] = rows;
+        foreach (var (row, _) in rows)
+        {
+            row.Background ??= new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+            row.Tapped += (_, _) => { selectedPanelRow = row; RefreshPanelFeedback(); };
+            row.PointerEntered += (_, _) => { hoveredPanelRow = row; RefreshPanelFeedback(); };
+            row.PointerExited += (_, _) =>
+            {
+                if (ReferenceEquals(hoveredPanelRow, row)) hoveredPanelRow = null;
+                RefreshPanelFeedback();
+            };
+        }
+        UpdatePanelFeedback(panel);
+    }
+
+    private void RefreshPanelFeedback()
+    {
+        foreach (var panel in panelFeedbackRows.Keys) UpdatePanelFeedback(panel);
+    }
+
+    private void UpdatePanelFeedback(StackPanel panel)
+    {
+        if (!panelFeedbackRows.TryGetValue(panel, out var rows)) return;
+        foreach (var (row, original) in rows)
+            row.Background = ReferenceEquals(selectedPanelRow, row)
+                ? new SolidColorBrush(Windows.UI.Color.FromArgb(255, 216, 234, 243))
+                : ReferenceEquals(hoveredPanelRow, row)
+                    ? new SolidColorBrush(Windows.UI.Color.FromArgb(255, 239, 246, 250))
+                    : original ?? new SolidColorBrush(Microsoft.UI.Colors.Transparent);
     }
 
     private async void ManageMeasures_Click(object sender, RoutedEventArgs e)
@@ -922,6 +1128,15 @@ public sealed partial class MainWindow : Window
 
     private void PlanList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        UpdateListFeedback(PlanList);
+        var index = PlanList.SelectedIndex;
+        if (index < 0 || index >= displayedPlans.Count) return;
+        if (editingPlanId != 0 && editingPlanId != displayedPlans[index].Id)
+            ResetPlan(clearSelection: false);
+    }
+
+    private void PlanList_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
+    {
         var index = PlanList.SelectedIndex;
         if (index < 0 || index >= displayedPlans.Count) return;
         SetPlanExpanded(false);
@@ -941,11 +1156,11 @@ public sealed partial class MainWindow : Window
         RenderGoals(plan.Goals);
     }
 
-    private void ResetPlan()
+    private void ResetPlan(bool clearSelection = true)
     {
         editingPlanId = 0;
         UpdateEditingIndicators();
-        PlanList.SelectedIndex = -1;
+        if (clearSelection) PlanList.SelectedIndex = -1;
         PlanTime.Text = DateTime.Now.ToString("HH:mm", CultureInfo.InvariantCulture);
         PlanStartDate.Date = DateTimeOffset.Now;
         PlanOngoing.IsChecked = true;
@@ -1006,6 +1221,8 @@ public sealed partial class MainWindow : Window
     private void RenderIntakes()
     {
         if (!TryIntakeDay(out var day)) return;
+        selectedIntakeRow = null;
+        hoveredIntakeRow = null;
         intakeRows.Clear();
         IntakeRows.Children.Clear();
         var key = day.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
@@ -1060,8 +1277,17 @@ public sealed partial class MainWindow : Window
             row.Children.Add(actualDose);
             row.Children.Add(actualQuantity);
             IntakeRows.Children.Add(row);
-            intakeRows.Add(new IntakeRow { Plan = plan, Status = status, Dose = actualDose, Quantity = actualQuantity,
-                Visual = row });
+            var intakeRow = new IntakeRow { Plan = plan, Status = status, Dose = actualDose, Quantity = actualQuantity,
+                Visual = row };
+            intakeRows.Add(intakeRow);
+            row.Tapped += (_, _) => { selectedIntakeRow = intakeRow; RefreshMedicationDueIndicators(); };
+            row.PointerEntered += (_, _) => { hoveredIntakeRow = intakeRow; RefreshMedicationDueIndicators(); };
+            row.PointerExited += (_, _) =>
+            {
+                if (ReferenceEquals(hoveredIntakeRow, intakeRow)) hoveredIntakeRow = null;
+                RefreshMedicationDueIndicators();
+            };
+            status.SelectionChanged += (_, _) => RefreshMedicationDueIndicators();
         }
         SortIntakeRows();
         var selectedTime = IntakeBulkTime.SelectedItem?.ToString();
@@ -1070,6 +1296,38 @@ public sealed partial class MainWindow : Window
         IntakeBulkTime.ItemsSource = times;
         IntakeBulkTime.SelectedItem = selectedTime is not null && times.Contains(selectedTime) ? selectedTime : times.FirstOrDefault();
         TakeSelectedTimeButton.IsEnabled = times.Length > 0;
+        RefreshMedicationDueIndicators();
+    }
+
+    private static bool IntakeIsDue(DateTime day, string time, DateTime now) =>
+        TimeOnly.TryParseExact(time, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var clock) &&
+        day.Date.Add(clock.ToTimeSpan()) <= now;
+
+    private void RefreshMedicationDueIndicators()
+    {
+        var now = DateTime.Now;
+        var today = now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        var selectedDay = IntakeDate.Date?.Date;
+        foreach (var row in intakeRows)
+        {
+            var due = selectedDay is { } day && row.Status.SelectedIndex == 0 &&
+                IntakeIsDue(day, row.Plan.Time, now);
+            var selected = ReferenceEquals(row, selectedIntakeRow);
+            var hovered = ReferenceEquals(row, hoveredIntakeRow);
+            row.Visual.Background = new SolidColorBrush(due
+                ? selected ? Windows.UI.Color.FromArgb(255, 255, 195, 195) :
+                    hovered ? Windows.UI.Color.FromArgb(255, 255, 216, 216) : Windows.UI.Color.FromArgb(255, 255, 229, 229)
+                : selected ? Windows.UI.Color.FromArgb(255, 216, 234, 243) :
+                    hovered ? Windows.UI.Color.FromArgb(255, 239, 246, 250) : Microsoft.UI.Colors.Transparent);
+        }
+
+        var displayedToday = selectedDay == now.Date;
+        var hasDue = displayedToday
+            ? intakeRows.Any(row => row.Status.SelectedIndex == 0 && IntakeIsDue(now.Date, row.Plan.Time, now))
+            : plans.Any(plan => plan.IsActiveOn(DateOnly.FromDateTime(now)) &&
+                IntakeIsDue(now.Date, plan.Time, now) &&
+                !intakes.Any(item => item.Day == today && item.PlanId == plan.Id));
+        MedicationDueIcon.Visibility = IntakeDueIcon.Visibility = hasDue ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void TakeSelectedTime_Click(object sender, RoutedEventArgs e)
@@ -1095,8 +1353,11 @@ public sealed partial class MainWindow : Window
             5 => IntakeStatusLabel(row.Status.SelectedIndex), 6 => row.Dose.Text,
             _ => Numeric(ParseNumber(row.Quantity.Text))
         };
-        var ordered = (descending ? intakeRows.OrderByDescending(Key, StringComparer.CurrentCultureIgnoreCase)
-            : intakeRows.OrderBy(Key, StringComparer.CurrentCultureIgnoreCase)).ToArray();
+        var filtered = intakeRows.Where(row => MatchesTableFilters("intakes", row.Plan.Time,
+            row.Plan.Name, row.Plan.Dose, row.Plan.Quantity, row.Plan.Form,
+            IntakeStatusLabel(row.Status.SelectedIndex), row.Dose.Text, row.Quantity.Text));
+        var ordered = (descending ? filtered.OrderByDescending(Key, StringComparer.CurrentCultureIgnoreCase)
+            : filtered.OrderBy(Key, StringComparer.CurrentCultureIgnoreCase)).ToArray();
         IntakeRows.Children.Clear();
         foreach (var row in ordered) IntakeRows.Children.Add(row.Visual);
     }
@@ -1163,8 +1424,13 @@ public sealed partial class MainWindow : Window
         };
         renderingStock = true;
         displayedProducts.Clear();
-        displayedProducts.AddRange(descending ? products.OrderByDescending(Key, StringComparer.CurrentCultureIgnoreCase)
-            : products.OrderBy(Key, StringComparer.CurrentCultureIgnoreCase));
+        var filtered = products.Where(product => MatchesTableFilters("stock", product.Name, product.Form,
+            product.Manufacturer, product.Supplier, product.PackUnits.ToString("G"), product.PackPrice.ToString("N2"),
+            product.StockKnown ? product.Current.ToString("G") : T("nicht erfasst"),
+            product.WeeklyNeed.ToString("G"), !product.StockKnown ? T("Bestand unbekannt") :
+            product.Current <= product.WeeklyNeed ? T("Nachkauf prüfen") : ""));
+        displayedProducts.AddRange(descending ? filtered.OrderByDescending(Key, StringComparer.CurrentCultureIgnoreCase)
+            : filtered.OrderBy(Key, StringComparer.CurrentCultureIgnoreCase));
         StockList.ItemsSource = displayedProducts.Select(product =>
         {
             var note = product.StockKnown && product.WeeklyNeed > 0 && product.Current <= product.WeeklyNeed
@@ -1175,6 +1441,7 @@ public sealed partial class MainWindow : Window
                 (product.StockKnown ? product.Current.ToString("G") : T("nicht erfasst"), 95),
                 (product.WeeklyNeed.ToString("G"), 90), (note, 170) ], table: "stock");
         }).ToArray();
+        ConfigureListFeedback(StockList);
         var weeklyCost = products.Where(product => product.PackUnits > 0)
             .Sum(product => product.WeeklyNeed / product.PackUnits * product.PackPrice);
         var lowCount = products.Count(product => product.StockKnown && product.WeeklyNeed > 0 &&
@@ -1207,6 +1474,7 @@ public sealed partial class MainWindow : Window
 
     private void StockList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        UpdateListFeedback(StockList);
         if (renderingStock) return;
         var product = SelectedStockProduct();
         if (product?.Id != editingStockProductId)
@@ -1291,7 +1559,14 @@ public sealed partial class MainWindow : Window
             store.SaveProductDetails(new PaceAtlas.MedicationProduct { Id = product.Id, Name = product.Name,
                 Form = product.Form, Manufacturer = StockManufacturer.Text.Trim(), Supplier = StockSupplier.Text.Trim(),
                 PackUnits = (decimal)StockPackUnits.Value, PackPrice = (decimal)StockPackPrice.Value });
-            RefreshProducts(); StockStatus.Text = "Packungsdaten gespeichert.";
+            RefreshProducts();
+            editingStockProductId = 0;
+            StockList.SelectedIndex = -1;
+            StockManufacturer.Text = StockSupplier.Text = "";
+            StockPackUnits.Value = StockPackPrice.Value = double.NaN;
+            StockCounted.Value = double.NaN;
+            UpdateStockEditingBanner();
+            StockStatus.Text = "Packungsdaten gespeichert.";
         }
         catch (Exception ex) { StockStatus.Text = "Speichern fehlgeschlagen: " + ex.Message; }
     }
@@ -1655,7 +1930,11 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void EntryList_SelectionChanged(object sender, SelectionChangedEventArgs e) => UpdateEndAction();
+    private void EntryList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        UpdateListFeedback(EntryList);
+        UpdateEndAction();
+    }
 
     private void UpdateEndAction()
     {
@@ -1713,6 +1992,12 @@ public sealed partial class MainWindow : Window
 
     private void EditEntry(Entry entry)
     {
+        if (entry.Kind == "Mahlzeit")
+        {
+            var meal = nutritionMeals.FirstOrDefault(item => item.Id == -entry.Id);
+            if (meal is not null) EditMeal(meal);
+            return;
+        }
         SetEntriesExpanded(false);
         if (entry.Kind == "Einnahme")
         {
@@ -1824,6 +2109,13 @@ public sealed partial class MainWindow : Window
         if (await ShowTranslatedDialogAsync(dialog) != ContentDialogResult.Primary) return;
         try
         {
+            if (entry.Kind == "Mahlzeit")
+            {
+                store.DeleteMeal(-entry.Id);
+                if (editingMealId == -entry.Id) ResetMeal();
+                ReloadNutrition();
+                return;
+            }
             store.Delete(entry.Id);
             if (editingEntryId == entry.Id) ClearEditing();
             ReloadMedicationData(); RenderIntakes(); RenderStock(); LoadEntries();
@@ -1883,7 +2175,7 @@ public sealed partial class MainWindow : Window
             if (await ShowTranslatedDialogAsync(dialog) != ContentDialogResult.Primary) return;
             store.Restore(path);
             ClearEditing();
-            ReloadMedicationData(); RenderPlans(); RenderIntakes(); RenderStock(); LoadEntries();
+            ReloadMedicationData(); RenderPlans(); RenderIntakes(); RenderStock(); LoadEntries(); ReloadNutrition();
             Status.Text = "Backup eingespielt.";
         }
         catch (Exception ex) { Status.Text = "Wiederherstellen fehlgeschlagen: " + ex.Message; }
@@ -1927,6 +2219,7 @@ public sealed partial class MainWindow : Window
             DisplayEntries();
             RenderOngoingMeasures();
             RefreshAnalysis();
+            if (FoodAnalysisRows is not null) RenderFoodAnalysis();
         }
         catch (Exception ex)
         {
@@ -2019,14 +2312,28 @@ public sealed partial class MainWindow : Window
             0 => entry.Start.ToString("O"), 1 => entry.End?.ToString("O") ?? "",
             2 => entry.Kind, 3 => EntryContent(entry), _ => entry.Note
         };
-        var source = entries.AsEnumerable();
+        var source = entries.AsEnumerable().Concat(nutritionMeals
+            .Where(meal => meal.Status == "consumed")
+            .Select(meal => new Entry { Id = -meal.Id, Kind = "Mahlzeit", Start = meal.At,
+                Data = meal.Name, Note = meal.Note }));
         if (HideIntakesFilter.IsChecked == true)
             source = source.Where(entry => entry.Kind != "Einnahme");
+        source = source.Where(entry => MatchesTableFilters("entries", entry.Start.ToString("dd.MM.yyyy HH:mm"),
+            entry.End?.ToString("dd.MM.yyyy HH:mm") ?? "", T(entry.Kind == "Schlaf" ? "Ruhe" : entry.Kind),
+            EntryContent(entry), entry.Note));
         var sorted = descending
             ? source.OrderByDescending(IsRunningEntry).ThenByDescending(SortKey, StringComparer.CurrentCultureIgnoreCase)
             : source.OrderByDescending(IsRunningEntry).ThenBy(SortKey, StringComparer.CurrentCultureIgnoreCase);
         foreach (var entry in sorted)
         {
+            if (entry.Kind == "Mahlzeit")
+            {
+                var meal = nutritionMeals.FirstOrDefault(item => item.Id == -entry.Id);
+                if (meal is null) continue;
+                displayedEntries.Add(entry);
+                visibleEntries.Add(MealEntryRow(entry, meal));
+                continue;
+            }
             if (entry.Kind == "Einnahme")
             {
                 PaceAtlas.IntakeData? intake;
@@ -2075,11 +2382,13 @@ public sealed partial class MainWindow : Window
                 displayedEntries.Add(entry);
                 string details;
                 int intensityLevel = 1;
+                IReadOnlyList<string> protection = [];
                 try
                 {
                     if (entry.Kind == "Schlaf")
                     {
                         var sleep = JsonSerializer.Deserialize<SleepData>(entry.Data);
+                        protection = sleep?.HearingProtection ?? [];
                         details = T("Geschlafen") + " · " + (selectedLanguage == "en" ? "Recovery: " : "Erholung: ") +
                             T(new[] { "nicht bewertet", "keine", "etwas", "mittel", "deutlich" }[
                                 Math.Clamp(sleep?.Recovery ?? 0, 0, 4)]);
@@ -2087,6 +2396,7 @@ public sealed partial class MainWindow : Window
                     else
                     {
                         var interval = JsonSerializer.Deserialize<IntervalData>(entry.Data);
+                        protection = interval?.HearingProtection ?? [];
                         intensityLevel = Math.Clamp(interval?.Intensity ?? 1, 1, 4);
                         details = string.Join(", ", (interval?.Dimensions ?? []).Select(T));
                         if (entry.Kind == "Ruhe")
@@ -2111,6 +2421,10 @@ public sealed partial class MainWindow : Window
                 if (entry.End is null)
                     intervalRow.Background = (Microsoft.UI.Xaml.Media.Brush)
                         ((FrameworkElement)Content).Resources["RunningIntervalBrush"];
+                if (protection.Count > 0)
+                    AddEntryDetails(intervalRow, T("Schutzmaßnahmen") + ": " +
+                        string.Join(" · ", protection.Select(name => T(CanonicalProtection(name)))
+                            .Distinct(StringComparer.CurrentCultureIgnoreCase)));
                 visibleEntries.Add(intervalRow);
                 continue;
             }
@@ -2132,15 +2446,26 @@ public sealed partial class MainWindow : Window
             if (data?.Crash == true) stateDetails += " · Crash";
             if (data is { Pulse: > 0 })
                 stateDetails += " · " + (selectedLanguage == "en" ? "Pulse: " : "Puls: ") + data.Pulse;
-            visibleEntries.Add(TableRow([(entry.Start.ToString("dd.MM.yyyy HH:mm"), 180), ("", 180),
+            var stateRow = TableRow([(entry.Start.ToString("dd.MM.yyyy HH:mm"), 180), ("", 180),
                 ("Zustand", 115), (stateDetails, 400),
                 (entry.Note, 340)], compact: true, table: "entries",
                 badges: [(CircleScale(Math.Clamp(data?.Overall ?? 0, 0, 4)), VisualScaleBrush(data?.Overall ?? 0)),
                     ..(data is { Pem: > 0 } ? new[] { ("◆ PEM", VisualScaleBrush(2)) } : []),
-                    ..(data?.Crash == true ? new[] { ("✖ Crash", VisualScaleBrush(4)) } : [])]));
+                    ..(data?.Crash == true ? new[] { ("✖ Crash", VisualScaleBrush(4)) } : [])]);
+            var presentSymptoms = data?.Symptoms.Keys
+                .Select(name => (Name: name, Severity: data.SymptomSeverity(name)))
+                .Where(item => item.Severity > 0)
+                .OrderBy(item => item.Name, StringComparer.CurrentCultureIgnoreCase)
+                .Select(item => $"{T(item.Name)}: {item.Severity}/4 ({T(Severities[item.Severity + 1])})")
+                .ToArray() ?? [];
+            AddEntryDetails(stateRow, presentSymptoms.Length == 0
+                ? N("Keine Symptome dokumentiert.", "No symptoms recorded.")
+                : string.Join(" · ", presentSymptoms));
+            visibleEntries.Add(stateRow);
         }
         var selectedIndex = selectedId == 0 ? -1 : displayedEntries.FindIndex(entry => entry.Id == selectedId);
         EntryList.SelectedIndex = selectedIndex;
+        ConfigureListFeedback(EntryList);
         UpdateEndAction();
         RefreshTodaySummary();
     }
@@ -2157,6 +2482,7 @@ public sealed partial class MainWindow : Window
                 "Aktivität" or "Ruhe" => string.Join(", ",
                     JsonSerializer.Deserialize<IntervalData>(entry.Data)?.Dimensions ?? []),
                 "Zustand" => (JsonSerializer.Deserialize<StateData>(entry.Data)?.Overall ?? -1).ToString(),
+                "Mahlzeit" => entry.Data,
                 _ => ""
             };
         }

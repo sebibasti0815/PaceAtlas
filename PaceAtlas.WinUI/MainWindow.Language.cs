@@ -18,6 +18,39 @@ public sealed partial class MainWindow
 
     private static readonly Dictionary<string, string> WinUiEnglish = new(StringComparer.Ordinal)
     {
+        ["Ernährung"] = "Nutrition", ["Mahlzeiten"] = "Meals", ["Lebensmittel"] = "Foods",
+        ["Mahlzeit"] = "Meal",
+        ["Zutaten"] = "Ingredients",
+        ["Regeln"] = "Rules", ["Mahlzeit planen oder erfassen"] = "Plan or record a meal",
+        ["Datum"] = "Date", ["Mahlzeit / Getränk"] = "Meal / drink", ["Zutat"] = "Ingredient",
+        ["Lebensmittel suchen"] = "Search foods", ["Menge in g / ml"] = "Amount in g / ml",
+        ["Zutat hinzufügen"] = "Add ingredient", ["Ausgewählte Zutat entfernen"] = "Remove selected ingredient",
+        ["Zutat ändern"] = "Update ingredient", ["Zutat-Bearbeitung abbrechen"] = "Cancel ingredient editing",
+        ["Notiz / Zubereitung"] = "Note / preparation", ["Als geplant speichern"] = "Save as planned",
+        ["Als gegessen speichern"] = "Save as consumed", ["Als Vorlage speichern"] = "Save as template",
+        ["Neue Mahlzeit"] = "New meal", ["Gespeicherte Mahlzeiten und Vorlagen · Doppelklick zum Bearbeiten"] =
+            "Saved meals and templates · double click to edit",
+        ["Auswahl als gegessen übernehmen"] = "Record selection as consumed",
+        ["Lebensmittel und Werte je 100 g"] = "Foods and values per 100 g",
+        ["Tabellenwerte aus dem gescannten Arztplan: Namen und Zahlen bitte vor Verwendung prüfen. Persönliche Regeln haben Vorrang vor der GL-Einstufung."] =
+            "Values from the scanned doctor's plan: check names and figures before use. Personal rules take precedence over GL ratings.",
+        ["Kohlenhydrate / 100 g"] = "Carbohydrates / 100 g", ["Glykämischer Index"] = "Glycemic index",
+        ["Bezeichnung"] = "Name", ["KH / 100 g"] = "Carbs / 100 g", ["GL / 100 g"] = "GL / 100 g",
+        ["Notiz"] = "Note", ["GI"] = "GI",
+        ["Glykämische Last / 100 g"] = "Glycemic load / 100 g", ["Quelle"] = "Source",
+        ["Eigene Notiz / Zubereitung"] = "Personal note / preparation",
+        ["Lebensmittel speichern"] = "Save food", ["Neues Lebensmittel"] = "New food",
+        ["Lebensmittel entfernen"] = "Remove food",
+        ["Persönliche Ernährungsregeln"] = "Personal food rules",
+        ["Ein Suchbegriff gilt für passende Lebensmittelnamen. Höhere Priorität setzt allgemeinere Regeln außer Kraft. Regeln aus dem Arztplan sind bearbeitbar."] =
+            "A matching term applies to food names. Higher priority overrides general rules. Rules from the doctor's plan can be edited.",
+        ["Suchbegriff"] = "Matching term", ["Einstufung"] = "Rating", ["Verboten"] = "Excluded",
+        ["Vermeiden"] = "Avoid", ["Bedingt erlaubt"] = "Conditional", ["Erlaubt"] = "Allowed",
+        ["Priorität"] = "Priority", ["Bedingung / Begründung"] = "Condition / reason",
+        ["Regel speichern"] = "Save rule", ["Neue Regel"] = "New rule", ["Regel entfernen"] = "Remove rule",
+        ["Ernährung und späterer Zustand"] = "Food and later condition",
+        ["Zeitliche Nähe zeigt keine Ursache. Nur als gegessen gespeicherte Mahlzeiten werden verglichen; fehlende Zustandseinträge bleiben sichtbar."] =
+            "Timing does not establish cause. Only consumed meals are compared; missing condition entries remain visible.",
         ["ME/CFS Verlauf"] = "ME/CFS tracker", ["Geräuscheempf."] = "Sound sensitivity",
         ["Ohrgeräusche"] = "Tinnitus",
         ["Aktiv (Min.):"] = "Active (min):", ["Pause (Min.):"] = "Break (min):",
@@ -277,6 +310,8 @@ public sealed partial class MainWindow
         {
             LocalizeChoices();
             LocalizeTree(Content);
+            MedicationTabTitle.Text = T("Medikamente und Supplemente");
+            IntakeTabTitle.Text = T("Tagesprotokoll");
             RefreshActivityTemplateChoice();
             RefreshSortableHeaderCaptions();
             if (EntryList.ContextFlyout is MenuFlyout menu)
@@ -289,6 +324,8 @@ public sealed partial class MainWindow
             DisplayEntries();
             LocalizeAnalysisPeriod();
             RefreshAnalysis();
+            ReloadNutrition();
+            UpdateMealIngredientEditor();
             UpdateEditingIndicators();
             foreach (var status in originalStatus.Keys) TranslateStatus(status);
             UpdatePacingDisplay();

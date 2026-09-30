@@ -81,7 +81,7 @@ public sealed class SavedAiAnalysis
     public DateTime Created { get; set; }
     public string Response { get; set; } = "";
 }
-public sealed class Store
+public sealed partial class Store
 {
     private static readonly string[] DefaultGoalNames = ["Antidepressiv", "Angststörung", "Antioxidant", "Herzfrequenz", "Bluthochdruck", "ME/CFS (Mitochondrien)", "Schmerzen", "Leaky Gut", "Antihistamin", "ME/CFS (allg. Schmerzen)", "ME/CFS (Muskelschwäche)", "ME/CFS (Erschöpfung)", "ME/CFS (Verdauung)", "entzündungshemmend", "Borreliose", "Darmaufbau", "Wassereinlagerung", "ME/CFS (allg.)", "Gewicht", "Brain Fog", "Schwindel", "Testosteron", "Schlafstörung"];
     public static string Folder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PaceAtlas");
@@ -102,6 +102,7 @@ public sealed class Store
         using var analyses = db.CreateCommand();
         analyses.CommandText = "CREATE TABLE IF NOT EXISTS ai_analyses (id INTEGER PRIMARY KEY, period INTEGER NOT NULL, language TEXT NOT NULL, model TEXT NOT NULL, snapshot_hash TEXT NOT NULL, created TEXT NOT NULL, response TEXT NOT NULL); CREATE INDEX IF NOT EXISTS ix_ai_analyses_lookup ON ai_analyses(period,language,id DESC)";
         analyses.ExecuteNonQuery();
+        InitializeNutrition(db);
         using var columns = db.CreateCommand();
         columns.CommandText = "PRAGMA table_info(medication_plan)";
         using var reader = columns.ExecuteReader();
