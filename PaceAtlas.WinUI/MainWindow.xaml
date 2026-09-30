@@ -361,26 +361,29 @@
                         </TabViewItem>
                         <TabViewItem x:Name="StockTab" Header="Packungen und Vorrat" IsClosable="False">
                           <Grid>
-                            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                             <TextBlock Text="Packungen und Vorrat" FontSize="20" FontWeight="SemiBold" Margin="0,8,0,8" />
-                            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10" Margin="0,8,0,8">
+                            <Border x:Name="StockEditingBanner" Grid.Row="1" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6" Margin="0,0,0,8">
+                              <TextBlock x:Name="StockEditingText" Foreground="#174B57" TextWrapping="Wrap" />
+                            </Border>
+                            <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10" Margin="0,8,0,8">
                               <AutoSuggestBox x:Name="StockManufacturer" Header="Hersteller" Width="160" TextChanged="StockManufacturer_TextChanged" />
                               <AutoSuggestBox x:Name="StockSupplier" Header="Lieferant" Width="160" TextChanged="StockSupplier_TextChanged" />
                               <NumberBox x:Name="StockPackUnits" Header="Inhalt je Packung" Width="140" Minimum="0" SpinButtonPlacementMode="Compact" />
                               <NumberBox x:Name="StockPackPrice" Header="Preis €" Width="120" Minimum="0" SpinButtonPlacementMode="Compact" />
                               <Button Content="Packungsdaten speichern" VerticalAlignment="Bottom" Click="SaveStockProduct_Click" Background="#167789" Foreground="White" />
                             </StackPanel>
-                            <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10" Margin="0,0,0,8">
+                            <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="10" Margin="0,0,0,8">
                               <NumberBox x:Name="StockPurchasePacks" Header="Gekaufte Packungen" Width="160" Minimum="0" SpinButtonPlacementMode="Compact" />
                               <Button Content="Nachkauf erfassen" VerticalAlignment="Bottom" Click="RecordPurchase_Click" Background="#167789" Foreground="White" />
                               <NumberBox x:Name="StockCounted" Header="Gezählter Bestand" Width="160" Minimum="0" SpinButtonPlacementMode="Compact" />
                               <Button Content="Bestand setzen" VerticalAlignment="Bottom" Click="SetStock_Click" Background="#167789" Foreground="White" />
                             </StackPanel>
-                            <StackPanel Grid.Row="3" Margin="0,0,0,8" Spacing="2">
+                            <StackPanel Grid.Row="4" Margin="0,0,0,8" Spacing="2">
                               <TextBlock x:Name="StockSummary" TextWrapping="Wrap" />
                               <TextBlock x:Name="StockStatus" Foreground="#316073" />
                             </StackPanel>
-                            <ScrollViewer Grid.Row="4" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                            <ScrollViewer Grid.Row="5" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                               <Grid>
                                 <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                                 <Grid x:Name="StockHeader" />

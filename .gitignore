@@ -13,5 +13,5 @@
 **/installer
 **/prerequisites
 artifacts/**
-installer/**
+installer/prerequisites/**
 .vs/**

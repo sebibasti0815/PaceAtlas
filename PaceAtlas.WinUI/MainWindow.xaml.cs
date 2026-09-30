@@ -1189,6 +1189,7 @@ public sealed partial class MainWindow : Window
             int index = displayedProducts.FindIndex(product => product.Id == selected);
             if (index >= 0) StockList.SelectedIndex = index;
         }
+        UpdateStockEditingBanner();
     }
 
     private static double ParseNumber(string value) =>
@@ -1202,12 +1203,24 @@ public sealed partial class MainWindow : Window
     private void StockList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         var product = SelectedStockProduct();
+        UpdateStockEditingBanner();
         if (product is null) return;
         StockManufacturer.Text = product.Manufacturer;
         StockSupplier.Text = product.Supplier;
         StockPackUnits.Value = product.PackUnits;
         StockPackPrice.Value = product.PackPrice;
         StockCounted.Value = product.Current;
+    }
+
+    private void UpdateStockEditingBanner()
+    {
+        if (StockEditingBanner is null || StockEditingText is null) return;
+        var product = SelectedStockProduct();
+        StockEditingBanner.Visibility = product is null ? Visibility.Collapsed : Visibility.Visible;
+        if (product is null) return;
+        StockEditingText.Text = selectedLanguage == "en"
+            ? $"You are editing {product.Name}. Saving package details updates this product."
+            : $"Du bearbeitest {product.Name}. Das Speichern der Packungsdaten ändert dieses Präparat.";
     }
 
     private void RefreshProducts()
