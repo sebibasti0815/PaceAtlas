@@ -84,8 +84,8 @@ public sealed partial class MainWindow
             if (template is null) return;
             name.Text = template.Name;
             intensity.SelectedIndex = Math.Clamp(template.Intensity - 1, 0, 3);
-            foreach (var check in dimensions) check.IsChecked = template.Dimensions.Contains(check.Tag?.ToString());
-            foreach (var check in protections) check.IsChecked = template.HearingProtection.Contains(check.Tag?.ToString());
+            foreach (var check in dimensions) check.IsChecked = template.Dimensions.Contains(check.Tag?.ToString() ?? "");
+            foreach (var check in protections) check.IsChecked = template.HearingProtection.Contains(check.Tag?.ToString() ?? "");
         };
         add.Click += (_, _) =>
         {

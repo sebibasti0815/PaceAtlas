@@ -358,15 +358,17 @@ public sealed partial class MainWindow
         var glKnown = mealIngredients.All(item => item.GlycemicLoadPer100G is not null);
         var exclusions = mealIngredients.Where(item => MatchingRule(item.Name)?.Decision == "exclude").ToArray();
         var advice = mealIngredients.Where(item => MatchingRule(item.Name)?.Decision is "conditional" or "avoid").ToArray();
+        var ruleWarning = exclusions.Length > 0
+            ? N("Ausschluss: ", "Excluded: ") + string.Join(", ", exclusions.Select(item => item.Name))
+            : advice.Length > 0
+                ? N("Bedingungen prüfen: ", "Check conditions: ") + string.Join(", ", advice.Select(item => item.Name))
+                : "";
         MealAssessment.Text = N("Mahlzeit: ", "Meal: ") +
             (carbsKnown ? $"{mealIngredients.Sum(item => item.CarbsPer100G!.Value * item.Grams / 100):0.#} g KH" :
                 N("KH unvollständig", "carbs incomplete")) + "  ·  " +
             (glKnown ? $"GL ≈ {mealIngredients.Sum(item => item.GlycemicLoadPer100G!.Value * item.Grams / 100):0.#}" :
                 N("GL unvollständig", "GL incomplete")) + "\n" +
-            (exclusions.Length > 0 ? N("Ausschluss: ", "Excluded: ") + string.Join(", ", exclusions.Select(item => item.Name)) :
-                advice.Length > 0 ? N("Bedingungen prüfen: ", "Check conditions: ") + string.Join(", ", advice.Select(item => item.Name)) :
-                N("Keine passende Ausschlussregel gefunden. Unbekannte Zutaten müssen geprüft werden.",
-                  "No matching exclusion found. Check unknown ingredients.")) + "\n" +
+            (ruleWarning.Length > 0 ? ruleWarning + "\n" : "") +
             N("Die GL-Ampel gilt je Lebensmittel pro 100 g; die Mahlzeiten-GL ist nur eine Schätzung.",
               "GL thresholds apply to each food per 100 g; meal GL is only an estimate.");
         MealAssessment.Foreground = new SolidColorBrush(exclusions.Length > 0 ?
@@ -402,6 +404,7 @@ public sealed partial class MainWindow
     private void ResetMeal()
     {
         editingMealId = 0; MealHistoryList.SelectedIndex = -1;
+        UpdateMealSaveButtonColors("planned");
         editingIngredientIndex = -1; UpdateMealIngredientEditor();
         mealIngredients.Clear(); MealDate.Date = DateTimeOffset.Now;
         MealTime.Text = DateTime.Now.ToString("HH:mm", CultureInfo.InvariantCulture);
@@ -451,12 +454,24 @@ public sealed partial class MainWindow
         MainTabs.SelectedItem = NutritionTab;
         NutritionTabs.SelectedIndex = 0;
         editingMealId = meal.Id;
+        UpdateMealSaveButtonColors(meal.Status);
         editingIngredientIndex = -1; UpdateMealIngredientEditor();
         MealFoodSearch.Text = ""; MealFoodGrams.Value = 100;
         MealName.Text = meal.Name; MealDate.Date = new DateTimeOffset(meal.At);
         MealTime.Text = meal.At.ToString("HH:mm", CultureInfo.InvariantCulture);
         MealNote.Text = meal.Note; mealIngredients.Clear(); mealIngredients.AddRange(meal.Ingredients);
         RenderMealIngredients(); MealStatusText.Text = N("Gespeicherte Mahlzeit wird bearbeitet.", "Editing saved meal.");
+    }
+
+    private void UpdateMealSaveButtonColors(string status)
+    {
+        var accent = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 22, 119, 137));
+        var white = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 255, 255));
+        var dark = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 31, 31, 31));
+        SavePlannedMealButton.Background = status == "planned" ? accent : white;
+        SavePlannedMealButton.Foreground = status == "planned" ? white : dark;
+        SaveConsumedMealButton.Background = status == "consumed" ? accent : white;
+        SaveConsumedMealButton.Foreground = status == "consumed" ? white : dark;
     }
 
     private Grid MealEntryRow(Entry entry, MealRecord meal)

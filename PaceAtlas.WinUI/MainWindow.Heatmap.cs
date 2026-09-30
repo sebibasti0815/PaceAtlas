@@ -176,8 +176,8 @@ public sealed partial class MainWindow
 
     private void HeatmapViewport_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        if (sender == DailyHeatmapViewport) DrawAnalysisHeatmap();
-        else if (sender == WeeklyHeatmapViewport) DrawWeeklyHeatmap();
+        if (ReferenceEquals(sender, DailyHeatmapViewport)) DrawAnalysisHeatmap();
+        else if (ReferenceEquals(sender, WeeklyHeatmapViewport)) DrawWeeklyHeatmap();
     }
 
     private void DrawWeeklyHeatmap()

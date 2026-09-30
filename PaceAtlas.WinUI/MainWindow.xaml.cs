@@ -778,7 +778,7 @@ public sealed partial class MainWindow : Window
 
     private void ConfigureListFeedback(ListView list)
     {
-        var rows = list.Items.OfType<Grid>().Select(row => (Row: row, Base: row.Background)).ToList();
+        var rows = list.Items.OfType<Grid>().Select(row => (Row: row, Base: (Brush?)row.Background)).ToList();
         listFeedbackRows[list] = rows;
         foreach (var (row, _) in rows)
         {
@@ -815,7 +815,7 @@ public sealed partial class MainWindow : Window
 
     private void ConfigurePanelFeedback(StackPanel panel)
     {
-        var rows = panel.Children.OfType<Grid>().Skip(1).Select(row => (Row: row, Base: row.Background)).ToList();
+        var rows = panel.Children.OfType<Grid>().Skip(1).Select(row => (Row: row, Base: (Brush?)row.Background)).ToList();
         panelFeedbackRows[panel] = rows;
         foreach (var (row, _) in rows)
         {

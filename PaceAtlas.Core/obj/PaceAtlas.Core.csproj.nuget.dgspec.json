@@ -5,7 +5,7 @@
   },
   "projects": {
     "L:\\source\\repos\\PaceAtlas\\PaceAtlas.Core\\PaceAtlas.Core.csproj": {
-      "version": "0.11.1",
+      "version": "0.11.4",
       "restore": {
         "projectUniqueName": "L:\\source\\repos\\PaceAtlas\\PaceAtlas.Core\\PaceAtlas.Core.csproj",
         "projectName": "PaceAtlas.Core",

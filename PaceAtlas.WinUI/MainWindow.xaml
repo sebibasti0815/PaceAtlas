@@ -524,8 +524,8 @@
                                 </Border>
                                 <TextBox x:Name="MealNote" Header="Notiz / Zubereitung" Width="720" HorizontalAlignment="Left" TextWrapping="Wrap" AcceptsReturn="True" Height="75" />
                                 <StackPanel Orientation="Horizontal" Spacing="10">
-                                  <Button Content="Als geplant speichern" Click="SavePlannedMeal_Click" Background="#167789" Foreground="White" />
-                                  <Button Content="Als gegessen speichern" Click="SaveConsumedMeal_Click" />
+                                  <Button x:Name="SavePlannedMealButton" Content="Als geplant speichern" Click="SavePlannedMeal_Click" Background="#167789" Foreground="White" />
+                                  <Button x:Name="SaveConsumedMealButton" Content="Als gegessen speichern" Click="SaveConsumedMeal_Click" Background="White" Foreground="#1F1F1F" />
                                   <Button Content="Als Vorlage speichern" Click="SaveMealTemplate_Click" />
                                   <Button Content="Neue Mahlzeit" Click="ResetMeal_Click" />
                                 </StackPanel>
