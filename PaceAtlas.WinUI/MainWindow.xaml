@@ -388,7 +388,7 @@
                                 <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                                 <Grid x:Name="StockHeader" />
                                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                  <ListView x:Name="StockList" SelectionChanged="StockList_SelectionChanged"
+                                  <ListView x:Name="StockList" SelectionChanged="StockList_SelectionChanged" DoubleTapped="StockList_DoubleTapped"
                                             ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.HorizontalScrollMode="Disabled">
                                     <ListView.ItemContainerStyle>
                                       <Style TargetType="ListViewItem"><Setter Property="MinHeight" Value="27" /><Setter Property="Padding" Value="0" /></Style>

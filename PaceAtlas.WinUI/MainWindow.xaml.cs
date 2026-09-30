@@ -191,6 +191,8 @@ public sealed partial class MainWindow : Window
     private readonly List<StockProduct> products = new();
     private readonly List<IntakeRow> intakeRows = new();
     private readonly List<StockProduct> displayedProducts = new();
+    private long editingStockProductId;
+    private bool renderingStock;
     private readonly List<MedicationPlan> displayedPlans = new();
     private readonly List<CheckBox> goalChecks = new();
     private readonly List<CheckBox> measureReasonChecks = new();
@@ -1159,6 +1161,7 @@ public sealed partial class MainWindow : Window
             6 => Numeric(product.Current), 7 => Numeric(product.WeeklyNeed),
             _ => !product.StockKnown ? "Bestand unbekannt" : product.Current <= product.WeeklyNeed ? "Nachkauf prüfen" : ""
         };
+        renderingStock = true;
         displayedProducts.Clear();
         displayedProducts.AddRange(descending ? products.OrderByDescending(Key, StringComparer.CurrentCultureIgnoreCase)
             : products.OrderBy(Key, StringComparer.CurrentCultureIgnoreCase));
@@ -1189,6 +1192,8 @@ public sealed partial class MainWindow : Window
             int index = displayedProducts.FindIndex(product => product.Id == selected);
             if (index >= 0) StockList.SelectedIndex = index;
         }
+        renderingStock = false;
+        if (!products.Any(product => product.Id == editingStockProductId)) editingStockProductId = 0;
         UpdateStockEditingBanner();
     }
 
@@ -1202,20 +1207,34 @@ public sealed partial class MainWindow : Window
 
     private void StockList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (renderingStock) return;
         var product = SelectedStockProduct();
+        if (product?.Id != editingStockProductId)
+        {
+            editingStockProductId = 0;
+            StockManufacturer.Text = StockSupplier.Text = "";
+            StockPackUnits.Value = StockPackPrice.Value = double.NaN;
+        }
         UpdateStockEditingBanner();
+    }
+
+    private void StockList_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
+    {
+        var product = SelectedStockProduct();
         if (product is null) return;
+        editingStockProductId = product.Id;
         StockManufacturer.Text = product.Manufacturer;
         StockSupplier.Text = product.Supplier;
         StockPackUnits.Value = product.PackUnits;
         StockPackPrice.Value = product.PackPrice;
         StockCounted.Value = product.Current;
+        UpdateStockEditingBanner();
     }
 
     private void UpdateStockEditingBanner()
     {
         if (StockEditingBanner is null || StockEditingText is null) return;
-        var product = SelectedStockProduct();
+        var product = products.FirstOrDefault(item => item.Id == editingStockProductId);
         StockEditingBanner.Visibility = product is null ? Visibility.Collapsed : Visibility.Visible;
         if (product is null) return;
         StockEditingText.Text = selectedLanguage == "en"
@@ -1262,8 +1281,8 @@ public sealed partial class MainWindow : Window
 
     private void SaveStockProduct_Click(object sender, RoutedEventArgs e)
     {
-        var product = SelectedStockProduct();
-        if (product is null) { StockStatus.Text = "Bitte ein Präparat auswählen."; return; }
+        var product = products.FirstOrDefault(item => item.Id == editingStockProductId);
+        if (product is null) { StockStatus.Text = selectedLanguage == "en" ? "Double-click a product to edit it." : "Bitte ein Präparat zur Bearbeitung doppelt anklicken."; return; }
         if (double.IsNaN(StockPackUnits.Value) || double.IsNaN(StockPackPrice.Value) ||
             StockPackUnits.Value < 0 || StockPackPrice.Value < 0)
         { StockStatus.Text = "Bitte gültige Packungsdaten angeben."; return; }
