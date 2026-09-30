@@ -493,7 +493,14 @@
                                 <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                                 <StackPanel Grid.Column="0" Spacing="8">
                                   <TextBlock Text="Zutaten" FontSize="18" FontWeight="SemiBold" />
-                                  <ListView x:Name="MealIngredientsList" Height="320" SelectionMode="Single" SelectionChanged="MealIngredients_SelectionChanged" DoubleTapped="MealIngredients_DoubleTapped" />
+                                  <ScrollViewer Height="320" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                    <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                                      <Grid x:Name="MealIngredientsHeader" />
+                                      <ListView x:Name="MealIngredientsList" Grid.Row="1" SelectionMode="Single" SelectionChanged="MealIngredients_SelectionChanged" DoubleTapped="MealIngredients_DoubleTapped" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                        <ListView.ItemContainerStyle><Style TargetType="ListViewItem"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="27" /><Setter Property="Padding" Value="0" /></Style></ListView.ItemContainerStyle>
+                                      </ListView>
+                                    </Grid>
+                                  </ScrollViewer>
                                   <Button x:Name="MealRemoveFoodButton" Content="Ausgewählte Zutat entfernen" Click="MealRemoveFood_Click" HorizontalAlignment="Left" IsEnabled="False" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Spacing="10" Width="740" HorizontalAlignment="Left">
@@ -526,7 +533,14 @@
                                 </StackPanel>
                                 <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Spacing="10">
                                 <TextBlock Text="Gespeicherte Mahlzeiten und Vorlagen · Doppelklick zum Bearbeiten" FontSize="18" FontWeight="SemiBold" />
-                                <ListView x:Name="MealHistoryList" Height="210" DoubleTapped="MealHistory_DoubleTapped" />
+                                <ScrollViewer Height="210" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                  <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                                    <Grid x:Name="MealHistoryHeader" />
+                                    <ListView x:Name="MealHistoryList" Grid.Row="1" DoubleTapped="MealHistory_DoubleTapped" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                      <ListView.ItemContainerStyle><Style TargetType="ListViewItem"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="27" /><Setter Property="Padding" Value="0" /></Style></ListView.ItemContainerStyle>
+                                    </ListView>
+                                  </Grid>
+                                </ScrollViewer>
                                 <StackPanel Orientation="Horizontal" Spacing="10">
                                   <Button Content="Auswahl als gegessen übernehmen" Click="ConsumeSelectedMeal_Click" />
                                   <Button Content="Auswahl entfernen" Click="DeleteSelectedMeal_Click" />

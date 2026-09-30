@@ -226,7 +226,8 @@ public sealed partial class MainWindow : Window
     private readonly Dictionary<string, (int Column, bool Descending)> tableSort = new()
     {
         ["entries"] = (0, true), ["plans"] = (0, false), ["stock"] = (0, false), ["intakes"] = (0, false),
-        ["foods"] = (0, false), ["rules"] = (0, false)
+        ["foods"] = (0, false), ["rules"] = (0, false),
+        ["ingredients"] = (0, false), ["meals"] = (0, true)
     };
     private readonly Dictionary<string, int[]> columnWidths = new()
     {
@@ -235,7 +236,9 @@ public sealed partial class MainWindow : Window
         ["stock"] = [170, 76, 145, 145, 95, 95, 95, 90, 170],
         ["intakes"] = [85, 190, 145, 95, 76, 110, 165, 155],
         ["foods"] = [280, 130, 105, 130, 230, 250],
-        ["rules"] = [230, 145, 95, 380, 230]
+        ["rules"] = [230, 145, 95, 380, 230],
+        ["ingredients"] = [260, 105, 125],
+        ["meals"] = [170, 290, 125, 100, 110, 300]
     };
     private readonly Dictionary<string, Dictionary<int, string>> tableFilters = new();
 
@@ -248,6 +251,7 @@ public sealed partial class MainWindow : Window
         ("entries", 2) => ["Zustand", "Aktivität", "Ruhe", "Maßnahme", "Einnahme", "Mahlzeit"],
         ("intakes", 5) => ["Offen", "Genommen", "Ausgelassen"],
         ("rules", 1) => ["Verboten", "Vermeiden", "Bedingt erlaubt", "Erlaubt"],
+        ("meals", 2) => ["geplant", "gegessen", "Vorlage"],
         _ => null
     };
 
@@ -261,6 +265,8 @@ public sealed partial class MainWindow : Window
             case "intakes": SortIntakeRows(); break;
             case "foods": RenderFoodCatalog(); break;
             case "rules": RenderFoodRules(); break;
+            case "ingredients": RenderMealIngredients(); break;
+            case "meals": RenderMealHistory(); break;
         }
         RefreshSortableHeaderCaptions();
     }
@@ -557,7 +563,8 @@ public sealed partial class MainWindow : Window
         var header = table switch
         {
             "entries" => EntryHeader, "plans" => PlanHeader, "stock" => StockHeader,
-            "foods" => FoodHeader, "rules" => RuleHeader, _ => IntakeHeader
+            "foods" => FoodHeader, "rules" => RuleHeader,
+            "ingredients" => MealIngredientsHeader, "meals" => MealHistoryHeader, _ => IntakeHeader
         };
         var rows = table switch
         {
@@ -566,6 +573,8 @@ public sealed partial class MainWindow : Window
             "stock" => StockList.Items.Cast<Grid>().ToArray(),
             "foods" => FoodCatalogList.Items.Cast<Grid>().ToArray(),
             "rules" => FoodRulesList.Items.Cast<Grid>().ToArray(),
+            "ingredients" => MealIngredientsList.Items.Cast<Grid>().ToArray(),
+            "meals" => MealHistoryList.Items.Cast<Grid>().ToArray(),
             _ => intakeRows.Select(row => row.Visual).ToArray()
         };
         foreach (var grid in rows.Prepend((Grid)header.Children[0]))
@@ -667,6 +676,8 @@ public sealed partial class MainWindow : Window
             case "intakes": SortIntakeRows(); break;
             case "foods": RenderFoodCatalog(); break;
             case "rules": RenderFoodRules(); break;
+            case "ingredients": RenderMealIngredients(); break;
+            case "meals": RenderMealHistory(); break;
         }
     }
 
@@ -674,7 +685,8 @@ public sealed partial class MainWindow : Window
     {
         foreach (var (table, host) in new[] { ("entries", EntryHeader), ("plans", PlanHeader),
                      ("stock", StockHeader), ("intakes", IntakeHeader),
-                     ("foods", FoodHeader), ("rules", RuleHeader) })
+                     ("foods", FoodHeader), ("rules", RuleHeader),
+                     ("ingredients", MealIngredientsHeader), ("meals", MealHistoryHeader) })
         {
             if (host.Children.FirstOrDefault() is not Grid headerGrid) continue;
             foreach (var heading in headerGrid.Children.OfType<Border>().Select((border, index) => (border, index)))
@@ -714,6 +726,10 @@ public sealed partial class MainWindow : Window
             ("GI", 105), ("GL / 100 g", 130), ("Quelle", 230), ("Notiz", 250)]));
         RuleHeader.Children.Add(SortableHeader("rules", [("Suchbegriff", 230), ("Einstufung", 145),
             ("Priorität", 95), ("Bedingung / Begründung", 380), ("Quelle", 230)]));
+        MealIngredientsHeader.Children.Add(SortableHeader("ingredients", [("Zutat", 260), ("Menge", 105),
+            ("KH-Gehalt", 125)]));
+        MealHistoryHeader.Children.Add(SortableHeader("meals", [("Datum", 170), ("Mahlzeit / Getränk", 290),
+            ("Status", 125), ("Zutaten", 100), ("KH-Gehalt", 110), ("Notiz", 300)]));
     }
 
     private static void SaveJson<T>(string path, T value)

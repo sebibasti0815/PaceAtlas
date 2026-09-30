@@ -37,6 +37,8 @@ public sealed partial class MainWindow
         ["Kohlenhydrate / 100 g"] = "Carbohydrates / 100 g", ["Glykämischer Index"] = "Glycemic index",
         ["Bezeichnung"] = "Name", ["KH / 100 g"] = "Carbs / 100 g", ["GL / 100 g"] = "GL / 100 g",
         ["Notiz"] = "Note", ["GI"] = "GI",
+        ["KH-Gehalt"] = "Carbohydrates", ["Menge"] = "Amount",
+        ["geplant"] = "planned", ["gegessen"] = "consumed", ["Vorlage"] = "Template",
         ["Glykämische Last / 100 g"] = "Glycemic load / 100 g", ["Quelle"] = "Source",
         ["Eigene Notiz / Zubereitung"] = "Personal note / preparation",
         ["Lebensmittel speichern"] = "Save food", ["Neues Lebensmittel"] = "New food",

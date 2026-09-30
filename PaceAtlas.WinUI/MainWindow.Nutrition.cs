@@ -14,7 +14,9 @@ public sealed partial class MainWindow
     private readonly List<FoodRule> nutritionRules = new();
     private readonly List<FoodRule> displayedNutritionRules = new();
     private readonly List<MealRecord> nutritionMeals = new();
+    private readonly List<MealRecord> displayedNutritionMeals = new();
     private readonly List<MealIngredient> mealIngredients = new();
+    private readonly List<int> displayedIngredientIndices = new();
     private long editingFoodId;
     private long editingRuleId;
     private long editingMealId;
@@ -50,15 +52,6 @@ public sealed partial class MainWindow
         }
         catch (Exception ex) { MealStatusText.Text = N("Ernährungsdaten konnten nicht geladen werden: ", "Could not load nutrition data: ") + ex.Message; }
         finally { refreshingNutrition = false; }
-    }
-
-    private static Grid NutritionRow(string content)
-    {
-        var row = new Grid { MinHeight = 32,
-            Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent) };
-        row.Children.Add(new TextBlock { Text = content, VerticalAlignment = VerticalAlignment.Center,
-            TextTrimming = TextTrimming.CharacterEllipsis, Margin = new Thickness(8, 4, 8, 4) });
-        return row;
     }
 
     private Grid NutritionTableRow(string table, params string[] cells)
@@ -288,13 +281,13 @@ public sealed partial class MainWindow
     private void MealIngredients_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
     {
         var index = MealIngredientsList.SelectedIndex;
-        if (index < 0 || index >= mealIngredients.Count) return;
-        editingIngredientIndex = index;
-        MealFoodSearch.Text = mealIngredients[index].Name;
-        MealFoodGrams.Value = mealIngredients[index].Grams;
+        if (index < 0 || index >= displayedIngredientIndices.Count) return;
+        editingIngredientIndex = displayedIngredientIndices[index];
+        MealFoodSearch.Text = mealIngredients[editingIngredientIndex].Name;
+        MealFoodGrams.Value = mealIngredients[editingIngredientIndex].Grams;
         UpdateMealIngredientEditor();
-        MealStatusText.Text = N($"Du bearbeitest „{mealIngredients[index].Name}“.",
-            $"You are editing “{mealIngredients[index].Name}”.");
+        MealStatusText.Text = N($"Du bearbeitest „{mealIngredients[editingIngredientIndex].Name}“.",
+            $"You are editing “{mealIngredients[editingIngredientIndex].Name}”.");
     }
 
     private void MealCancelFoodEdit_Click(object sender, RoutedEventArgs e)
@@ -315,10 +308,11 @@ public sealed partial class MainWindow
     private void MealRemoveFood_Click(object sender, RoutedEventArgs e)
     {
         var index = MealIngredientsList.SelectedIndex;
-        if (index < 0 || index >= mealIngredients.Count) return;
-        mealIngredients.RemoveAt(index);
-        if (editingIngredientIndex == index) MealCancelFoodEdit_Click(sender, e);
-        else if (editingIngredientIndex > index) editingIngredientIndex--;
+        if (index < 0 || index >= displayedIngredientIndices.Count) return;
+        var originalIndex = displayedIngredientIndices[index];
+        mealIngredients.RemoveAt(originalIndex);
+        if (editingIngredientIndex == originalIndex) MealCancelFoodEdit_Click(sender, e);
+        else if (editingIngredientIndex > originalIndex) editingIngredientIndex--;
         RenderMealIngredients();
     }
 
@@ -335,13 +329,29 @@ public sealed partial class MainWindow
     private void RenderMealIngredients()
     {
         if (MealIngredientsList is null) return;
-        MealIngredientsList.ItemsSource = mealIngredients.Select(item => NutritionRow(
-            $"{item.Name}  ·  {item.Grams:0.#} g  ·  KH {Nutrient(item.CarbsPer100G * item.Grams / 100)} g  ·  " +
-            $"GL {Nutrient(item.GlycemicLoadPer100G * item.Grams / 100)}  ·  " +
-            (MatchingRule(item.Name) is { } rule ? RuleLabel(rule.Decision) + ": " + rule.Note + "  ·  " : "") +
-            (item.GlycemicLoadPer100G is { } gl ? gl > 20 ? N("GL/100 g > 20: meiden", "GL/100 g > 20: avoid") :
-                gl >= 10 ? N("GL/100 g 10–20: vermeiden", "GL/100 g 10–20: avoid") : N("GL/100 g < 10", "GL/100 g < 10") :
-                N("GL unbekannt", "GL unknown")))).ToArray();
+        var (column, descending) = tableSort["ingredients"];
+        string[] Cells(MealIngredient item) => [item.Name, $"{item.Grams:0.#} g",
+            item.CarbsPer100G is { } carbs ? $"{carbs * item.Grams / 100:0.#} g" : "?"];
+        string Key(MealIngredient item) => column switch
+        {
+            1 => Numeric(item.Grams), 2 => Numeric(item.CarbsPer100G is { } carbs
+                ? carbs * item.Grams / 100 : -1), _ => item.Name
+        };
+        var filtered = Enumerable.Range(0, mealIngredients.Count)
+            .Where(index => MatchesTableFilters("ingredients", Cells(mealIngredients[index])));
+        displayedIngredientIndices.Clear();
+        displayedIngredientIndices.AddRange(descending
+            ? filtered.OrderByDescending(index => Key(mealIngredients[index]), StringComparer.CurrentCultureIgnoreCase)
+            : filtered.OrderBy(index => Key(mealIngredients[index]), StringComparer.CurrentCultureIgnoreCase));
+        MealIngredientsList.ItemsSource = displayedIngredientIndices.Select(index =>
+        {
+            var item = mealIngredients[index];
+            var row = NutritionTableRow("ingredients", Cells(item));
+            var rule = MatchingRule(item.Name);
+            ToolTipService.SetToolTip(row.Children.OfType<TextBlock>().First(), $"GL: {Nutrient(item.GlycemicLoadPer100G * item.Grams / 100)} · " +
+                (rule is null ? N("Keine passende Regel", "No matching rule") : RuleLabel(rule.Decision) + ": " + rule.Note));
+            return row;
+        }).ToArray();
         ConfigureListFeedback(MealIngredientsList);
         MealRemoveFoodButton.IsEnabled = false;
         var carbsKnown = mealIngredients.All(item => item.CarbsPer100G is not null);
@@ -402,18 +412,37 @@ public sealed partial class MainWindow
     private void RenderMealHistory()
     {
         if (MealHistoryList is null) return;
-        MealHistoryList.ItemsSource = nutritionMeals.Select(meal => NutritionRow(
-            $"{(meal.Status == "template" ? N("Vorlage", "Template") : meal.At.ToString("dd.MM.yyyy HH:mm"))}  ·  " +
-            $"{meal.Name}  ·  {meal.Ingredients.Count} {N("Zutaten", "ingredients")}  ·  " +
-            (meal.Status == "consumed" ? N("gegessen", "consumed") : meal.Status == "planned" ? N("geplant", "planned") : ""))).ToArray();
+        var (column, descending) = tableSort["meals"];
+        string Status(MealRecord meal) => meal.Status switch
+        {
+            "consumed" => N("gegessen", "consumed"), "planned" => N("geplant", "planned"),
+            _ => N("Vorlage", "Template")
+        };
+        double? Carbs(MealRecord meal) => meal.Ingredients.All(item => item.CarbsPer100G is not null)
+            ? meal.Ingredients.Sum(item => item.CarbsPer100G!.Value * item.Grams / 100) : null;
+        string[] Cells(MealRecord meal) => [meal.At.ToString("dd.MM.yyyy HH:mm"),
+            meal.Name, Status(meal), meal.Ingredients.Count.ToString(CultureInfo.CurrentCulture),
+            Carbs(meal) is { } carbs ? $"{carbs:0.#} g" : "?", meal.Note];
+        string Key(MealRecord meal) => column switch
+        {
+            0 => meal.At.ToString("O"),
+            3 => Numeric(meal.Ingredients.Count), 4 => Numeric(Carbs(meal) ?? -1),
+            _ => Cells(meal)[column]
+        };
+        var filtered = nutritionMeals.Where(meal => MatchesTableFilters("meals", Cells(meal)));
+        displayedNutritionMeals.Clear();
+        displayedNutritionMeals.AddRange(descending
+            ? filtered.OrderByDescending(Key, StringComparer.CurrentCultureIgnoreCase)
+            : filtered.OrderBy(Key, StringComparer.CurrentCultureIgnoreCase));
+        MealHistoryList.ItemsSource = displayedNutritionMeals.Select(meal => NutritionTableRow("meals", Cells(meal))).ToArray();
         ConfigureListFeedback(MealHistoryList);
     }
 
     private void MealHistory_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
     {
         var index = MealHistoryList.SelectedIndex;
-        if (index < 0 || index >= nutritionMeals.Count) return;
-        EditMeal(nutritionMeals[index]);
+        if (index < 0 || index >= displayedNutritionMeals.Count) return;
+        EditMeal(displayedNutritionMeals[index]);
     }
 
     private void EditMeal(MealRecord meal)
@@ -445,8 +474,8 @@ public sealed partial class MainWindow
     private void ConsumeSelectedMeal_Click(object sender, RoutedEventArgs e)
     {
         var index = MealHistoryList.SelectedIndex;
-        if (index < 0 || index >= nutritionMeals.Count) return;
-        var original = nutritionMeals[index];
+        if (index < 0 || index >= displayedNutritionMeals.Count) return;
+        var original = displayedNutritionMeals[index];
         try
         {
             store.SaveMeal(new MealRecord { Id = original.Status == "planned" ? original.Id : 0,
@@ -460,8 +489,8 @@ public sealed partial class MainWindow
     private void DeleteSelectedMeal_Click(object sender, RoutedEventArgs e)
     {
         var index = MealHistoryList.SelectedIndex;
-        if (index < 0 || index >= nutritionMeals.Count) return;
-        try { store.DeleteMeal(nutritionMeals[index].Id); ResetMeal(); ReloadNutrition(); }
+        if (index < 0 || index >= displayedNutritionMeals.Count) return;
+        try { store.DeleteMeal(displayedNutritionMeals[index].Id); ResetMeal(); ReloadNutrition(); }
         catch (Exception ex) { MealStatusText.Text = ex.Message; }
     }
 
