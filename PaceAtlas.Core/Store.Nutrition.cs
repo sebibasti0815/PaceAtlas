@@ -253,7 +253,7 @@ public sealed partial class Store
         return result;
     }
 
-    public void SaveFood(FoodItem food)
+    public FoodItem SaveFood(FoodItem food)
     {
         using var db = Open(); using var command = db.CreateCommand();
         command.CommandText = food.Id <= 0
@@ -267,6 +267,27 @@ public sealed partial class Store
         command.Parameters.AddWithValue("$b", string.IsNullOrEmpty(food.BlsCode) ? DBNull.Value : food.BlsCode);
         command.Parameters.AddWithValue("$o", string.IsNullOrEmpty(food.OffCode) ? DBNull.Value : food.OffCode);
         command.ExecuteNonQuery();
+        using var lastId = db.CreateCommand();
+        lastId.CommandText = "SELECT last_insert_rowid()";
+        var id = food.Id > 0 ? food.Id : Convert.ToInt64(lastId.ExecuteScalar());
+        using var saved = db.CreateCommand();
+        saved.CommandText = """
+            SELECT f.name,COALESCE(f.carbs,b.carbs,o.carbs),f.gi,
+                   COALESCE(f.gl,CASE WHEN f.gi IS NOT NULL AND COALESCE(f.carbs,b.carbs,o.carbs) IS NOT NULL
+                     THEN ROUND(f.gi * COALESCE(f.carbs,b.carbs,o.carbs) / 100.0,1) END),
+                   f.source,f.note,COALESCE(f.bls_code,''),COALESCE(f.off_code,'')
+            FROM foods f LEFT JOIN bls_foods b ON b.code=f.bls_code
+                         LEFT JOIN off_foods o ON o.code=f.off_code WHERE f.id=$id
+            """;
+        saved.Parameters.AddWithValue("$id", id);
+        using var reader = saved.ExecuteReader();
+        if (!reader.Read()) throw new InvalidOperationException("Saved food could not be loaded.");
+        return new FoodItem { Id = id, Name = reader.GetString(0),
+            CarbsPer100G = reader.IsDBNull(1) ? null : reader.GetDouble(1),
+            GlycemicIndex = reader.IsDBNull(2) ? null : reader.GetDouble(2),
+            GlycemicLoadPer100G = reader.IsDBNull(3) ? null : reader.GetDouble(3),
+            Source = reader.GetString(4), Note = reader.GetString(5),
+            BlsCode = reader.GetString(6), OffCode = reader.GetString(7) };
     }
 
     public void DeleteFood(long id)

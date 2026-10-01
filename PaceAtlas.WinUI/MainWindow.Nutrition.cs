@@ -39,6 +39,7 @@ public sealed partial class MainWindow
     }
     private int mealFeedbackGeneration;
     private bool savingMeal;
+    private bool savingFood;
     private bool confirmingPendingMealIngredient;
     private Button? activeMealSaveButton;
     private object? activeMealSaveLabel;
@@ -340,8 +341,9 @@ public sealed partial class MainWindow
         }
     }
 
-    private void SaveFood_Click(object sender, RoutedEventArgs e)
+    private async void SaveFood_Click(object sender, RoutedEventArgs e)
     {
+        if (savingFood || OffImportRunning || databaseMaintenanceRunning) return;
         if (string.IsNullOrWhiteSpace(FoodName.Text))
         { FoodEditorStatus.Text = N("Bitte eine Bezeichnung eingeben.", "Enter a name."); return; }
         var name = FoodName.Text.Trim();
@@ -352,22 +354,45 @@ public sealed partial class MainWindow
         var carbs = NumberOrNull(FoodCarbs); var gi = NumberOrNull(FoodGi); var gl = NumberOrNull(FoodGl);
         if (gl is null && carbs is not null && gi is not null) gl = Math.Round(carbs.Value * gi.Value / 100, 1);
         var baseFood = editingFoodId < 0 ? nutritionFoods.FirstOrDefault(food => food.Id == editingFoodId) : null;
+        var originalId = editingFoodId;
+        var food = new FoodItem { Id = originalId, Name = name,
+            CarbsPer100G = baseFood is not null && carbs == baseFood.CarbsPer100G ? null : carbs,
+            GlycemicIndex = gi, GlycemicLoadPer100G = gl,
+            Source = baseFood is not null && FoodSource.Text == baseFood.Source
+                ? N("Eigene Ergänzung · ", "Personal override · ") + baseFood.Source
+                : string.IsNullOrWhiteSpace(FoodSource.Text) ? N("Eigener Eintrag", "User entry") : FoodSource.Text.Trim(),
+            Note = FoodNote.Text.Trim(), BlsCode = baseFood?.BlsCode ?? "", OffCode = baseFood?.OffCode ?? "" };
+        savingFood = true;
+        SaveFoodButton.IsEnabled = false;
+        FoodSaveProgress.Visibility = Visibility.Visible;
+        FoodSaveProgress.IsActive = true;
+        var buttonLabel = SaveFoodButton.Content;
+        SaveFoodButton.Content = N("Wird gespeichert …", "Saving …");
+        FoodEditorStatus.Text = N("Lebensmittel wird gespeichert …", "Saving food …");
         try
         {
-            store.SaveFood(new FoodItem { Id = editingFoodId, Name = name,
-                CarbsPer100G = baseFood is not null && carbs == baseFood.CarbsPer100G ? null : carbs,
-                GlycemicIndex = gi, GlycemicLoadPer100G = gl,
-                Source = baseFood is not null && FoodSource.Text == baseFood.Source
-                    ? N("Eigene Ergänzung · ", "Personal override · ") + baseFood.Source
-                    : string.IsNullOrWhiteSpace(FoodSource.Text) ? N("Eigener Eintrag", "User entry") : FoodSource.Text.Trim(),
-                Note = FoodNote.Text.Trim(), BlsCode = baseFood?.BlsCode ?? "", OffCode = baseFood?.OffCode ?? "" });
-            editingFoodId = 0; ReloadNutrition(); NewFood_Click(sender, e);
+            await Task.Delay(50);
+            var saved = await Task.Run(() => store.SaveFood(food));
+            nutritionFoods.RemoveAll(item => item.Id == originalId || item.Id == saved.Id ||
+                (item.Id < 0 && item.Name.Equals(saved.Name, StringComparison.OrdinalIgnoreCase)));
+            var position = nutritionFoods.FindIndex(item =>
+                string.Compare(item.Name, saved.Name, StringComparison.OrdinalIgnoreCase) > 0);
+            if (position < 0) nutritionFoods.Add(saved); else nutritionFoods.Insert(position, saved);
+            editingFoodId = 0; NewFood_Click(sender, e); RenderFoodCatalog();
             FoodEditorStatus.Text = N("Lebensmittel gespeichert.", "Food saved.");
         }
         catch (Microsoft.Data.Sqlite.SqliteException ex) when (ex.SqliteErrorCode == 19 &&
             ex.Message.Contains("foods.name", StringComparison.OrdinalIgnoreCase))
         { FoodEditorStatus.Text = DuplicateFoodMessage(name); }
         catch (Exception ex) { FoodEditorStatus.Text = N("Speichern fehlgeschlagen: ", "Save failed: ") + ex.Message; }
+        finally
+        {
+            savingFood = false;
+            SaveFoodButton.IsEnabled = true;
+            SaveFoodButton.Content = buttonLabel;
+            FoodSaveProgress.IsActive = false;
+            FoodSaveProgress.Visibility = Visibility.Collapsed;
+        }
     }
 
     private string DuplicateFoodMessage(string name) => N(

@@ -612,7 +612,8 @@
                                 </Grid>
                                 <TextBox x:Name="FoodSource" Grid.Row="1" Grid.Column="1" Header="Quelle" />
                                 <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="10">
-                                  <Button Content="Lebensmittel speichern" Click="SaveFood_Click" Background="#167789" Foreground="White" />
+                                  <Button x:Name="SaveFoodButton" Content="Lebensmittel speichern" Click="SaveFood_Click" Background="#167789" Foreground="White" />
+                                  <ProgressRing x:Name="FoodSaveProgress" Width="24" Height="24" IsActive="False" Visibility="Collapsed" VerticalAlignment="Center" AutomationProperties.Name="Lebensmittel wird gespeichert" />
                                   <Button Content="Neues Lebensmittel" Click="NewFood_Click" />
                                   <Button x:Name="DeleteFoodButton" Content="Lebensmittel entfernen" Click="DeleteFood_Click" IsEnabled="False" />
                                 </StackPanel>
