@@ -140,7 +140,7 @@
                                 <TextBlock Text="Symptome" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
                                 <Button Content="…" Click="ManageSymptoms_Click" ToolTipService.ToolTip="Symptome bearbeiten" />
                             </StackPanel>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" Margin="0,0,20,0">
                                 <Button Content="Alle: keine" Click="MarkNone_Click" />
                                 <Button Content="Alle: nicht beurteilt" Click="MarkUnassessed_Click" />
                             </StackPanel>
