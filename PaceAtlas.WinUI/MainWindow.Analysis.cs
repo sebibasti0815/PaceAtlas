@@ -178,7 +178,7 @@ public sealed partial class MainWindow
     private void MainTabs_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         DispatcherQueue.TryEnqueue(StretchAnalysisLayout);
-        if (MainTabs.SelectedItem == NutritionTab)
+        if (ReferenceEquals(MainTabs.SelectedItem, NutritionTab))
             _ = EnsureNutritionFoodsLoadedAsync();
     }
 

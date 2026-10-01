@@ -658,6 +658,21 @@ public sealed partial class MainWindow : Window
         foreach (var grid in rows.Prepend((Grid)header.Children[0]))
             for (int i = 0; i < grid.ColumnDefinitions.Count; i++)
                 grid.ColumnDefinitions[i].Width = new GridLength(columnWidths[table][i]);
+        if (table == "ingredients") FillMealIngredientsWidth();
+    }
+
+    private void MealIngredientsViewport_SizeChanged(object sender, SizeChangedEventArgs e) => FillMealIngredientsWidth();
+
+    private void FillMealIngredientsWidth()
+    {
+        if (MealIngredientsViewport is null || MealIngredientsHeader?.Children.FirstOrDefault() is not Grid header)
+            return;
+        var widths = columnWidths["ingredients"];
+        var last = widths.Length - 1;
+        var remaining = MealIngredientsViewport.ActualWidth - widths.Take(last).Sum() - 2;
+        var width = Math.Max(widths[last], remaining);
+        foreach (var grid in MealIngredientsList.Items.Cast<Grid>().Prepend(header))
+            grid.ColumnDefinitions[last].Width = new GridLength(width);
     }
 
     private Grid SortableHeader(string table, (string Text, int Width)[] cells)

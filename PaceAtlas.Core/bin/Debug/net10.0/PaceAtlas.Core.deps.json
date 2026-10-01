@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v10.0": {
-      "PaceAtlas.Core/0.15.1": {
+      "PaceAtlas.Core/0.15.3": {
         "dependencies": {
           "Microsoft.Data.Sqlite": "10.0.12"
         },
@@ -180,7 +180,7 @@
     }
   },
   "libraries": {
-    "PaceAtlas.Core/0.15.1": {
+    "PaceAtlas.Core/0.15.3": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

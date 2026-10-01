@@ -562,6 +562,7 @@ public sealed partial class MainWindow
                 (rule is null ? N("Keine passende Regel", "No matching rule") : RuleLabel(rule.Decision) + ": " + rule.Note));
             return row;
         }).ToArray();
+        FillMealIngredientsWidth();
         ConfigureListFeedback(MealIngredientsList);
         MealRemoveFoodButton.IsEnabled = false;
         var carbsKnown = mealIngredients.All(item => item.CarbsPer100G is not null);

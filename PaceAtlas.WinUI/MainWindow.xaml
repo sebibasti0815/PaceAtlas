@@ -513,7 +513,7 @@
                                   <TextBlock x:Name="MealEditingText" Foreground="#174B57" TextWrapping="Wrap" />
                                 </Border>
                                 <StackPanel Grid.Row="1" Grid.Column="1" Spacing="8">
-                                  <ScrollViewer Height="300" MaxWidth="560" HorizontalAlignment="Left" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                  <ScrollViewer x:Name="MealIngredientsViewport" Height="300" Margin="0,0,16,0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" SizeChanged="MealIngredientsViewport_SizeChanged">
                                     <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                                       <Grid x:Name="MealIngredientsHeader" />
                                       <ListView x:Name="MealIngredientsList" Grid.Row="1" SelectionMode="Single" SelectionChanged="MealIngredients_SelectionChanged" DoubleTapped="MealIngredients_DoubleTapped" ScrollViewer.VerticalScrollBarVisibility="Auto">
