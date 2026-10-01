@@ -292,9 +292,26 @@ public sealed partial class MainWindow
                     $"No matching products: {result.Rows:N0} rows checked, {result.Germany:N0} sold in Germany, {result.Named:N0} with names, {result.Nutrition:N0} with carbohydrate values. Existing data remains unchanged.");
             else
             {
+                string maintenanceNote;
+                databaseMaintenanceRunning = true;
+                CancelOffImportButton.IsEnabled = false;
+                FoodEditorStatus.Text = N("Import abgeschlossen. Datenbank wird geprüft und bei Bedarf optimiert …",
+                    "Import complete. Checking and optimizing the database if needed …");
+                try
+                {
+                    var maintenance = await Task.Run(() => store.MaintainDatabase());
+                    maintenanceNote = maintenance.Vacuumed
+                        ? N(" Datenbank verdichtet.", " Database compacted.") : "";
+                }
+                catch (Exception ex)
+                {
+                    maintenanceNote = N(" Datenbankwartung fehlgeschlagen: ",
+                        " Database maintenance failed: ") + DatabaseMaintenanceError(ex);
+                }
+                finally { databaseMaintenanceRunning = false; }
                 ReloadNutrition();
                 FoodEditorStatus.Text = N($"{result.Imported} Open-Food-Facts-Produkte importiert oder aktualisiert.",
-                    $"{result.Imported} Open Food Facts products imported or updated.");
+                    $"{result.Imported} Open Food Facts products imported or updated.") + maintenanceNote;
             }
         }
         catch (OperationCanceledException)

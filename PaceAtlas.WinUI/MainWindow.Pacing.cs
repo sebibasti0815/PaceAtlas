@@ -318,6 +318,15 @@ public sealed partial class MainWindow
     }
     private void PacingWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
     {
+        if (databaseMaintenanceRunning)
+        {
+            args.Cancel = true;
+            MessageBoxW(hiddenToTray ? IntPtr.Zero : WinRT.Interop.WindowNative.GetWindowHandle(this),
+                N("Die Datenbankwartung läuft noch. Bitte warte, bis sie abgeschlossen ist.",
+                    "Database maintenance is still running. Please wait until it finishes."),
+                N("Datenbankwartung", "Database maintenance"), 0x40040);
+            return;
+        }
         if (OffImportRunning)
         {
             args.Cancel = true;

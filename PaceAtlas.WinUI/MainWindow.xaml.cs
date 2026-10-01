@@ -16,6 +16,7 @@ namespace PaceAtlas.WinUI;
 public sealed partial class MainWindow : Window
 {
     private bool aboutOpen;
+    private bool databaseMaintenanceRunning;
     private readonly DispatcherTimer todaySummaryTimer = new() { Interval = TimeSpan.FromMinutes(1) };
 
     private static bool TryCalendarTime(CalendarDatePicker picker, TextBox time, out DateTime value)
@@ -92,13 +93,52 @@ public sealed partial class MainWindow : Window
                     VerticalScrollBarVisibility = ScrollBarVisibility.Auto },
                 MinWidth = 550,
                 PrimaryButtonText = english ? "Check for updates" : "Auf Updates prüfen",
+                SecondaryButtonText = english ? "Optimize database" : "Datenbank optimieren",
+                IsSecondaryButtonEnabled = !OffImportRunning && !databaseMaintenanceRunning,
                 CloseButtonText = english ? "Close" : "Schließen"
             };
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
                 await CheckForUpdatesAsync(true);
+            else if (result == ContentDialogResult.Secondary)
+                await ShowDatabaseMaintenanceAsync();
         }
         finally { aboutOpen = false; }
+    }
+
+    private string DatabaseMaintenanceError(Exception ex) => ex is IOException { Message: "VACUUM_DISK_SPACE" }
+        ? N("Für die Datenbankwartung wird vorübergehend freier Speicherplatz von etwa der doppelten Datenbankgröße benötigt.",
+            "Database maintenance temporarily needs free space of approximately twice the database size.")
+        : ex.Message;
+
+    private async Task ShowDatabaseMaintenanceAsync()
+    {
+        if (databaseMaintenanceRunning || OffImportRunning) return;
+        databaseMaintenanceRunning = true;
+        var status = new TextBlock { Text = N("Die Datenbank wird optimiert. Bitte warten …",
+            "Optimizing the database. Please wait …"), TextWrapping = TextWrapping.Wrap };
+        var body = new StackPanel { Spacing = 12, Width = 390 };
+        body.Children.Add(new ProgressRing { IsActive = true, Width = 32, Height = 32,
+            HorizontalAlignment = HorizontalAlignment.Left });
+        body.Children.Add(status);
+        var progress = new ContentDialog { XamlRoot = ((FrameworkElement)Content).XamlRoot,
+            Title = N("Datenbankwartung", "Database maintenance"), Content = body };
+        var shown = progress.ShowAsync();
+        try
+        {
+            var result = await Task.Run(() => store.MaintainDatabase(forceVacuum: true));
+            status.Text = N($"Fertig. Datenbankgröße: {result.BeforeBytes / 1024d / 1024:0.#} → {result.AfterBytes / 1024d / 1024:0.#} MB.",
+                $"Done. Database size: {result.BeforeBytes / 1024d / 1024:0.#} → {result.AfterBytes / 1024d / 1024:0.#} MB.");
+        }
+        catch (Exception ex) { status.Text = N("Datenbankwartung fehlgeschlagen: ",
+            "Database maintenance failed: ") + DatabaseMaintenanceError(ex); }
+        finally
+        {
+            databaseMaintenanceRunning = false;
+            ((ProgressRing)body.Children[0]).IsActive = false;
+            progress.CloseButtonText = N("Schließen", "Close");
+        }
+        await shown;
     }
 
     private static readonly string[] DefaultSymptomNames =

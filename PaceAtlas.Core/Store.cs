@@ -591,6 +591,34 @@ public sealed partial class Store
         using var target = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = path, Mode = SqliteOpenMode.ReadWriteCreate }.ToString());
         target.Open(); source.BackupDatabase(target);
     }
+    public (bool Vacuumed, long BeforeBytes, long AfterBytes) MaintainDatabase(bool forceVacuum = false)
+    {
+        using var db = Open();
+        using var command = db.CreateCommand();
+        command.CommandTimeout = 0;
+        long Count(string pragma)
+        {
+            command.CommandText = pragma;
+            return Convert.ToInt64(command.ExecuteScalar());
+        }
+        var before = new FileInfo(Database).Length;
+        var freePages = Count("PRAGMA freelist_count");
+        var pageCount = Count("PRAGMA page_count");
+        var pageSize = Count("PRAGMA page_size");
+        var vacuum = forceVacuum || freePages * pageSize >= 16L * 1024 * 1024 &&
+            freePages * 10 >= pageCount;
+        if (vacuum)
+        {
+            var drive = new DriveInfo(Path.GetPathRoot(Database)!);
+            if (drive.AvailableFreeSpace < before * 2)
+                throw new IOException("VACUUM_DISK_SPACE");
+            command.CommandText = "VACUUM";
+            command.ExecuteNonQuery();
+        }
+        command.CommandText = "PRAGMA optimize=0x10002";
+        command.ExecuteNonQuery();
+        return (vacuum, before, new FileInfo(Database).Length);
+    }
     public void Restore(string path)
     {
         using var source = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = path, Mode = SqliteOpenMode.ReadOnly }.ToString());
