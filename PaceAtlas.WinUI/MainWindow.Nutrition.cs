@@ -23,6 +23,9 @@ public sealed partial class MainWindow
     private string editingMealStatus = "";
     private int editingIngredientIndex = -1;
     private bool refreshingNutrition;
+    private bool nutritionInitialized;
+    private bool nutritionFoodsLoaded;
+    private bool nutritionFoodsLoading;
     private CancellationTokenSource? offImportCancellation;
     private bool closeAfterOffImport;
     private bool OffImportRunning => offImportCancellation is not null;
@@ -36,10 +39,22 @@ public sealed partial class MainWindow
     }
     private int mealFeedbackGeneration;
     private bool savingMeal;
+    private Button? activeMealSaveButton;
+    private object? activeMealSaveLabel;
 
-    private async Task BeginMealSaveAsync()
+    private async Task BeginMealSaveAsync(string? status = null)
     {
         savingMeal = true;
+        activeMealSaveButton = status switch
+        {
+            "planned" => SavePlannedMealButton,
+            "consumed" => SaveConsumedMealButton,
+            "template" => SaveMealTemplateButton,
+            _ => null
+        };
+        activeMealSaveLabel = activeMealSaveButton?.Content;
+        if (activeMealSaveButton is not null)
+            activeMealSaveButton.Content = N("Wird gespeichert …", "Saving …");
         SavePlannedMealButton.IsEnabled = false;
         SaveConsumedMealButton.IsEnabled = false;
         SaveMealTemplateButton.IsEnabled = false;
@@ -52,6 +67,9 @@ public sealed partial class MainWindow
     private void EndMealSave()
     {
         savingMeal = false;
+        if (activeMealSaveButton is not null) activeMealSaveButton.Content = activeMealSaveLabel;
+        activeMealSaveButton = null;
+        activeMealSaveLabel = null;
         MealSaveProgress.IsActive = false;
         MealSaveProgress.Visibility = Visibility.Collapsed;
         SavePlannedMealButton.IsEnabled = true;
@@ -72,18 +90,55 @@ public sealed partial class MainWindow
         MealFoodGrams.Value = 100;
         FoodCarbs.Value = FoodGi.Value = FoodGl.Value = double.NaN;
         RuleDecision.SelectedIndex = 0;
+        MealFoodSearch.IsEnabled = false;
+        nutritionInitialized = true;
         ReloadNutrition();
     }
 
-    private void ReloadNutrition()
+    private async Task EnsureNutritionFoodsLoadedAsync()
+    {
+        if (!nutritionInitialized || nutritionFoodsLoaded || nutritionFoodsLoading) return;
+        nutritionFoodsLoading = true;
+        FoodCatalogCount.Text = N("Lebensmittel werden geladen …", "Loading foods …");
+        MealFoodSearch.PlaceholderText = N("Lebensmittel werden geladen …", "Loading foods …");
+        try
+        {
+            var foods = await Task.Run(() => store.Foods());
+            nutritionFoods.Clear();
+            nutritionFoods.AddRange(foods);
+            nutritionFoodsLoaded = true;
+            MealFoodSearch.IsEnabled = true;
+            MealFoodSearch.PlaceholderText = N("Lebensmittel suchen", "Search foods");
+            RenderFoodCatalog();
+        }
+        catch (Exception ex)
+        {
+            FoodCatalogCount.Text = N("Lebensmittel konnten nicht geladen werden: ",
+                "Could not load foods: ") + ex.Message;
+        }
+        finally { nutritionFoodsLoading = false; }
+    }
+
+    private void ReloadMealData()
+    {
+        nutritionMeals.Clear(); nutritionMeals.AddRange(store.Meals());
+        RenderMealHistory(); RenderFoodAnalysis(); RefreshMealDueIndicators();
+        if (EntryList is not null) DisplayEntries();
+    }
+
+    private void ReloadNutrition(bool reloadFoods = true)
     {
         try
         {
             refreshingNutrition = true;
-            nutritionFoods.Clear(); nutritionFoods.AddRange(store.Foods());
+            if (reloadFoods && nutritionFoodsLoaded)
+            {
+                nutritionFoods.Clear(); nutritionFoods.AddRange(store.Foods());
+            }
             nutritionRules.Clear(); nutritionRules.AddRange(store.FoodRules());
             nutritionMeals.Clear(); nutritionMeals.AddRange(store.Meals());
-            RenderFoodCatalog(); RenderFoodRules(); RenderMealHistory(); RenderMealIngredients(); RenderFoodAnalysis();
+            if (nutritionFoodsLoaded) RenderFoodCatalog();
+            RenderFoodRules(); RenderMealHistory(); RenderMealIngredients(); RenderFoodAnalysis();
             RefreshMealDueIndicators();
             if (EntryList is not null) DisplayEntries();
         }
@@ -121,18 +176,26 @@ public sealed partial class MainWindow
             1 => Numeric(food.CarbsPer100G ?? -1), 2 => Numeric(food.GlycemicIndex ?? -1),
             3 => Numeric(food.GlycemicLoadPer100G ?? -1), _ => Cells(food)[column]
         };
-        var filtered = nutritionFoods.Where(food => MatchesTableFilters("foods", Cells(food)));
-        visibleNutritionFoods.AddRange(descending ? filtered.OrderByDescending(Key, StringComparer.CurrentCultureIgnoreCase)
-            : filtered.OrderBy(Key, StringComparer.CurrentCultureIgnoreCase));
         var hasFoodFilter = tableFilters.TryGetValue("foods", out var foodFilters) && foodFilters.Count > 0;
+        var fastDefault = column == 0 && !descending && !hasFoodFilter;
+        if (fastDefault)
+            visibleNutritionFoods.AddRange(nutritionFoods.Take(300)); // Foods() is already ordered by name.
+        else
+        {
+            var filtered = nutritionFoods.Where(food => MatchesTableFilters("foods", Cells(food)));
+            visibleNutritionFoods.AddRange((descending
+                ? filtered.OrderByDescending(Key, StringComparer.CurrentCultureIgnoreCase)
+                : filtered.OrderBy(Key, StringComparer.CurrentCultureIgnoreCase)).Take(300));
+        }
+        var matchingCount = !hasFoodFilter ? nutritionFoods.Count :
+            nutritionFoods.Count(food => MatchesTableFilters("foods", Cells(food)));
         FoodCatalogCount.Text = !store.HasBlsCatalog()
-            ? N($"{visibleNutritionFoods.Count} Lebensmittel · BLS-Offlinedaten fehlen für diesen Benutzer; vollständiges Paket einmal installieren.",
-                $"{visibleNutritionFoods.Count} foods · BLS offline data missing for this user; install the complete package once.")
-            : visibleNutritionFoods.Count > 300 && !hasFoodFilter
-                ? N($"{visibleNutritionFoods.Count} Lebensmittel · erste 300 angezeigt; über die Lupe in den Spalten suchen.",
-                    $"{visibleNutritionFoods.Count} foods · first 300 shown; use column search to narrow the list.")
-                : N($"{visibleNutritionFoods.Count} Lebensmittel", $"{visibleNutritionFoods.Count} foods");
-        if (visibleNutritionFoods.Count > 300) visibleNutritionFoods.RemoveRange(300, visibleNutritionFoods.Count - 300);
+            ? N($"{matchingCount} Lebensmittel · BLS-Offlinedaten fehlen für diesen Benutzer; vollständiges Paket einmal installieren.",
+                $"{matchingCount} foods · BLS offline data missing for this user; install the complete package once.")
+            : matchingCount > 300 && !hasFoodFilter
+                ? N($"{matchingCount} Lebensmittel · erste 300 angezeigt; über die Lupe in den Spalten suchen.",
+                    $"{matchingCount} foods · first 300 shown; use column search to narrow the list.")
+                : N($"{matchingCount} Lebensmittel", $"{matchingCount} foods");
         FoodCatalogList.ItemsSource = visibleNutritionFoods.Select(food => NutritionTableRow("foods", food.Name, Nutrient(food.CarbsPer100G),
             Nutrient(food.GlycemicIndex), Nutrient(food.GlycemicLoadPer100G), food.Source, food.Note)).ToArray();
         ConfigureListFeedback(FoodCatalogList);
@@ -538,11 +601,11 @@ public sealed partial class MainWindow
             Ingredients = mealIngredients.Select(item => new MealIngredient { FoodId = item.FoodId,
                 Name = item.Name, Grams = item.Grams, CarbsPer100G = item.CarbsPer100G,
                 GlycemicLoadPer100G = item.GlycemicLoadPer100G }).ToList(), Note = MealNote.Text.Trim() };
-        await BeginMealSaveAsync();
+        await BeginMealSaveAsync(status);
         try
         {
             await Task.Run(() => store.SaveMeal(meal));
-            ResetMeal(); ReloadNutrition();
+            ResetMeal(); ReloadMealData();
             MealStatusText.Text = N("Mahlzeit gespeichert.", "Meal saved.");
         }
         catch (Exception ex) { MealStatusText.Text = N("Speichern fehlgeschlagen: ", "Save failed: ") + ex.Message; }
@@ -730,7 +793,7 @@ public sealed partial class MainWindow
         try
         {
             await Task.Run(() => store.SaveMeal(meal));
-            ReloadNutrition(); MealStatusText.Text = status == "planned"
+            ReloadMealData(); MealStatusText.Text = status == "planned"
                 ? N("Als geplant übernommen.", "Copied as planned.")
                 : N("Als gegessen erfasst.", "Recorded as consumed.");
             if (status == "consumed" && original.Status == "template")
@@ -756,7 +819,7 @@ public sealed partial class MainWindow
     {
         var index = MealHistoryList.SelectedIndex;
         if (index < 0 || index >= displayedNutritionMeals.Count) return;
-        try { store.DeleteMeal(displayedNutritionMeals[index].Id); ResetMeal(); ReloadNutrition(); }
+        try { store.DeleteMeal(displayedNutritionMeals[index].Id); ResetMeal(); ReloadMealData(); }
         catch (Exception ex) { MealStatusText.Text = ex.Message; }
     }
 

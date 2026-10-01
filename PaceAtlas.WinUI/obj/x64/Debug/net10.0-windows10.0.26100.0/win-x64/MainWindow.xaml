@@ -145,7 +145,7 @@
                                 <Button x:ConnectionId='255' Content="Alle: nicht beurteilt"                              />
                             </StackPanel>
                         </Grid>
-                        <Grid x:ConnectionId='250' x:Name="SymptomGrid" ColumnSpacing="12" RowSpacing="8"                                  />
+                        <Grid x:ConnectionId='250' x:Name="SymptomGrid" ColumnSpacing="12" RowSpacing="4"                                  />
                         <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                             <TextBlock Text="Welches Symptom schränkt dich gerade am meisten ein? (optional)"
                                        VerticalAlignment="Center" TextWrapping="Wrap" />
@@ -235,7 +235,7 @@
                             </StackPanel>
                         </Grid>
                     </TabViewItem>
-                    <TabViewItem x:ConnectionId='22' x:Name="MeasureTab" Header="Maßnahme" IsClosable="False">
+                    <TabViewItem x:ConnectionId='22' x:Name="MeasureTab" Header="Sofortmaßnahme" IsClosable="False">
                         <Grid>
                             <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                             <ScrollViewer x:ConnectionId='196' x:Name="MeasureFormScroller" Grid.Row="0" VerticalScrollBarVisibility="Auto">
@@ -545,11 +545,11 @@
                                 </StackPanel>
                                 <Button x:ConnectionId='108' x:Name="MealRemoveFoodButton" Grid.Row="2" Grid.Column="1" Content="Ausgewählte Zutat entfernen"                              HorizontalAlignment="Left" IsEnabled="False" />
                                 <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Spacing="10">
-                                  <Button x:ConnectionId='123' x:Name="SavePlannedMealButton" Content="Als geplant speichern"                               Background="#167789" Foreground="White" />
-                                  <Button x:ConnectionId='124' x:Name="SaveConsumedMealButton" Content="Als gegessen speichern"                                Background="White" Foreground="#1F1F1F" />
-                                  <Button x:ConnectionId='125' x:Name="SaveMealTemplateButton" Content="Als Vorlage speichern"                                />
-                                  <Button x:ConnectionId='126' Content="Neue Mahlzeit"                         />
-                                  <ProgressRing x:ConnectionId='127' x:Name="MealSaveProgress" Width="24" Height="24" IsActive="False" Visibility="Collapsed" VerticalAlignment="Center" AutomationProperties.Name="Mahlzeit wird gespeichert" />
+                                  <ProgressRing x:ConnectionId='123' x:Name="MealSaveProgress" Width="24" Height="24" IsActive="False" Visibility="Collapsed" VerticalAlignment="Center" AutomationProperties.Name="Mahlzeit wird gespeichert" />
+                                  <Button x:ConnectionId='124' x:Name="SavePlannedMealButton" Content="Als geplant speichern"                               Background="#167789" Foreground="White" />
+                                  <Button x:ConnectionId='125' x:Name="SaveConsumedMealButton" Content="Als gegessen speichern"                                Background="White" Foreground="#1F1F1F" />
+                                  <Button x:ConnectionId='126' x:Name="SaveMealTemplateButton" Content="Als Vorlage speichern"                                />
+                                  <Button x:ConnectionId='127' Content="Neue Mahlzeit"                         />
                                 </StackPanel>
                                 <TextBlock x:ConnectionId='109' x:Name="MealStatusText" Grid.Row="3" Grid.Column="0" Width="720" HorizontalAlignment="Left" Foreground="#316073" TextWrapping="Wrap" />
                                 <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Spacing="10" Margin="0,-6,0,0">

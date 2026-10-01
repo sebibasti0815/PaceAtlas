@@ -145,7 +145,7 @@
                                 <Button Content="Alle: nicht beurteilt" Click="MarkUnassessed_Click" />
                             </StackPanel>
                         </Grid>
-                        <Grid x:Name="SymptomGrid" ColumnSpacing="12" RowSpacing="8" SizeChanged="Fields_SizeChanged" />
+                        <Grid x:Name="SymptomGrid" ColumnSpacing="12" RowSpacing="4" SizeChanged="Fields_SizeChanged" />
                         <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                             <TextBlock Text="Welches Symptom schränkt dich gerade am meisten ein? (optional)"
                                        VerticalAlignment="Center" TextWrapping="Wrap" />
@@ -235,7 +235,7 @@
                             </StackPanel>
                         </Grid>
                     </TabViewItem>
-                    <TabViewItem x:Name="MeasureTab" Header="Maßnahme" IsClosable="False">
+                    <TabViewItem x:Name="MeasureTab" Header="Sofortmaßnahme" IsClosable="False">
                         <Grid>
                             <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                             <ScrollViewer x:Name="MeasureFormScroller" Grid.Row="0" VerticalScrollBarVisibility="Auto">
@@ -545,11 +545,11 @@
                                 </StackPanel>
                                 <Button x:Name="MealRemoveFoodButton" Grid.Row="2" Grid.Column="1" Content="Ausgewählte Zutat entfernen" Click="MealRemoveFood_Click" HorizontalAlignment="Left" IsEnabled="False" />
                                 <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Spacing="10">
+                                  <ProgressRing x:Name="MealSaveProgress" Width="24" Height="24" IsActive="False" Visibility="Collapsed" VerticalAlignment="Center" AutomationProperties.Name="Mahlzeit wird gespeichert" />
                                   <Button x:Name="SavePlannedMealButton" Content="Als geplant speichern" Click="SavePlannedMeal_Click" Background="#167789" Foreground="White" />
                                   <Button x:Name="SaveConsumedMealButton" Content="Als gegessen speichern" Click="SaveConsumedMeal_Click" Background="White" Foreground="#1F1F1F" />
                                   <Button x:Name="SaveMealTemplateButton" Content="Als Vorlage speichern" Click="SaveMealTemplate_Click" />
                                   <Button Content="Neue Mahlzeit" Click="ResetMeal_Click" />
-                                  <ProgressRing x:Name="MealSaveProgress" Width="24" Height="24" IsActive="False" Visibility="Collapsed" VerticalAlignment="Center" AutomationProperties.Name="Mahlzeit wird gespeichert" />
                                 </StackPanel>
                                 <TextBlock x:Name="MealStatusText" Grid.Row="3" Grid.Column="0" Width="720" HorizontalAlignment="Left" Foreground="#316073" TextWrapping="Wrap" />
                                 <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Spacing="10" Margin="0,-6,0,0">

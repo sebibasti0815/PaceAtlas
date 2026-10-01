@@ -67,6 +67,7 @@ public sealed partial class MainWindow
         ["Ohrgeräusche"] = "Tinnitus",
         ["Aktiv (Min.):"] = "Active (min):", ["Pause (Min.):"] = "Break (min):",
         ["Zeitraum erfassen"] = "Record interval", ["Maßnahme erfassen"] = "Record intervention",
+        ["Sofortmaßnahme"] = "Immediate intervention",
         ["Aktivität und Ruhe"] = "Activity and rest", ["Aktivität:"] = "Activity:",
         ["Aktivitäten verwalten"] = "Manage activities", ["Ruhequalität"] = "Rest quality",
         ["Belastungsarten"] = "Activity types",
@@ -367,7 +368,7 @@ public sealed partial class MainWindow
             RenderOngoingMeasures();
             LocalizeAnalysisPeriod();
             RefreshAnalysis();
-            ReloadNutrition();
+            ReloadNutrition(reloadFoods: false);
             UpdateMealIngredientEditor();
             UpdateEditingIndicators();
             foreach (var status in originalStatus.Keys) TranslateStatus(status);

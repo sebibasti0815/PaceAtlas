@@ -1879,8 +1879,8 @@ public sealed partial class MainWindow : Window
         {
             var name = SymptomNames[i];
             var choice = new ComboBox { ItemsSource = Severities, SelectedIndex = previousSymptoms.GetValueOrDefault(name, 0),
-                Width = 192, Height = 44, VerticalAlignment = VerticalAlignment.Center };
-            var field = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 5, Height = 48 };
+                Width = 192, Height = 34, VerticalAlignment = VerticalAlignment.Center };
+            var field = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 5, Height = 38 };
             var label = new TextBlock { Text = name == "Geräuschempfindlichkeit" ? "Geräuscheempf." : name,
                 Width = 110, FontSize = 12,
                 TextWrapping = TextWrapping.Wrap,
@@ -2267,7 +2267,7 @@ public sealed partial class MainWindow : Window
             {
                 store.DeleteMeal(-entry.Id);
                 if (editingMealId == -entry.Id) ResetMeal();
-                ReloadNutrition();
+                ReloadMealData();
                 return;
             }
             store.Delete(entry.Id);
