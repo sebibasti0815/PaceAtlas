@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PaceAtlas.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("0.15.6.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("0.15.6+f8b3196bd502812fcd4091a48b600f4d21697248")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("0.15.6+2680dd336de1747883ba9b48f05b8a006864b92f")]
 [assembly: System.Reflection.AssemblyProductAttribute("PaceAtlas.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PaceAtlas.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("0.15.6.0")]
