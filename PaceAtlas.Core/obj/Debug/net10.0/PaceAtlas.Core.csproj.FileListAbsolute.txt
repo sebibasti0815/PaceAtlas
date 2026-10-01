@@ -11,4 +11,3 @@ L:\source\repos\PaceAtlas\PaceAtlas.Core\obj\Debug\net10.0\refint\PaceAtlas.Core
 L:\source\repos\PaceAtlas\PaceAtlas.Core\obj\Debug\net10.0\PaceAtlas.Core.pdb
 L:\source\repos\PaceAtlas\PaceAtlas.Core\obj\Debug\net10.0\ref\PaceAtlas.Core.dll
 L:\source\repos\PaceAtlas\PaceAtlas.Core\obj\Debug\net10.0\PaceAtla.72506F08.Up2Date
-L:\source\repos\PaceAtlas\PaceAtlas.Core\obj\Debug\net10.0\PaceAtlas.Core.sourcelink.json

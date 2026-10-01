@@ -7,5 +7,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
     <EmbeddedResource Include="NutritionCatalog.tsv" LogicalName="PaceAtlas.NutritionCatalog.tsv" />
+    <EmbeddedResource Include="Bls4Catalog.tsv.gz" LogicalName="PaceAtlas.Bls4Catalog.tsv.gz" Condition="Exists('Bls4Catalog.tsv.gz')" />
   </ItemGroup>
 </Project>

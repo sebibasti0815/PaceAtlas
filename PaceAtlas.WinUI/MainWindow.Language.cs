@@ -12,6 +12,7 @@ public sealed partial class MainWindow
     private bool languageInitialized;
     private readonly Dictionary<object, string> originalUiLabels = new();
     private readonly Dictionary<TextBox, string> originalPlaceholders = new();
+    private readonly Dictionary<FrameworkElement, string> originalTooltips = new();
     private readonly Dictionary<TextBlock, string> originalStatus = new();
     private bool applyingLanguage;
     private bool updatingStatus;
@@ -28,10 +29,15 @@ public sealed partial class MainWindow
         ["Zutat ändern"] = "Update ingredient", ["Zutat-Bearbeitung abbrechen"] = "Cancel ingredient editing",
         ["Notiz / Zubereitung"] = "Note / preparation", ["Als geplant speichern"] = "Save as planned",
         ["Als gegessen speichern"] = "Save as consumed", ["Als Vorlage speichern"] = "Save as template",
-        ["Neue Mahlzeit"] = "New meal", ["Gespeicherte Mahlzeiten und Vorlagen · Doppelklick zum Bearbeiten"] =
-            "Saved meals and templates · double click to edit",
+        ["Neue Mahlzeit"] = "New meal", ["Geplante Mahlzeiten und Vorlagen"] =
+            "Planned meals and templates",
         ["Auswahl als gegessen übernehmen"] = "Record selection as consumed",
+        ["Auswahl als geplant übernehmen"] = "Copy selection as planned",
+        ["Auswahl bearbeiten"] = "Edit selection",
         ["Lebensmittel und Werte je 100 g"] = "Foods and values per 100 g",
+        ["Ärztlicher Plan und BLS 4.0 (Max Rubner-Institut, CC BY 4.0). Eigene Werte und persönliche Regeln haben Vorrang. Ohne GI bleibt die GL unbekannt."] =
+            "Doctor's plan and BLS 4.0 (Max Rubner-Institut, CC BY 4.0). Your values and personal rules take priority. Without a GI, the GL remains unknown.",
+        ["BLS-Aktualisierung prüfen"] = "Check for BLS updates",
         ["Tabellenwerte aus dem gescannten Arztplan: Namen und Zahlen bitte vor Verwendung prüfen. Persönliche Regeln haben Vorrang vor der GL-Einstufung."] =
             "Values from the scanned doctor's plan: check names and figures before use. Personal rules take precedence over GL ratings.",
         ["Kohlenhydrate / 100 g"] = "Carbohydrates / 100 g", ["Glykämischer Index"] = "Glycemic index",
@@ -152,6 +158,25 @@ public sealed partial class MainWindow
         ["Nachkauf erfasst."] = "Purchase recorded.", ["Bestand gesetzt."] = "Stock set.",
         ["CSV exportiert."] = "CSV exported.", ["Backup erstellt."] = "Backup created.",
         ["Backup eingespielt."] = "Backup restored.",
+        ["Bitte beim Abschluss das beobachtete Ergebnis auswählen."] = "Select the observed outcome before completing the intervention.",
+        ["Bitte das Ende im Kalender auswählen."] = "Select the end date in the calendar.",
+        ["Bitte das beobachtete Ergebnis auswählen und die Maßnahme speichern."] = "Select the observed outcome and save the intervention.",
+        ["Bitte den Beginn angeben."] = "Enter the start time.",
+        ["Bitte die Uhrzeit des Rückblicks als HH:mm eingeben."] = "Enter the review time as HH:mm.",
+        ["Bitte ein Ziel oder Problem für die laufende Maßnahme angeben."] = "Enter a goal or issue for the ongoing intervention.",
+        ["Bitte einen Tag im Kalender auswählen."] = "Select a day in the calendar.",
+        ["Bitte zuerst eine Uhrzeit auswählen."] = "Select a time first.",
+        ["Bitte zum Rückblick auch ein Datum auswählen."] = "Select a review date as well.",
+        ["Der Rückblick darf nicht vor dem Beginn liegen."] = "The review cannot be before the start.",
+        ["Das Ende darf nicht vor dem Beginn liegen."] = "The end cannot be before the start.",
+        ["Eintrag gespeichert. Neuer Eintrag vorbereitet."] = "Entry saved. New entry ready.",
+        ["Maßnahme gespeichert. Neuer Eintrag vorbereitet."] = "Intervention saved. New entry ready.",
+        ["Zeitraum gespeichert. Neuer Zeitraum vorbereitet."] = "Interval saved. New interval ready.",
+        ["Zeit für eine Pause"] = "Time for a break", ["Pause vorzeitig beenden"] = "End break early",
+        ["Eingenommen"] = "Taken", ["Schmerzorte bearbeiten"] = "Edit pain locations",
+        ["Schutzmaßnahmen bearbeiten"] = "Edit protective measures",
+        ["Symptome bearbeiten"] = "Edit symptoms", ["Info ..."] = "About ...",
+        ["Sprache / Language"] = "Language / Sprache",
     };
 
     private string T(string german) => selectedLanguage == "de" ? german :
@@ -172,7 +197,16 @@ public sealed partial class MainWindow
 
     private void LocalizeTree(object? node)
     {
-        if (node is null || ReferenceEquals(node, LanguageChoice)) return;
+        if (node is null) return;
+        if (node is FrameworkElement element && ToolTipService.GetToolTip(element) is string tooltip)
+        {
+            if (!originalTooltips.TryGetValue(element, out var german))
+                originalTooltips[element] = german = tooltip;
+            else if (tooltip != german && tooltip != EnglishLabel(german))
+                originalTooltips[element] = german = tooltip;
+            ToolTipService.SetToolTip(element, T(german));
+        }
+        if (ReferenceEquals(node, LanguageChoice)) return;
         if (node is TextBlock label && label.Tag is not string && !originalStatus.ContainsKey(label) &&
             !ReferenceEquals(label, MottoQuestion) && !ReferenceEquals(label, MottoAnswer) &&
             !ReferenceEquals(label, PacingStatus) && label.Text is string text)
@@ -314,6 +348,8 @@ public sealed partial class MainWindow
             LocalizeTree(Content);
             MedicationTabTitle.Text = T("Medikamente und Supplemente");
             IntakeTabTitle.Text = T("Tagesprotokoll");
+            NutritionTabTitle.Text = T("Ernährung");
+            MealsTabTitle.Text = T("Mahlzeiten");
             RefreshActivityTemplateChoice();
             RefreshSortableHeaderCaptions();
             if (EntryList.ContextFlyout is MenuFlyout menu)
@@ -324,6 +360,7 @@ public sealed partial class MainWindow
             RenderIntakes();
             RenderStock();
             DisplayEntries();
+            RenderOngoingMeasures();
             LocalizeAnalysisPeriod();
             RefreshAnalysis();
             ReloadNutrition();
@@ -331,6 +368,7 @@ public sealed partial class MainWindow
             UpdateEditingIndicators();
             foreach (var status in originalStatus.Keys) TranslateStatus(status);
             UpdatePacingDisplay();
+            foreach (var (overlay, _) in pacingOverlays) LocalizeTree(overlay.Content);
             UpdateEntriesToggleHint();
         }
         finally { applyingLanguage = false; }
@@ -378,6 +416,7 @@ public sealed partial class MainWindow
             ("Bestand konnte nicht gesetzt werden: ", "Could not set stock: "),
             ("Auswahl konnte nicht gespeichert werden: ", "Could not save options: "),
             ("Einträge konnten nicht geladen werden: ", "Could not load entries: "),
+            ("Auswahllisten konnten nicht geladen werden: ", "Could not load selection lists: "),
             ("PaceAtlas-Daten konnten nicht geladen werden: ", "Could not load Pace Atlas data: "),
             ("Spaltenbreiten konnten nicht gespeichert werden: ", "Could not save column widths: ")
         })

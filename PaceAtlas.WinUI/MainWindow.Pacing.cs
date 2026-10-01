@@ -81,7 +81,7 @@ public sealed partial class MainWindow
                 ShowAboutFromTray,
                 () => reminderMinutes, () => reminderCustom, SetReminderInterval, ConfigureReminderInterval);
         }
-        catch (Exception ex) { PacingStatus.Text = "Tray nicht verfügbar: " + ex.Message; }
+        catch (Exception ex) { PacingStatus.Text = N("Tray nicht verfügbar: ", "Tray unavailable: ") + ex.Message; }
         AppWindow.Changed += (_, _) =>
         {
             if (hiddenToTray || restoringFromTray || AppWindow.Presenter is not OverlappedPresenter presenter) return;
@@ -107,7 +107,7 @@ public sealed partial class MainWindow
     private void SaveTraySettings()
     {
         try { SaveJson(TraySettingsPath, new TraySettings { StartInTray = startInTray }); }
-        catch (Exception ex) { PacingStatus.Text = "Tray-Einstellung: " + ex.Message; }
+        catch (Exception ex) { PacingStatus.Text = N("Tray-Einstellung: ", "Tray setting: ") + ex.Message; }
     }
 
     private void PacingMinutes_Changed(NumberBox sender, NumberBoxValueChangedEventArgs args)
@@ -117,7 +117,7 @@ public sealed partial class MainWindow
         activeMinutes = Math.Clamp((int)PacingActiveMinutes.Value, 2, 300);
         pauseMinutes = Math.Clamp((int)PacingPauseMinutes.Value, 1, 120);
         try { SaveJson(TimerSettingsPath, new { ActiveMinutes = activeMinutes, PauseMinutes = pauseMinutes }); }
-        catch (Exception ex) { PacingStatus.Text = "Timer-Einstellungen: " + ex.Message; }
+        catch (Exception ex) { PacingStatus.Text = N("Timer-Einstellungen: ", "Timer settings: ") + ex.Message; }
         // A changed interval applies to the next phase, exactly as in WinForms.
     }
 
@@ -214,6 +214,7 @@ public sealed partial class MainWindow
             end.Click += (_, _) => EndPacingBreak();
             var root = new Grid { Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 48, 64, 86)) };
             root.Children.Add(center); root.Children.Add(end);
+            LocalizeTree(root);
             var overlay = new Window { Content = root, Title = "Pacing Timer" };
             if (overlay.AppWindow.Presenter is OverlappedPresenter presenter)
             {

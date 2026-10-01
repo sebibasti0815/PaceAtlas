@@ -45,12 +45,36 @@ public sealed partial class MainWindow : Window
             var version = typeof(MainWindow).Assembly.GetName().Version?.ToString(3) ?? "?";
             var english = selectedLanguage == "en";
             var aboutContent = new StackPanel { Spacing = 12 };
-            aboutContent.Children.Add(new TextBlock { Text = $"Pace Atlas\nVersion {version}\nME/CFS", TextWrapping = TextWrapping.Wrap });
+            aboutContent.Children.Add(new TextBlock { Text = $"Pace Atlas · Version {version} · ME/CFS",
+                FontSize = 18, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold });
+            var slogan = new StackPanel { Spacing = 2 };
+            slogan.Children.Add(new TextBlock { Text = MottoQuestion.Text, TextWrapping = TextWrapping.Wrap,
+                FontFamily = new FontFamily("Segoe Script"), FontStyle = Windows.UI.Text.FontStyle.Italic });
+            slogan.Children.Add(new TextBlock { Text = MottoAnswer.Text, TextWrapping = TextWrapping.Wrap });
+            aboutContent.Children.Add(slogan);
+            aboutContent.Children.Add(new TextBlock { Text = english ? "Nutrition data: Bundeslebensmittelschlüssel (BLS) 4.0" :
+                "Nährstoffdaten: Bundeslebensmittelschlüssel (BLS) 4.0",
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold });
+            aboutContent.Children.Add(new TextBlock { Text =
+                "Max Rubner-Institut (2025): Bundeslebensmittelschlüssel (BLS), Version 4.0 — Deutsche Nährstoffdatenbank. Karlsruhe. DOI: 10.25826/Data20251217-134202-0",
+                TextWrapping = TextWrapping.Wrap });
+            aboutContent.Children.Add(new TextBlock { Text = english
+                ? "License: Creative Commons Attribution 4.0 International (CC BY 4.0). The original Excel data was converted into an offline catalog for this application. Credit the Max Rubner-Institut, link the license and indicate changes when reusing the data. This license applies to the BLS data, not your personal entries."
+                : "Lizenz: Creative Commons Namensnennung 4.0 International (CC BY 4.0). Die ursprünglichen Excel-Daten wurden für diese Anwendung in einen Offlinekatalog umgewandelt. Bei Weiterverwendung der Daten das Max Rubner-Institut nennen, die Lizenz verlinken und Änderungen angeben. Die Lizenz betrifft die BLS-Daten, nicht deine persönlichen Einträge.",
+                TextWrapping = TextWrapping.Wrap });
+            var links = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10 };
+            links.Children.Add(new HyperlinkButton { Content = english ? "BLS source" : "BLS-Quelle",
+                NavigateUri = new Uri("https://blsdb.de/download"), Padding = new Thickness(0) });
+            links.Children.Add(new HyperlinkButton { Content = english ? "License terms" : "Lizenzbedingungen",
+                NavigateUri = new Uri("https://creativecommons.org/licenses/by/4.0/legalcode.de"), Padding = new Thickness(0) });
+            aboutContent.Children.Add(links);
             var dialog = new ContentDialog
             {
                 XamlRoot = ((FrameworkElement)Content).XamlRoot,
                 Title = english ? "About Pace Atlas" : "Info zu Pace Atlas",
-                Content = aboutContent,
+                Content = new ScrollViewer { Content = aboutContent, MaxHeight = 520,
+                    VerticalScrollBarVisibility = ScrollBarVisibility.Auto },
+                MinWidth = 550,
                 PrimaryButtonText = english ? "Check for updates" : "Auf Updates prüfen",
                 CloseButtonText = english ? "Close" : "Schließen"
             };
@@ -341,9 +365,13 @@ public sealed partial class MainWindow : Window
         AttachStatusLocalization();
         ApplyUiLanguage();
         UpdateEditingIndicators();
-        todaySummaryTimer.Tick += (_, _) => { RefreshTodaySummary(); RefreshMedicationDueIndicators(); };
+        todaySummaryTimer.Tick += (_, _) => { RefreshTodaySummary(); RefreshMedicationDueIndicators(); RefreshMealDueIndicators(); };
         todaySummaryTimer.Start();
-        ((FrameworkElement)Content).Loaded += (_, _) => _ = CheckForUpdatesAsync(false);
+        ((FrameworkElement)Content).Loaded += async (_, _) =>
+        {
+            await CheckForUpdatesAsync(false);
+            await CheckBlsDataAsync(false);
+        };
     }
 
     private static void ConfigureTabColors(TabView view)
@@ -1077,8 +1105,10 @@ public sealed partial class MainWindow : Window
         {
             var due = item.Data!.ReviewDate is { } date && date <= DateTime.Now;
             var label = $"{MeasureDescription(item.Data)} · {item.Entry.Start:dd.MM.yyyy} · " +
-                (item.Data.Status == "paused" ? "pausiert" : "läuft") +
-                (item.Data.ReviewDate is { } review ? $" · Rückblick {review:dd.MM.yyyy HH:mm}" + (due ? " fällig" : "") : "");
+                (item.Data.Status == "paused" ? T("Pausiert") : T("Läuft")) +
+                (item.Data.ReviewDate is { } review
+                    ? N($" · Rückblick {review:dd.MM.yyyy HH:mm}", $" · Review {review:dd.MM.yyyy HH:mm}") +
+                      (due ? N(" fällig", " due") : "") : "");
             var button = new Button { Content = label, Tag = item.Entry.Id,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 Background = new SolidColorBrush(item.Data.Status == "paused"
@@ -1090,7 +1120,7 @@ public sealed partial class MainWindow : Window
             OngoingMeasures.Children.Add(button);
         }
         if (OngoingMeasures.Children.Count == 0)
-            OngoingMeasures.Children.Add(new TextBlock { Text = "Keine laufenden Maßnahmen." });
+            OngoingMeasures.Children.Add(new TextBlock { Text = N("Keine laufenden Maßnahmen.", "No ongoing interventions.") });
     }
 
     private void AddGoal_Click(object sender, RoutedEventArgs e)
@@ -1356,7 +1386,8 @@ public sealed partial class MainWindow : Window
             row.Status.SelectedIndex = 1;
             count++;
         }
-        IntakeStatus.Text = $"{count} Einnahme(n) um {time} als genommen markiert. Zum Übernehmen den Tag speichern.";
+        IntakeStatus.Text = N($"{count} Einnahme(n) um {time} als genommen markiert. Zum Übernehmen den Tag speichern.",
+            $"{count} intake(s) at {time} marked as taken. Save the day to apply.");
     }
 
     private void SortIntakeRows()

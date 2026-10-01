@@ -20,6 +20,7 @@ public sealed partial class MainWindow
     private long editingFoodId;
     private long editingRuleId;
     private long editingMealId;
+    private string editingMealStatus = "";
     private int editingIngredientIndex = -1;
     private bool refreshingNutrition;
 
@@ -48,6 +49,7 @@ public sealed partial class MainWindow
             nutritionRules.Clear(); nutritionRules.AddRange(store.FoodRules());
             nutritionMeals.Clear(); nutritionMeals.AddRange(store.Meals());
             RenderFoodCatalog(); RenderFoodRules(); RenderMealHistory(); RenderMealIngredients(); RenderFoodAnalysis();
+            RefreshMealDueIndicators();
             if (EntryList is not null) DisplayEntries();
         }
         catch (Exception ex) { MealStatusText.Text = N("Ernährungsdaten konnten nicht geladen werden: ", "Could not load nutrition data: ") + ex.Message; }
@@ -87,6 +89,14 @@ public sealed partial class MainWindow
         var filtered = nutritionFoods.Where(food => MatchesTableFilters("foods", Cells(food)));
         visibleNutritionFoods.AddRange(descending ? filtered.OrderByDescending(Key, StringComparer.CurrentCultureIgnoreCase)
             : filtered.OrderBy(Key, StringComparer.CurrentCultureIgnoreCase));
+        FoodCatalogCount.Text = !store.HasBlsCatalog()
+            ? N($"{visibleNutritionFoods.Count} Lebensmittel · BLS-Offlinedaten fehlen für diesen Benutzer; vollständiges Paket einmal installieren.",
+                $"{visibleNutritionFoods.Count} foods · BLS offline data missing for this user; install the complete package once.")
+            : visibleNutritionFoods.Count > 300
+                ? N($"{visibleNutritionFoods.Count} Lebensmittel · erste 300 angezeigt; über die Lupe in den Spalten suchen.",
+                    $"{visibleNutritionFoods.Count} foods · first 300 shown; use column search to narrow the list.")
+                : N($"{visibleNutritionFoods.Count} Lebensmittel", $"{visibleNutritionFoods.Count} foods");
+        if (visibleNutritionFoods.Count > 300) visibleNutritionFoods.RemoveRange(300, visibleNutritionFoods.Count - 300);
         FoodCatalogList.ItemsSource = visibleNutritionFoods.Select(food => NutritionTableRow("foods", food.Name, Nutrient(food.CarbsPer100G),
             Nutrient(food.GlycemicIndex), Nutrient(food.GlycemicLoadPer100G), food.Source, food.Note)).ToArray();
         ConfigureListFeedback(FoodCatalogList);
@@ -97,7 +107,8 @@ public sealed partial class MainWindow
     private void FoodCatalog_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         var index = FoodCatalogList.SelectedIndex;
-        if (DeleteFoodButton is not null) DeleteFoodButton.IsEnabled = index >= 0 && index < visibleNutritionFoods.Count;
+        if (DeleteFoodButton is not null) DeleteFoodButton.IsEnabled = index >= 0 && index < visibleNutritionFoods.Count
+            && !visibleNutritionFoods[index].IsBlsBase;
     }
 
     private void FoodCatalog_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
@@ -109,6 +120,10 @@ public sealed partial class MainWindow
         FoodName.Text = food.Name; FoodCarbs.Value = food.CarbsPer100G ?? double.NaN;
         FoodGi.Value = food.GlycemicIndex ?? double.NaN; FoodGl.Value = food.GlycemicLoadPer100G ?? double.NaN;
         FoodSource.Text = food.Source; FoodNote.Text = food.Note;
+        FoodEditorStatus.Text = food.IsBlsBase
+            ? N("BLS-Grundwert. Speichern legt eine persönliche Ergänzung an; der BLS-Eintrag bleibt erhalten.",
+                "BLS reference value. Saving creates a personal override; the BLS record remains available.")
+            : "";
     }
 
     private void NewFood_Click(object sender, RoutedEventArgs e)
@@ -131,12 +146,17 @@ public sealed partial class MainWindow
         { FoodEditorStatus.Text = DuplicateFoodMessage(duplicate.Name); return; }
         var carbs = NumberOrNull(FoodCarbs); var gi = NumberOrNull(FoodGi); var gl = NumberOrNull(FoodGl);
         if (gl is null && carbs is not null && gi is not null) gl = Math.Round(carbs.Value * gi.Value / 100, 1);
+        var baseFood = editingFoodId < 0 ? nutritionFoods.FirstOrDefault(food => food.Id == editingFoodId) : null;
         try
         {
             store.SaveFood(new FoodItem { Id = editingFoodId, Name = name,
-                CarbsPer100G = carbs, GlycemicIndex = gi, GlycemicLoadPer100G = gl,
-                Source = string.IsNullOrWhiteSpace(FoodSource.Text) ? N("Eigener Eintrag", "User entry") : FoodSource.Text.Trim(),
-                Note = FoodNote.Text.Trim() });
+                CarbsPer100G = baseFood is not null && carbs == baseFood.CarbsPer100G ? null : carbs,
+                GlycemicIndex = gi, GlycemicLoadPer100G = gl,
+                Source = baseFood is not null && FoodSource.Text == baseFood.Source
+                    ? N("Eigene Ergänzung · BLS 4.0 (Max Rubner-Institut, CC BY 4.0)",
+                        "Personal override · BLS 4.0 (Max Rubner-Institut, CC BY 4.0)")
+                    : string.IsNullOrWhiteSpace(FoodSource.Text) ? N("Eigener Eintrag", "User entry") : FoodSource.Text.Trim(),
+                Note = FoodNote.Text.Trim(), BlsCode = baseFood?.BlsCode ?? "" });
             editingFoodId = 0; ReloadNutrition(); NewFood_Click(sender, e);
             FoodEditorStatus.Text = N("Lebensmittel gespeichert.", "Food saved.");
         }
@@ -155,6 +175,7 @@ public sealed partial class MainWindow
         var index = FoodCatalogList.SelectedIndex;
         if (index < 0 || index >= visibleNutritionFoods.Count) return;
         var food = visibleNutritionFoods[index];
+        if (food.IsBlsBase) return;
         var dialog = new ContentDialog
         {
             Title = N("Lebensmittel entfernen?", "Remove food?"),
@@ -267,7 +288,9 @@ public sealed partial class MainWindow
         var ingredient = new MealIngredient { FoodId = food?.Id ?? existing!.FoodId,
             Name = food?.Name ?? existing!.Name, Grams = MealFoodGrams.Value,
             CarbsPer100G = food is null ? existing?.CarbsPer100G : food.CarbsPer100G,
-            GlycemicLoadPer100G = food is null ? existing?.GlycemicLoadPer100G : food.GlycemicLoadPer100G };
+            GlycemicLoadPer100G = food is null ? existing?.GlycemicLoadPer100G : food.GlycemicLoadPer100G,
+            BlsCode = food?.BlsCode ?? existing?.BlsCode ?? "",
+            NutrientSource = food?.Source ?? existing?.NutrientSource ?? "" };
         var wasEditing = existing is not null;
         if (existing is null) mealIngredients.Add(ingredient);
         else mealIngredients[editingIngredientIndex] = ingredient;
@@ -385,7 +408,9 @@ public sealed partial class MainWindow
         { MealStatusText.Text = N("Bitte Datum und Uhrzeit prüfen.", "Check date and time."); return; }
         try
         {
-            store.SaveMeal(new MealRecord { Id = editingMealId, Name = MealName.Text.Trim(),
+            var preserveOriginal = editingMealStatus == "template" && status != "template"
+                || editingMealStatus != "" && editingMealStatus != "template" && status == "template";
+            store.SaveMeal(new MealRecord { Id = preserveOriginal ? 0 : editingMealId, Name = MealName.Text.Trim(),
                 At = day.Date.Add(time.ToTimeSpan()), Status = status,
                 Ingredients = mealIngredients.Select(item => new MealIngredient { FoodId = item.FoodId,
                     Name = item.Name, Grams = item.Grams, CarbsPer100G = item.CarbsPer100G,
@@ -403,7 +428,7 @@ public sealed partial class MainWindow
 
     private void ResetMeal()
     {
-        editingMealId = 0; MealHistoryList.SelectedIndex = -1;
+        editingMealId = 0; editingMealStatus = ""; MealHistoryList.SelectedIndex = -1;
         UpdateMealSaveButtonColors("planned");
         editingIngredientIndex = -1; UpdateMealIngredientEditor();
         mealIngredients.Clear(); MealDate.Date = DateTimeOffset.Now;
@@ -423,29 +448,93 @@ public sealed partial class MainWindow
         };
         double? Carbs(MealRecord meal) => meal.Ingredients.All(item => item.CarbsPer100G is not null)
             ? meal.Ingredients.Sum(item => item.CarbsPer100G!.Value * item.Grams / 100) : null;
-        string[] Cells(MealRecord meal) => [meal.At.ToString("dd.MM.yyyy HH:mm"),
+        string[] Cells(MealRecord meal) => [meal.Status == "template" ? "" : meal.At.ToString("dd.MM.yyyy HH:mm"),
             meal.Name, Status(meal), meal.Ingredients.Count.ToString(CultureInfo.CurrentCulture),
             Carbs(meal) is { } carbs ? $"{carbs:0.#} g" : "?", meal.Note];
         string Key(MealRecord meal) => column switch
         {
-            0 => meal.At.ToString("O"),
+            0 => meal.Status == "template" ? "" : meal.At.ToString("O"),
             3 => Numeric(meal.Ingredients.Count), 4 => Numeric(Carbs(meal) ?? -1),
             _ => Cells(meal)[column]
         };
-        var filtered = nutritionMeals.Where(meal => MatchesTableFilters("meals", Cells(meal)));
+        var filtered = nutritionMeals.Where(meal => meal.Status is "template" or "planned" &&
+            MatchesTableFilters("meals", Cells(meal)));
         displayedNutritionMeals.Clear();
         displayedNutritionMeals.AddRange(descending
             ? filtered.OrderByDescending(Key, StringComparer.CurrentCultureIgnoreCase)
             : filtered.OrderBy(Key, StringComparer.CurrentCultureIgnoreCase));
-        MealHistoryList.ItemsSource = displayedNutritionMeals.Select(meal => NutritionTableRow("meals", Cells(meal))).ToArray();
+        MealHistoryList.ItemsSource = displayedNutritionMeals.Select(meal =>
+        {
+            var row = NutritionTableRow("meals", Cells(meal));
+            if (MealIsDue(meal, DateTime.Now))
+                row.Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 229, 229));
+            return row;
+        }).ToArray();
         ConfigureListFeedback(MealHistoryList);
+    }
+
+    private static bool MealIsDue(MealRecord meal, DateTime now) =>
+        meal.Status == "planned" && meal.At <= now;
+
+    private void RefreshMealDueIndicators()
+    {
+        if (NutritionDueIcon is null || MealsDueIcon is null) return;
+        var now = DateTime.Now;
+        var due = nutritionMeals.Any(meal => MealIsDue(meal, now));
+        NutritionDueIcon.Visibility = MealsDueIcon.Visibility = due ? Visibility.Visible : Visibility.Collapsed;
+        if (MealHistoryList is not null && listFeedbackRows.TryGetValue(MealHistoryList, out var rows) &&
+            displayedNutritionMeals.Count == rows.Count)
+        {
+            for (var index = 0; index < rows.Count; index++)
+                rows[index] = (rows[index].Row, MealIsDue(displayedNutritionMeals[index], now)
+                    ? new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 229, 229))
+                    : new SolidColorBrush(Microsoft.UI.Colors.Transparent));
+            UpdateListFeedback(MealHistoryList);
+        }
     }
 
     private void MealHistory_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
     {
+        if (!SelectMealAt(e.OriginalSource as DependencyObject)) return;
         var index = MealHistoryList.SelectedIndex;
         if (index < 0 || index >= displayedNutritionMeals.Count) return;
-        EditMeal(displayedNutritionMeals[index]);
+        if (displayedNutritionMeals[index].Status == "template")
+            ConsumeSelectedMeal_Click(sender, e);
+        else
+            EditMeal(displayedNutritionMeals[index]);
+        e.Handled = true;
+    }
+
+    private bool SelectMealAt(DependencyObject? source)
+    {
+        var node = source;
+        while (node is not null && node is not ListViewItem)
+            node = VisualTreeHelper.GetParent(node);
+        if (node is not ListViewItem item) return false;
+        MealHistoryList.SelectedItem = item.Content;
+        return true;
+    }
+
+    private void MealHistory_RightTapped(object sender, Microsoft.UI.Xaml.Input.RightTappedRoutedEventArgs e) =>
+        SelectMealAt(e.OriginalSource as DependencyObject);
+
+    private void MealHistoryMenu_Opening(object sender, object e)
+    {
+        var selected = MealHistoryList.SelectedIndex >= 0 && MealHistoryList.SelectedIndex < displayedNutritionMeals.Count;
+        foreach (var item in new[] { EditMealMenu, PlanMealMenu, ConsumeMealMenu, DeleteMealMenu })
+        {
+            item.IsEnabled = selected;
+            item.Text = T(item == EditMealMenu ? "Auswahl bearbeiten" : item == PlanMealMenu
+                ? "Auswahl als geplant übernehmen" : item == ConsumeMealMenu
+                    ? "Auswahl als gegessen übernehmen" : "Auswahl entfernen");
+        }
+    }
+
+    private void EditSelectedMealTemplate_Click(object sender, RoutedEventArgs e)
+    {
+        var index = MealHistoryList.SelectedIndex;
+        if (index >= 0 && index < displayedNutritionMeals.Count)
+            EditMeal(displayedNutritionMeals[index]);
     }
 
     private void EditMeal(MealRecord meal)
@@ -454,6 +543,7 @@ public sealed partial class MainWindow
         MainTabs.SelectedItem = NutritionTab;
         NutritionTabs.SelectedIndex = 0;
         editingMealId = meal.Id;
+        editingMealStatus = meal.Status;
         UpdateMealSaveButtonColors(meal.Status);
         editingIngredientIndex = -1; UpdateMealIngredientEditor();
         MealFoodSearch.Text = ""; MealFoodGrams.Value = 100;
@@ -472,6 +562,8 @@ public sealed partial class MainWindow
         SavePlannedMealButton.Foreground = status == "planned" ? white : dark;
         SaveConsumedMealButton.Background = status == "consumed" ? accent : white;
         SaveConsumedMealButton.Foreground = status == "consumed" ? white : dark;
+        SaveMealTemplateButton.Background = status == "template" ? accent : white;
+        SaveMealTemplateButton.Foreground = status == "template" ? white : dark;
     }
 
     private Grid MealEntryRow(Entry entry, MealRecord meal)
@@ -486,17 +578,22 @@ public sealed partial class MainWindow
         return row;
     }
 
-    private void ConsumeSelectedMeal_Click(object sender, RoutedEventArgs e)
+    private void PlanSelectedMeal_Click(object sender, RoutedEventArgs e) => CopySelectedMeal("planned");
+    private void ConsumeSelectedMeal_Click(object sender, RoutedEventArgs e) => CopySelectedMeal("consumed");
+
+    private void CopySelectedMeal(string status)
     {
         var index = MealHistoryList.SelectedIndex;
         if (index < 0 || index >= displayedNutritionMeals.Count) return;
         var original = displayedNutritionMeals[index];
         try
         {
-            store.SaveMeal(new MealRecord { Id = original.Status == "planned" ? original.Id : 0,
-                Name = original.Name, At = DateTime.Now, Status = "consumed",
+            store.SaveMeal(new MealRecord { Id = status == "consumed" && original.Status == "planned" ? original.Id : 0,
+                Name = original.Name, At = DateTime.Now, Status = status,
                 Ingredients = original.Ingredients, Note = original.Note });
-            ReloadNutrition(); MealStatusText.Text = N("Als gegessen erfasst.", "Recorded as consumed.");
+            ReloadNutrition(); MealStatusText.Text = status == "planned"
+                ? N("Als geplant übernommen.", "Copied as planned.")
+                : N("Als gegessen erfasst.", "Recorded as consumed.");
         }
         catch (Exception ex) { MealStatusText.Text = ex.Message; }
     }

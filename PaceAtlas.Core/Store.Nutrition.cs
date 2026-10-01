@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using System.Globalization;
+using System.IO.Compression;
 using System.Text.Json;
 
 namespace PaceAtlas;
@@ -13,6 +14,8 @@ public sealed class FoodItem
     public double? GlycemicLoadPer100G { get; set; }
     public string Source { get; set; } = "";
     public string Note { get; set; } = "";
+    public string BlsCode { get; set; } = "";
+    public bool IsBlsBase { get; set; }
 }
 
 public sealed class FoodRule
@@ -32,6 +35,8 @@ public sealed class MealIngredient
     public double Grams { get; set; }
     public double? CarbsPer100G { get; set; }
     public double? GlycemicLoadPer100G { get; set; }
+    public string BlsCode { get; set; } = "";
+    public string NutrientSource { get; set; } = "";
 }
 
 public sealed class MealRecord
@@ -46,6 +51,91 @@ public sealed class MealRecord
 
 public sealed partial class Store
 {
+    private const string BlsVersion = "4.0-2025";
+    private static void InitializeBls(SqliteConnection db)
+    {
+        using (var schema = db.CreateCommand())
+        {
+            schema.CommandText = """
+                CREATE TABLE IF NOT EXISTS bls_foods (
+                  id INTEGER PRIMARY KEY, code TEXT NOT NULL UNIQUE, name TEXT NOT NULL,
+                  name_en TEXT NOT NULL, carbs REAL, nutrients TEXT NOT NULL,
+                  version TEXT NOT NULL);
+                CREATE INDEX IF NOT EXISTS ix_bls_foods_name ON bls_foods(name COLLATE NOCASE);
+                """;
+            schema.ExecuteNonQuery();
+        }
+        using (var columns = db.CreateCommand())
+        {
+            columns.CommandText = "PRAGMA table_info(foods)";
+            using var reader = columns.ExecuteReader();
+            var hasCode = false;
+            while (reader.Read()) if (reader.GetString(1) == "bls_code") hasCode = true;
+            reader.Close();
+            if (!hasCode)
+            {
+                using var alter = db.CreateCommand();
+                alter.CommandText = "ALTER TABLE foods ADD COLUMN bls_code TEXT";
+                alter.ExecuteNonQuery();
+            }
+        }
+        using (var index = db.CreateCommand())
+        {
+            index.CommandText = "CREATE UNIQUE INDEX IF NOT EXISTS ix_foods_bls_code ON foods(bls_code)";
+            index.ExecuteNonQuery();
+        }
+        using var version = db.CreateCommand();
+        version.CommandText = "SELECT value FROM app_settings WHERE key='bls_catalog_version'";
+        if (version.ExecuteScalar() is string current && current == BlsVersion) return;
+
+        // Smaller update packages may omit the seed. An existing per-user catalog remains usable.
+        using var resource = typeof(Store).Assembly.GetManifestResourceStream("PaceAtlas.Bls4Catalog.tsv.gz");
+        if (resource is null) return;
+        using var gzip = new GZipStream(resource, CompressionMode.Decompress);
+        using var text = new StreamReader(gzip);
+        using var transaction = db.BeginTransaction();
+        using var insert = db.CreateCommand();
+        insert.Transaction = transaction;
+        insert.CommandText = """
+            INSERT INTO bls_foods(code,name,name_en,carbs,nutrients,version)
+            VALUES($code,$name,$en,$carbs,$nutrients,$version)
+            ON CONFLICT(code) DO UPDATE SET name=excluded.name,name_en=excluded.name_en,
+              carbs=excluded.carbs,nutrients=excluded.nutrients,version=excluded.version
+            """;
+        var code = insert.Parameters.Add("$code", SqliteType.Text);
+        var name = insert.Parameters.Add("$name", SqliteType.Text);
+        var english = insert.Parameters.Add("$en", SqliteType.Text);
+        var carbs = insert.Parameters.Add("$carbs", SqliteType.Real);
+        var nutrients = insert.Parameters.Add("$nutrients", SqliteType.Text);
+        var seedVersion = insert.Parameters.Add("$version", SqliteType.Text);
+        seedVersion.Value = BlsVersion;
+        while (text.ReadLine() is { } line)
+        {
+            var parts = line.Split('\t', 5);
+            if (parts.Length != 5) throw new InvalidDataException("BLS-Katalog ist unvollständig.");
+            code.Value = parts[0]; name.Value = parts[1]; english.Value = parts[2];
+            carbs.Value = double.TryParse(parts[3], NumberStyles.Float, CultureInfo.InvariantCulture, out var value)
+                ? value : DBNull.Value;
+            nutrients.Value = parts[4];
+            insert.ExecuteNonQuery();
+        }
+        using var mark = db.CreateCommand(); mark.Transaction = transaction;
+        mark.CommandText = """
+            INSERT INTO app_settings(key,value) VALUES('bls_catalog_version',$version)
+            ON CONFLICT(key) DO UPDATE SET value=excluded.value
+            """;
+        mark.Parameters.AddWithValue("$version", BlsVersion);
+        mark.ExecuteNonQuery();
+        transaction.Commit();
+    }
+
+    public bool HasBlsCatalog()
+    {
+        using var db = Open(); using var command = db.CreateCommand();
+        command.CommandText = "SELECT EXISTS(SELECT 1 FROM bls_foods LIMIT 1)";
+        return Convert.ToInt32(command.ExecuteScalar()) != 0;
+    }
+
     private void InitializeNutrition(SqliteConnection db)
     {
         using (var create = db.CreateCommand())
@@ -63,6 +153,7 @@ public sealed partial class Store
                 """;
             create.ExecuteNonQuery();
         }
+        InitializeBls(db);
         using var check = db.CreateCommand();
         check.CommandText = "SELECT COUNT(*) FROM app_settings WHERE key='nutrition_seeded'";
         if (Convert.ToInt32(check.ExecuteScalar()) != 0) return;
@@ -127,27 +218,41 @@ public sealed partial class Store
     {
         var result = new List<FoodItem>();
         using var db = Open(); using var command = db.CreateCommand();
-        command.CommandText = "SELECT id,name,carbs,gi,gl,source,note FROM foods ORDER BY name COLLATE NOCASE";
+        command.CommandText = """
+            SELECT f.id,f.name,COALESCE(f.carbs,b.carbs),f.gi,
+                   COALESCE(f.gl,CASE WHEN f.gi IS NOT NULL AND COALESCE(f.carbs,b.carbs) IS NOT NULL
+                     THEN ROUND(f.gi * COALESCE(f.carbs,b.carbs) / 100.0,1) END),
+                   f.source,f.note,COALESCE(f.bls_code,'') AS code,0 AS base
+            FROM foods f LEFT JOIN bls_foods b ON b.code=f.bls_code
+            UNION ALL
+            SELECT -b.id,b.name,b.carbs,NULL,NULL,
+                   'BLS 4.0 · Max Rubner-Institut · CC BY 4.0','',b.code,1
+            FROM bls_foods b WHERE NOT EXISTS
+              (SELECT 1 FROM foods f WHERE f.bls_code=b.code OR f.name=b.name COLLATE NOCASE)
+            ORDER BY name COLLATE NOCASE
+            """;
         using var reader = command.ExecuteReader();
         while (reader.Read()) result.Add(new FoodItem { Id = reader.GetInt64(0), Name = reader.GetString(1),
             CarbsPer100G = reader.IsDBNull(2) ? null : reader.GetDouble(2),
             GlycemicIndex = reader.IsDBNull(3) ? null : reader.GetDouble(3),
             GlycemicLoadPer100G = reader.IsDBNull(4) ? null : reader.GetDouble(4),
-            Source = reader.GetString(5), Note = reader.GetString(6) });
+            Source = reader.GetString(5), Note = reader.GetString(6),
+            BlsCode = reader.GetString(7), IsBlsBase = reader.GetInt32(8) != 0 });
         return result;
     }
 
     public void SaveFood(FoodItem food)
     {
         using var db = Open(); using var command = db.CreateCommand();
-        command.CommandText = food.Id == 0
-            ? "INSERT INTO foods(name,carbs,gi,gl,source,note) VALUES($n,$c,$i,$g,$s,$t)"
+        command.CommandText = food.Id <= 0
+            ? "INSERT INTO foods(name,carbs,gi,gl,source,note,bls_code) VALUES($n,$c,$i,$g,$s,$t,$b)"
             : "UPDATE foods SET name=$n,carbs=$c,gi=$i,gl=$g,source=$s,note=$t WHERE id=$id";
         command.Parameters.AddWithValue("$id", food.Id); command.Parameters.AddWithValue("$n", food.Name.Trim());
         command.Parameters.AddWithValue("$c", (object?)food.CarbsPer100G ?? DBNull.Value);
         command.Parameters.AddWithValue("$i", (object?)food.GlycemicIndex ?? DBNull.Value);
         command.Parameters.AddWithValue("$g", (object?)food.GlycemicLoadPer100G ?? DBNull.Value);
         command.Parameters.AddWithValue("$s", food.Source); command.Parameters.AddWithValue("$t", food.Note);
+        command.Parameters.AddWithValue("$b", string.IsNullOrEmpty(food.BlsCode) ? DBNull.Value : food.BlsCode);
         command.ExecuteNonQuery();
     }
 
