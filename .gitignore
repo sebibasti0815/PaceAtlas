@@ -1,0 +1,17 @@
+\# file types
+*.cache
+*.dtbcache.v2
+*.dll
+*.pdb
+*.suo
+.suo
+*.testlog
+*.user
+
+\# directories
+**/Release
+**/installer
+**/prerequisites
+artifacts/**
+installer/prerequisites/**
+.vs/**
