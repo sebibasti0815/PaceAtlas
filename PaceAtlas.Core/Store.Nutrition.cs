@@ -16,6 +16,8 @@ public sealed class FoodItem
     public string Note { get; set; } = "";
     public string BlsCode { get; set; } = "";
     public bool IsBlsBase { get; set; }
+    public string OffCode { get; set; } = "";
+    public bool IsOffBase { get; set; }
 }
 
 public sealed class FoodRule
@@ -154,6 +156,7 @@ public sealed partial class Store
             create.ExecuteNonQuery();
         }
         InitializeBls(db);
+        InitializeOpenFoodFacts(db);
         using var check = db.CreateCommand();
         check.CommandText = "SELECT COUNT(*) FROM app_settings WHERE key='nutrition_seeded'";
         if (Convert.ToInt32(check.ExecuteScalar()) != 0) return;
@@ -219,17 +222,25 @@ public sealed partial class Store
         var result = new List<FoodItem>();
         using var db = Open(); using var command = db.CreateCommand();
         command.CommandText = """
-            SELECT f.id,f.name,COALESCE(f.carbs,b.carbs),f.gi,
-                   COALESCE(f.gl,CASE WHEN f.gi IS NOT NULL AND COALESCE(f.carbs,b.carbs) IS NOT NULL
-                     THEN ROUND(f.gi * COALESCE(f.carbs,b.carbs) / 100.0,1) END),
-                   f.source,f.note,COALESCE(f.bls_code,'') AS code,0 AS base
+            SELECT f.id,f.name,COALESCE(f.carbs,b.carbs,o.carbs),f.gi,
+                   COALESCE(f.gl,CASE WHEN f.gi IS NOT NULL AND COALESCE(f.carbs,b.carbs,o.carbs) IS NOT NULL
+                     THEN ROUND(f.gi * COALESCE(f.carbs,b.carbs,o.carbs) / 100.0,1) END),
+                   f.source,f.note,COALESCE(f.bls_code,'') AS code,0 AS base,
+                   COALESCE(f.off_code,''),0
             FROM foods f LEFT JOIN bls_foods b ON b.code=f.bls_code
+                         LEFT JOIN off_foods o ON o.code=f.off_code
             UNION ALL
             SELECT -b.id,b.name,b.carbs,NULL,NULL,
-                   'BLS 4.0 · Max Rubner-Institut · CC BY 4.0','',b.code,1
+                   'BLS 4.0 · Max Rubner-Institut · CC BY 4.0','',b.code,1,'',0
             FROM bls_foods b WHERE NOT EXISTS
               (SELECT 1 FROM foods f WHERE f.bls_code=b.code OR f.name=b.name COLLATE NOCASE)
-            ORDER BY name COLLATE NOCASE
+            UNION ALL
+            SELECT -1000000000-o.id,o.name,o.carbs,NULL,NULL,
+                   'Open Food Facts · ODbL 1.0 · Barcode ' || o.code,'', '',0,o.code,1
+            FROM off_foods o WHERE NOT EXISTS
+              (SELECT 1 FROM foods f WHERE f.off_code=o.code OR f.name=o.name COLLATE NOCASE)
+              AND NOT EXISTS (SELECT 1 FROM bls_foods b WHERE b.name=o.name COLLATE NOCASE)
+            ORDER BY 2 COLLATE NOCASE
             """;
         using var reader = command.ExecuteReader();
         while (reader.Read()) result.Add(new FoodItem { Id = reader.GetInt64(0), Name = reader.GetString(1),
@@ -237,7 +248,8 @@ public sealed partial class Store
             GlycemicIndex = reader.IsDBNull(3) ? null : reader.GetDouble(3),
             GlycemicLoadPer100G = reader.IsDBNull(4) ? null : reader.GetDouble(4),
             Source = reader.GetString(5), Note = reader.GetString(6),
-            BlsCode = reader.GetString(7), IsBlsBase = reader.GetInt32(8) != 0 });
+            BlsCode = reader.GetString(7), IsBlsBase = reader.GetInt32(8) != 0,
+            OffCode = reader.GetString(9), IsOffBase = reader.GetInt32(10) != 0 });
         return result;
     }
 
@@ -245,7 +257,7 @@ public sealed partial class Store
     {
         using var db = Open(); using var command = db.CreateCommand();
         command.CommandText = food.Id <= 0
-            ? "INSERT INTO foods(name,carbs,gi,gl,source,note,bls_code) VALUES($n,$c,$i,$g,$s,$t,$b)"
+            ? "INSERT INTO foods(name,carbs,gi,gl,source,note,bls_code,off_code) VALUES($n,$c,$i,$g,$s,$t,$b,$o)"
             : "UPDATE foods SET name=$n,carbs=$c,gi=$i,gl=$g,source=$s,note=$t WHERE id=$id";
         command.Parameters.AddWithValue("$id", food.Id); command.Parameters.AddWithValue("$n", food.Name.Trim());
         command.Parameters.AddWithValue("$c", (object?)food.CarbsPer100G ?? DBNull.Value);
@@ -253,6 +265,7 @@ public sealed partial class Store
         command.Parameters.AddWithValue("$g", (object?)food.GlycemicLoadPer100G ?? DBNull.Value);
         command.Parameters.AddWithValue("$s", food.Source); command.Parameters.AddWithValue("$t", food.Note);
         command.Parameters.AddWithValue("$b", string.IsNullOrEmpty(food.BlsCode) ? DBNull.Value : food.BlsCode);
+        command.Parameters.AddWithValue("$o", string.IsNullOrEmpty(food.OffCode) ? DBNull.Value : food.OffCode);
         command.ExecuteNonQuery();
     }
 

@@ -173,7 +173,7 @@
                     <TabViewItem x:Name="IntervalTab" Header="Aktivität und Ruhe" IsClosable="False">
                         <Grid>
                             <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <ScrollViewer x:Name="IntervalFormScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                             <StackPanel Spacing="12" Margin="0,8,0,0">
                                 <TextBlock Text="Zeitraum erfassen" FontSize="20" FontWeight="SemiBold" />
                                 <Border x:Name="IntervalEditingBanner" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
@@ -238,7 +238,7 @@
                     <TabViewItem x:Name="MeasureTab" Header="Maßnahme" IsClosable="False">
                         <Grid>
                             <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                            <ScrollViewer x:Name="MeasureFormScroller" Grid.Row="0" VerticalScrollBarVisibility="Auto">
                                 <StackPanel Spacing="12" Margin="0,8,24,0" MaxWidth="1100" HorizontalAlignment="Left">
                                     <TextBlock Text="Maßnahme erfassen" FontSize="20" FontWeight="SemiBold" />
                                     <Border x:Name="MeasureEditingBanner" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
@@ -349,7 +349,7 @@
                               <StackPanel Spacing="3">
                                 <StackPanel Orientation="Horizontal" Spacing="12">
                                   <CalendarDatePicker x:Name="IntakeDate" Header="Einnahmen am" Width="170" PlaceholderText="TT.MM.JJJJ" DateChanged="IntakeDate_DateChanged" />
-                                  <ComboBox x:Name="IntakeBulkTime" Header="Uhrzeit" Width="125" />
+                                  <ComboBox x:Name="IntakeBulkTime" Header="Uhrzeit" Width="125" SelectionChanged="IntakeBulkTime_SelectionChanged" />
                                   <Button x:Name="TakeSelectedTimeButton" Content="Eingenommen" VerticalAlignment="Bottom"
                                           IsEnabled="False" Click="TakeSelectedTime_Click" />
                                 </StackPanel>
@@ -500,16 +500,20 @@
                               </Border>
                             </StackPanel>
                           </TabViewItem.Header>
-                          <Grid RowSpacing="10" Margin="0,8,0,0">
+                          <Grid RowSpacing="10" ColumnSpacing="16" Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="740" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                             <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                             <TextBlock Text="Mahlzeit planen oder erfassen" FontSize="20" FontWeight="SemiBold" />
-                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <TextBlock Grid.Column="1" Text="Zutaten" FontSize="20" FontWeight="SemiBold" />
+                            <ScrollViewer Grid.Row="1" Grid.ColumnSpan="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                               <Grid RowSpacing="6" ColumnSpacing="16">
-                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="2*" /></Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                                <StackPanel Grid.Column="0" Spacing="8">
-                                  <TextBlock Text="Zutaten" FontSize="18" FontWeight="SemiBold" />
-                                  <ScrollViewer Height="240" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="740" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                                <Border x:Name="MealEditingBanner" Grid.ColumnSpan="2" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
+                                  <TextBlock x:Name="MealEditingText" Foreground="#174B57" TextWrapping="Wrap" />
+                                </Border>
+                                <StackPanel Grid.Row="1" Grid.Column="1" Spacing="8">
+                                  <ScrollViewer Height="300" MaxWidth="560" HorizontalAlignment="Left" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                                     <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                                       <Grid x:Name="MealIngredientsHeader" />
                                       <ListView x:Name="MealIngredientsList" Grid.Row="1" SelectionMode="Single" SelectionChanged="MealIngredients_SelectionChanged" DoubleTapped="MealIngredients_DoubleTapped" ScrollViewer.VerticalScrollBarVisibility="Auto">
@@ -518,7 +522,7 @@
                                     </Grid>
                                   </ScrollViewer>
                                 </StackPanel>
-                                <StackPanel Grid.Column="1" Spacing="10" Width="740" HorizontalAlignment="Left">
+                                <StackPanel Grid.Row="1" Grid.Column="0" Spacing="10" Width="740" HorizontalAlignment="Left">
                                 <StackPanel Orientation="Horizontal" Spacing="10">
                                   <CalendarDatePicker x:Name="MealDate" Header="Datum" Width="170" PlaceholderText="TT.MM.JJJJ" />
                                   <TextBox x:Name="MealTime" Header="Uhrzeit (HH:mm)" Width="130" />
@@ -539,17 +543,21 @@
                                 </Border>
                                 <TextBox x:Name="MealNote" Header="Notiz / Zubereitung" Width="720" HorizontalAlignment="Left" TextWrapping="Wrap" AcceptsReturn="True" Height="75" />
                                 </StackPanel>
-                                <Button x:Name="MealRemoveFoodButton" Grid.Row="1" Content="Ausgewählte Zutat entfernen" Click="MealRemoveFood_Click" HorizontalAlignment="Left" IsEnabled="False" />
-                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                                <Button x:Name="MealRemoveFoodButton" Grid.Row="2" Grid.Column="1" Content="Ausgewählte Zutat entfernen" Click="MealRemoveFood_Click" HorizontalAlignment="Left" IsEnabled="False" />
+                                <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Spacing="10">
                                   <Button x:Name="SavePlannedMealButton" Content="Als geplant speichern" Click="SavePlannedMeal_Click" Background="#167789" Foreground="White" />
                                   <Button x:Name="SaveConsumedMealButton" Content="Als gegessen speichern" Click="SaveConsumedMeal_Click" Background="White" Foreground="#1F1F1F" />
                                   <Button x:Name="SaveMealTemplateButton" Content="Als Vorlage speichern" Click="SaveMealTemplate_Click" />
                                   <Button Content="Neue Mahlzeit" Click="ResetMeal_Click" />
+                                  <ProgressRing x:Name="MealSaveProgress" Width="24" Height="24" IsActive="False" Visibility="Collapsed" VerticalAlignment="Center" AutomationProperties.Name="Mahlzeit wird gespeichert" />
                                 </StackPanel>
-                                <TextBlock x:Name="MealStatusText" Grid.Row="2" Grid.Column="1" Width="720" HorizontalAlignment="Left" Foreground="#316073" TextWrapping="Wrap" />
-                                <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Spacing="10">
+                                <TextBlock x:Name="MealStatusText" Grid.Row="3" Grid.Column="0" Width="720" HorizontalAlignment="Left" Foreground="#316073" TextWrapping="Wrap" />
+                                <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Spacing="10" Margin="0,-6,0,0">
+                                <Border x:Name="MealTemplateFeedback" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
+                                  <TextBlock x:Name="MealTemplateFeedbackText" Foreground="#174B57" TextWrapping="Wrap" />
+                                </Border>
                                 <TextBlock Text="Geplante Mahlzeiten und Vorlagen" FontSize="18" FontWeight="SemiBold" />
-                                <ScrollViewer Height="210" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                <ScrollViewer Height="210" Margin="0,0,16,0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                                   <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                                     <Grid x:Name="MealHistoryHeader" />
                                     <ListView x:Name="MealHistoryList" Grid.Row="1" DoubleTapped="MealHistory_DoubleTapped" RightTapped="MealHistory_RightTapped" ScrollViewer.VerticalScrollBarVisibility="Auto">
@@ -582,8 +590,13 @@
                             <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                             <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                             <TextBlock Grid.ColumnSpan="2" Text="Lebensmittel und Werte je 100 g" FontSize="20" FontWeight="SemiBold" />
-                            <TextBlock Grid.Row="1" Text="Ärztlicher Plan und BLS 4.0 (Max Rubner-Institut, CC BY 4.0). Eigene Werte und persönliche Regeln haben Vorrang. Ohne GI bleibt die GL unbekannt." TextWrapping="Wrap" VerticalAlignment="Center" />
-                            <Button Grid.RowSpan="2" Grid.Column="1" Content="BLS-Aktualisierung prüfen" Click="CheckBlsData_Click" VerticalAlignment="Bottom" Margin="12,0,0,0" />
+                            <TextBlock Grid.Row="1" Text="Ärztlicher Plan, BLS 4.0 und importierte Open-Food-Facts-Produkte. Eigene Werte und persönliche Regeln haben Vorrang. Ohne GI bleibt die GL unbekannt." TextWrapping="Wrap" VerticalAlignment="Center" />
+                            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="8" Margin="12,0,0,0">
+                              <Button Content="BLS-Aktualisierung prüfen" Click="CheckBlsData_Click" />
+                              <Button x:Name="ImportOffButton" Content="Open Food Facts importieren" Click="ImportOpenFoodFacts_Click" />
+                              <Button x:Name="CancelOffImportButton" Content="Import abbrechen" Click="CancelOpenFoodFactsImport_Click" Visibility="Collapsed" />
+                              <ProgressRing x:Name="OffImportProgress" IsActive="False" Width="24" Height="24" Visibility="Collapsed" AutomationProperties.Name="Open Food Facts import" />
+                            </StackPanel>
                             <Grid Grid.Row="2" Grid.ColumnSpan="2" RowSpacing="4">
                               <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                               <Grid RowSpacing="9" ColumnSpacing="16">

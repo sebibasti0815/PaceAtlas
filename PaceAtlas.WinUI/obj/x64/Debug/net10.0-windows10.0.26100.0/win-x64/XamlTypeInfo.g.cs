@@ -226,7 +226,7 @@ namespace PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo
         
         private void InitTypeTables()
         {
-            _typeNameTable = new string[34];
+            _typeNameTable = new string[36];
             _typeNameTable[0] = "Microsoft.UI.Xaml.Controls.XamlControlsResources";
             _typeNameTable[1] = "Microsoft.UI.Xaml.ResourceDictionary";
             _typeNameTable[2] = "Object";
@@ -257,12 +257,14 @@ namespace PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo
             _typeNameTable[27] = "Microsoft.UI.Xaml.Media.SolidColorBrush";
             _typeNameTable[28] = "Microsoft.UI.Xaml.TextReadingOrder";
             _typeNameTable[29] = "Microsoft.UI.Xaml.Controls.NumberBoxValidationMode";
-            _typeNameTable[30] = "PaceAtlas.WinUI.MainWindow";
-            _typeNameTable[31] = "Microsoft.UI.Xaml.Window";
-            _typeNameTable[32] = "Microsoft.UI.Xaml.Controls.TreeViewNode";
-            _typeNameTable[33] = "System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>";
+            _typeNameTable[30] = "Microsoft.UI.Xaml.Controls.ProgressRing";
+            _typeNameTable[31] = "Microsoft.UI.Xaml.Controls.ProgressRingTemplateSettings";
+            _typeNameTable[32] = "PaceAtlas.WinUI.MainWindow";
+            _typeNameTable[33] = "Microsoft.UI.Xaml.Window";
+            _typeNameTable[34] = "Microsoft.UI.Xaml.Controls.TreeViewNode";
+            _typeNameTable[35] = "System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>";
 
-            _typeTable = new global::System.Type[34];
+            _typeTable = new global::System.Type[36];
             _typeTable[0] = typeof(global::Microsoft.UI.Xaml.Controls.XamlControlsResources);
             _typeTable[1] = typeof(global::Microsoft.UI.Xaml.ResourceDictionary);
             _typeTable[2] = typeof(global::System.Object);
@@ -293,10 +295,12 @@ namespace PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo
             _typeTable[27] = typeof(global::Microsoft.UI.Xaml.Media.SolidColorBrush);
             _typeTable[28] = typeof(global::Microsoft.UI.Xaml.TextReadingOrder);
             _typeTable[29] = typeof(global::Microsoft.UI.Xaml.Controls.NumberBoxValidationMode);
-            _typeTable[30] = typeof(global::PaceAtlas.WinUI.MainWindow);
-            _typeTable[31] = typeof(global::Microsoft.UI.Xaml.Window);
-            _typeTable[32] = typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode);
-            _typeTable[33] = typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>);
+            _typeTable[30] = typeof(global::Microsoft.UI.Xaml.Controls.ProgressRing);
+            _typeTable[31] = typeof(global::Microsoft.UI.Xaml.Controls.ProgressRingTemplateSettings);
+            _typeTable[32] = typeof(global::PaceAtlas.WinUI.MainWindow);
+            _typeTable[33] = typeof(global::Microsoft.UI.Xaml.Window);
+            _typeTable[34] = typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode);
+            _typeTable[35] = typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>);
         }
 
         private int LookupTypeIndexByName(string typeName)
@@ -336,8 +340,9 @@ namespace PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo
         private object Activate_15_TabViewItem() { return new global::Microsoft.UI.Xaml.Controls.TabViewItem(); }
         private object Activate_19_TabViewItemTemplateSettings() { return new global::Microsoft.UI.Xaml.Controls.TabViewItemTemplateSettings(); }
         private object Activate_21_NumberBox() { return new global::Microsoft.UI.Xaml.Controls.NumberBox(); }
-        private object Activate_30_MainWindow() { return new global::PaceAtlas.WinUI.MainWindow(); }
-        private object Activate_32_TreeViewNode() { return new global::Microsoft.UI.Xaml.Controls.TreeViewNode(); }
+        private object Activate_30_ProgressRing() { return new global::Microsoft.UI.Xaml.Controls.ProgressRing(); }
+        private object Activate_32_MainWindow() { return new global::PaceAtlas.WinUI.MainWindow(); }
+        private object Activate_34_TreeViewNode() { return new global::Microsoft.UI.Xaml.Controls.TreeViewNode(); }
         private void StaticInitializer_0_XamlControlsResources() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.XamlControlsResources).TypeHandle);
         private void StaticInitializer_4_TabView() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.TabView).TypeHandle);
         private void StaticInitializer_6_IList() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.Generic.IList<global::System.Object>).TypeHandle);
@@ -352,9 +357,11 @@ namespace PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo
         private void StaticInitializer_23_NumberBoxSpinButtonPlacementMode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NumberBoxSpinButtonPlacementMode).TypeHandle);
         private void StaticInitializer_24_INumberFormatter2() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Windows.Globalization.NumberFormatting.INumberFormatter2).TypeHandle);
         private void StaticInitializer_29_NumberBoxValidationMode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.NumberBoxValidationMode).TypeHandle);
-        private void StaticInitializer_30_MainWindow() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::PaceAtlas.WinUI.MainWindow).TypeHandle);
-        private void StaticInitializer_32_TreeViewNode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode).TypeHandle);
-        private void StaticInitializer_33_IList() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>).TypeHandle);
+        private void StaticInitializer_30_ProgressRing() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.ProgressRing).TypeHandle);
+        private void StaticInitializer_31_ProgressRingTemplateSettings() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.ProgressRingTemplateSettings).TypeHandle);
+        private void StaticInitializer_32_MainWindow() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::PaceAtlas.WinUI.MainWindow).TypeHandle);
+        private void StaticInitializer_34_TreeViewNode() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::Microsoft.UI.Xaml.Controls.TreeViewNode).TypeHandle);
+        private void StaticInitializer_35_IList() => global::System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(global::System.Collections.Generic.IList<global::Microsoft.UI.Xaml.Controls.TreeViewNode>).TypeHandle);
         private void MapAdd_0_XamlControlsResources(object instance, object key, object item)
         {
             var collection = (global::System.Collections.Generic.IDictionary<global::System.Object, global::System.Object>)instance;
@@ -368,7 +375,7 @@ namespace PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo
             var newItem = (global::System.Object)item;
             collection.Add(newItem);
         }
-        private void VectorAdd_33_IList(object instance, object item)
+        private void VectorAdd_35_IList(object instance, object item)
         {
             var collection = (global::System.Collections.Generic.ICollection<global::Microsoft.UI.Xaml.Controls.TreeViewNode>)instance;
             var newItem = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)item;
@@ -599,22 +606,42 @@ namespace PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 30:   //  PaceAtlas.WinUI.MainWindow
+            case 30:   //  Microsoft.UI.Xaml.Controls.ProgressRing
+                userType = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Controls.Control"));
+                userType.Activator = Activate_30_ProgressRing;
+                userType.StaticInitializer = StaticInitializer_30_ProgressRing;
+                userType.AddMemberName("IsActive");
+                userType.AddMemberName("IsIndeterminate");
+                userType.AddMemberName("Maximum");
+                userType.AddMemberName("Minimum");
+                userType.AddMemberName("TemplateSettings");
+                userType.AddMemberName("Value");
+                xamlType = userType;
+                break;
+
+            case 31:   //  Microsoft.UI.Xaml.Controls.ProgressRingTemplateSettings
+                userType = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.DependencyObject"));
+                userType.StaticInitializer = StaticInitializer_31_ProgressRingTemplateSettings;
+                userType.SetIsReturnTypeStub();
+                xamlType = userType;
+                break;
+
+            case 32:   //  PaceAtlas.WinUI.MainWindow
                 userType = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.Window"));
-                userType.Activator = Activate_30_MainWindow;
-                userType.StaticInitializer = StaticInitializer_30_MainWindow;
+                userType.Activator = Activate_32_MainWindow;
+                userType.StaticInitializer = StaticInitializer_32_MainWindow;
                 userType.SetIsLocalType();
                 xamlType = userType;
                 break;
 
-            case 31:   //  Microsoft.UI.Xaml.Window
+            case 33:   //  Microsoft.UI.Xaml.Window
                 xamlType = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlSystemBaseType(typeName, type);
                 break;
 
-            case 32:   //  Microsoft.UI.Xaml.Controls.TreeViewNode
+            case 34:   //  Microsoft.UI.Xaml.Controls.TreeViewNode
                 userType = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlUserType(this, typeName, type, GetXamlTypeByName("Microsoft.UI.Xaml.DependencyObject"));
-                userType.Activator = Activate_32_TreeViewNode;
-                userType.StaticInitializer = StaticInitializer_32_TreeViewNode;
+                userType.Activator = Activate_34_TreeViewNode;
+                userType.StaticInitializer = StaticInitializer_34_TreeViewNode;
                 userType.AddMemberName("Children");
                 userType.AddMemberName("Content");
                 userType.AddMemberName("Depth");
@@ -626,10 +653,10 @@ namespace PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo
                 xamlType = userType;
                 break;
 
-            case 33:   //  System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>
+            case 35:   //  System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>
                 userType = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlUserType(this, typeName, type, null);
-                userType.StaticInitializer = StaticInitializer_33_IList;
-                userType.CollectionAdd = VectorAdd_33_IList;
+                userType.StaticInitializer = StaticInitializer_35_IList;
+                userType.CollectionAdd = VectorAdd_35_IList;
                 userType.SetIsReturnTypeStub();
                 xamlType = userType;
                 break;
@@ -1122,52 +1149,107 @@ namespace PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo
             var that = (global::Microsoft.UI.Xaml.Controls.NumberBox)instance;
             that.ValidationMode = (global::Microsoft.UI.Xaml.Controls.NumberBoxValidationMode)Value;
         }
-        private object get_44_TreeViewNode_Children(object instance)
+        private object get_44_ProgressRing_IsActive(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
+            return that.IsActive;
+        }
+        private void set_44_ProgressRing_IsActive(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
+            that.IsActive = (global::System.Boolean)Value;
+        }
+        private object get_45_ProgressRing_IsIndeterminate(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
+            return that.IsIndeterminate;
+        }
+        private void set_45_ProgressRing_IsIndeterminate(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
+            that.IsIndeterminate = (global::System.Boolean)Value;
+        }
+        private object get_46_ProgressRing_Maximum(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
+            return that.Maximum;
+        }
+        private void set_46_ProgressRing_Maximum(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
+            that.Maximum = (global::System.Double)Value;
+        }
+        private object get_47_ProgressRing_Minimum(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
+            return that.Minimum;
+        }
+        private void set_47_ProgressRing_Minimum(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
+            that.Minimum = (global::System.Double)Value;
+        }
+        private object get_48_ProgressRing_TemplateSettings(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
+            return that.TemplateSettings;
+        }
+        private object get_49_ProgressRing_Value(object instance)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
+            return that.Value;
+        }
+        private void set_49_ProgressRing_Value(object instance, object Value)
+        {
+            var that = (global::Microsoft.UI.Xaml.Controls.ProgressRing)instance;
+            that.Value = (global::System.Double)Value;
+        }
+        private object get_50_TreeViewNode_Children(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.Children;
         }
-        private object get_45_TreeViewNode_Content(object instance)
+        private object get_51_TreeViewNode_Content(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.Content;
         }
-        private void set_45_TreeViewNode_Content(object instance, object Value)
+        private void set_51_TreeViewNode_Content(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             that.Content = (global::System.Object)Value;
         }
-        private object get_46_TreeViewNode_Depth(object instance)
+        private object get_52_TreeViewNode_Depth(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.Depth;
         }
-        private object get_47_TreeViewNode_HasChildren(object instance)
+        private object get_53_TreeViewNode_HasChildren(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.HasChildren;
         }
-        private object get_48_TreeViewNode_HasUnrealizedChildren(object instance)
+        private object get_54_TreeViewNode_HasUnrealizedChildren(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.HasUnrealizedChildren;
         }
-        private void set_48_TreeViewNode_HasUnrealizedChildren(object instance, object Value)
+        private void set_54_TreeViewNode_HasUnrealizedChildren(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             that.HasUnrealizedChildren = (global::System.Boolean)Value;
         }
-        private object get_49_TreeViewNode_IsExpanded(object instance)
+        private object get_55_TreeViewNode_IsExpanded(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.IsExpanded;
         }
-        private void set_49_TreeViewNode_IsExpanded(object instance, object Value)
+        private void set_55_TreeViewNode_IsExpanded(object instance, object Value)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             that.IsExpanded = (global::System.Boolean)Value;
         }
-        private object get_50_TreeViewNode_Parent(object instance)
+        private object get_56_TreeViewNode_Parent(object instance)
         {
             var that = (global::Microsoft.UI.Xaml.Controls.TreeViewNode)instance;
             return that.Parent;
@@ -1488,50 +1570,91 @@ namespace PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo
                 xamlMember.Getter = get_43_NumberBox_ValidationMode;
                 xamlMember.Setter = set_43_NumberBox_ValidationMode;
                 break;
+            case "Microsoft.UI.Xaml.Controls.ProgressRing.IsActive":
+                userType = (global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ProgressRing");
+                xamlMember = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlMember(this, "IsActive", "Boolean");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_44_ProgressRing_IsActive;
+                xamlMember.Setter = set_44_ProgressRing_IsActive;
+                break;
+            case "Microsoft.UI.Xaml.Controls.ProgressRing.IsIndeterminate":
+                userType = (global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ProgressRing");
+                xamlMember = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlMember(this, "IsIndeterminate", "Boolean");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_45_ProgressRing_IsIndeterminate;
+                xamlMember.Setter = set_45_ProgressRing_IsIndeterminate;
+                break;
+            case "Microsoft.UI.Xaml.Controls.ProgressRing.Maximum":
+                userType = (global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ProgressRing");
+                xamlMember = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlMember(this, "Maximum", "Double");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_46_ProgressRing_Maximum;
+                xamlMember.Setter = set_46_ProgressRing_Maximum;
+                break;
+            case "Microsoft.UI.Xaml.Controls.ProgressRing.Minimum":
+                userType = (global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ProgressRing");
+                xamlMember = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlMember(this, "Minimum", "Double");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_47_ProgressRing_Minimum;
+                xamlMember.Setter = set_47_ProgressRing_Minimum;
+                break;
+            case "Microsoft.UI.Xaml.Controls.ProgressRing.TemplateSettings":
+                userType = (global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ProgressRing");
+                xamlMember = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlMember(this, "TemplateSettings", "Microsoft.UI.Xaml.Controls.ProgressRingTemplateSettings");
+                xamlMember.Getter = get_48_ProgressRing_TemplateSettings;
+                xamlMember.SetIsReadOnly();
+                break;
+            case "Microsoft.UI.Xaml.Controls.ProgressRing.Value":
+                userType = (global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.ProgressRing");
+                xamlMember = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlMember(this, "Value", "Double");
+                xamlMember.SetIsDependencyProperty();
+                xamlMember.Getter = get_49_ProgressRing_Value;
+                xamlMember.Setter = set_49_ProgressRing_Value;
+                break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.Children":
                 userType = (global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlMember(this, "Children", "System.Collections.Generic.IList`1<Microsoft.UI.Xaml.Controls.TreeViewNode>");
-                xamlMember.Getter = get_44_TreeViewNode_Children;
+                xamlMember.Getter = get_50_TreeViewNode_Children;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.Content":
                 userType = (global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlMember(this, "Content", "Object");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_45_TreeViewNode_Content;
-                xamlMember.Setter = set_45_TreeViewNode_Content;
+                xamlMember.Getter = get_51_TreeViewNode_Content;
+                xamlMember.Setter = set_51_TreeViewNode_Content;
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.Depth":
                 userType = (global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlMember(this, "Depth", "Int32");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_46_TreeViewNode_Depth;
+                xamlMember.Getter = get_52_TreeViewNode_Depth;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.HasChildren":
                 userType = (global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlMember(this, "HasChildren", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_47_TreeViewNode_HasChildren;
+                xamlMember.Getter = get_53_TreeViewNode_HasChildren;
                 xamlMember.SetIsReadOnly();
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.HasUnrealizedChildren":
                 userType = (global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlMember(this, "HasUnrealizedChildren", "Boolean");
-                xamlMember.Getter = get_48_TreeViewNode_HasUnrealizedChildren;
-                xamlMember.Setter = set_48_TreeViewNode_HasUnrealizedChildren;
+                xamlMember.Getter = get_54_TreeViewNode_HasUnrealizedChildren;
+                xamlMember.Setter = set_54_TreeViewNode_HasUnrealizedChildren;
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.IsExpanded":
                 userType = (global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlMember(this, "IsExpanded", "Boolean");
                 xamlMember.SetIsDependencyProperty();
-                xamlMember.Getter = get_49_TreeViewNode_IsExpanded;
-                xamlMember.Setter = set_49_TreeViewNode_IsExpanded;
+                xamlMember.Getter = get_55_TreeViewNode_IsExpanded;
+                xamlMember.Setter = set_55_TreeViewNode_IsExpanded;
                 break;
             case "Microsoft.UI.Xaml.Controls.TreeViewNode.Parent":
                 userType = (global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlUserType)GetXamlTypeByName("Microsoft.UI.Xaml.Controls.TreeViewNode");
                 xamlMember = new global::PaceAtlas.WinUI.PaceAtlas_WinUI_XamlTypeInfo.XamlMember(this, "Parent", "Microsoft.UI.Xaml.Controls.TreeViewNode");
-                xamlMember.Getter = get_50_TreeViewNode_Parent;
+                xamlMember.Getter = get_56_TreeViewNode_Parent;
                 xamlMember.SetIsReadOnly();
                 break;
             }

@@ -38,6 +38,10 @@ public sealed partial class MainWindow
         ["Ärztlicher Plan und BLS 4.0 (Max Rubner-Institut, CC BY 4.0). Eigene Werte und persönliche Regeln haben Vorrang. Ohne GI bleibt die GL unbekannt."] =
             "Doctor's plan and BLS 4.0 (Max Rubner-Institut, CC BY 4.0). Your values and personal rules take priority. Without a GI, the GL remains unknown.",
         ["BLS-Aktualisierung prüfen"] = "Check for BLS updates",
+        ["Open Food Facts importieren"] = "Import Open Food Facts",
+        ["Import abbrechen"] = "Cancel import",
+        ["Ärztlicher Plan, BLS 4.0 und importierte Open-Food-Facts-Produkte. Eigene Werte und persönliche Regeln haben Vorrang. Ohne GI bleibt die GL unbekannt."] =
+            "Doctor's plan, BLS 4.0 and imported Open Food Facts products. Your values and personal rules take priority. Without GI, GL remains unknown.",
         ["Tabellenwerte aus dem gescannten Arztplan: Namen und Zahlen bitte vor Verwendung prüfen. Persönliche Regeln haben Vorrang vor der GL-Einstufung."] =
             "Values from the scanned doctor's plan: check names and figures before use. Personal rules take precedence over GL ratings.",
         ["Kohlenhydrate / 100 g"] = "Carbohydrates / 100 g", ["Glykämischer Index"] = "Glycemic index",

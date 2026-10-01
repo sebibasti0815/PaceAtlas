@@ -289,6 +289,20 @@ public sealed partial class MainWindow
     }
     private void PacingWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
     {
+        if (OffImportRunning)
+        {
+            args.Cancel = true;
+            if (closeAfterOffImport) return;
+            if (MessageBoxW(hiddenToTray ? IntPtr.Zero : WinRT.Interop.WindowNative.GetWindowHandle(this),
+                N("Der Open-Food-Facts-Import läuft noch. Import abbrechen und danach Pace Atlas schließen? Die bisherigen Daten bleiben erhalten.",
+                    "The Open Food Facts import is still running. Cancel the import and then close Pace Atlas? Existing data will be preserved."),
+                "Open Food Facts", 0x40024) == 6)
+            {
+                closeAfterOffImport = true;
+                offImportCancellation?.Cancel();
+            }
+            return;
+        }
         if (!pacingRunning) return;
         args.Cancel = MessageBoxW(hiddenToTray ? IntPtr.Zero : WinRT.Interop.WindowNative.GetWindowHandle(this),
             "Der Pacing Timer läuft noch. PaceAtlas wirklich beenden?", "Pacing Timer", 0x40024) != 6;

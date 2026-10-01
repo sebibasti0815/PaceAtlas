@@ -23,6 +23,41 @@ public sealed partial class MainWindow
     private string editingMealStatus = "";
     private int editingIngredientIndex = -1;
     private bool refreshingNutrition;
+    private CancellationTokenSource? offImportCancellation;
+    private bool closeAfterOffImport;
+    private bool OffImportRunning => offImportCancellation is not null;
+
+    private void CancelOpenFoodFactsImport_Click(object sender, RoutedEventArgs e)
+    {
+        offImportCancellation?.Cancel();
+        CancelOffImportButton.IsEnabled = false;
+        FoodEditorStatus.Text = N("Import wird abgebrochen; bisherige Daten bleiben erhalten.",
+            "Stopping import; existing data will be preserved.");
+    }
+    private int mealFeedbackGeneration;
+    private bool savingMeal;
+
+    private async Task BeginMealSaveAsync()
+    {
+        savingMeal = true;
+        SavePlannedMealButton.IsEnabled = false;
+        SaveConsumedMealButton.IsEnabled = false;
+        SaveMealTemplateButton.IsEnabled = false;
+        MealSaveProgress.Visibility = Visibility.Visible;
+        MealSaveProgress.IsActive = true;
+        MealStatusText.Text = N("Mahlzeit wird gespeichert …", "Saving meal …");
+        await Task.Delay(50); // Let the UI paint before the catalog and history are refreshed.
+    }
+
+    private void EndMealSave()
+    {
+        savingMeal = false;
+        MealSaveProgress.IsActive = false;
+        MealSaveProgress.Visibility = Visibility.Collapsed;
+        SavePlannedMealButton.IsEnabled = true;
+        SaveConsumedMealButton.IsEnabled = true;
+        SaveMealTemplateButton.IsEnabled = true;
+    }
 
     private string N(string german, string english) => selectedLanguage == "en" ? english : german;
     private static double? NumberOrNull(NumberBox box) => double.IsNaN(box.Value) ? null : box.Value;
@@ -89,10 +124,11 @@ public sealed partial class MainWindow
         var filtered = nutritionFoods.Where(food => MatchesTableFilters("foods", Cells(food)));
         visibleNutritionFoods.AddRange(descending ? filtered.OrderByDescending(Key, StringComparer.CurrentCultureIgnoreCase)
             : filtered.OrderBy(Key, StringComparer.CurrentCultureIgnoreCase));
+        var hasFoodFilter = tableFilters.TryGetValue("foods", out var foodFilters) && foodFilters.Count > 0;
         FoodCatalogCount.Text = !store.HasBlsCatalog()
             ? N($"{visibleNutritionFoods.Count} Lebensmittel · BLS-Offlinedaten fehlen für diesen Benutzer; vollständiges Paket einmal installieren.",
                 $"{visibleNutritionFoods.Count} foods · BLS offline data missing for this user; install the complete package once.")
-            : visibleNutritionFoods.Count > 300
+            : visibleNutritionFoods.Count > 300 && !hasFoodFilter
                 ? N($"{visibleNutritionFoods.Count} Lebensmittel · erste 300 angezeigt; über die Lupe in den Spalten suchen.",
                     $"{visibleNutritionFoods.Count} foods · first 300 shown; use column search to narrow the list.")
                 : N($"{visibleNutritionFoods.Count} Lebensmittel", $"{visibleNutritionFoods.Count} foods");
@@ -108,7 +144,7 @@ public sealed partial class MainWindow
     {
         var index = FoodCatalogList.SelectedIndex;
         if (DeleteFoodButton is not null) DeleteFoodButton.IsEnabled = index >= 0 && index < visibleNutritionFoods.Count
-            && !visibleNutritionFoods[index].IsBlsBase;
+            && !visibleNutritionFoods[index].IsBlsBase && !visibleNutritionFoods[index].IsOffBase;
     }
 
     private void FoodCatalog_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
@@ -120,10 +156,9 @@ public sealed partial class MainWindow
         FoodName.Text = food.Name; FoodCarbs.Value = food.CarbsPer100G ?? double.NaN;
         FoodGi.Value = food.GlycemicIndex ?? double.NaN; FoodGl.Value = food.GlycemicLoadPer100G ?? double.NaN;
         FoodSource.Text = food.Source; FoodNote.Text = food.Note;
-        FoodEditorStatus.Text = food.IsBlsBase
-            ? N("BLS-Grundwert. Speichern legt eine persönliche Ergänzung an; der BLS-Eintrag bleibt erhalten.",
-                "BLS reference value. Saving creates a personal override; the BLS record remains available.")
-            : "";
+        FoodEditorStatus.Text = food.IsBlsBase || food.IsOffBase
+            ? N("Quellwert. Speichern legt eine persönliche Ergänzung an; die Quelldaten bleiben erhalten.",
+                "Source value. Saving creates a personal override; the source data remains available.") : "";
     }
 
     private void NewFood_Click(object sender, RoutedEventArgs e)
@@ -133,6 +168,95 @@ public sealed partial class MainWindow
         FoodName.Text = FoodSource.Text = FoodNote.Text = "";
         FoodCarbs.Value = FoodGi.Value = FoodGl.Value = double.NaN;
         FoodEditorStatus.Text = N("Neues Lebensmittel vorbereitet.", "New food ready.");
+    }
+
+    private async void ImportOpenFoodFacts_Click(object sender, RoutedEventArgs e)
+    {
+        var english = selectedLanguage == "en";
+        var instructions = new StackPanel { Spacing = 12 };
+        instructions.Children.Add(new TextBlock
+        {
+            Text = english
+                ? "Download the tab-separated CSV export from Open Food Facts, preferably the compressed .csv.gz file. The import keeps products sold in Germany with a German name and carbohydrate values, and combines obvious duplicates. JSONL and MongoDB exports cannot be imported here."
+                : "Lade den tabulatorgetrennten CSV-Export von Open Food Facts herunter, am besten die komprimierte Datei mit der Endung .csv.gz. Der Import übernimmt Produkte mit Deutschlandbezug, deutschem Namen und Kohlenhydratwerten und fasst offensichtliche Doppelungen zusammen. JSONL und MongoDB-Dumps können hier nicht importiert werden.",
+            TextWrapping = TextWrapping.Wrap
+        });
+        instructions.Children.Add(new HyperlinkButton
+        {
+            Content = english ? "Open Food Facts data and downloads" : "Open Food Facts: Daten und Downloads",
+            NavigateUri = new Uri("https://world.openfoodfacts.org/data"),
+            Padding = new Thickness(0)
+        });
+        var dialog = new ContentDialog
+        {
+            XamlRoot = ((FrameworkElement)Content).XamlRoot,
+            Title = english ? "Import Open Food Facts" : "Open Food Facts importieren",
+            Content = instructions,
+            PrimaryButtonText = english ? "Select file" : "Datei auswählen",
+            CloseButtonText = english ? "Cancel" : "Abbrechen",
+            DefaultButton = ContentDialogButton.Primary
+        };
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+        var picker = new Windows.Storage.Pickers.FileOpenPicker();
+        picker.FileTypeFilter.Add(".csv"); picker.FileTypeFilter.Add(".tsv"); picker.FileTypeFilter.Add(".gz");
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(this));
+        var file = await picker.PickSingleFileAsync();
+        if (file is null) return;
+        ImportOffButton.IsEnabled = false;
+        CancelOffImportButton.Visibility = Visibility.Visible;
+        CancelOffImportButton.IsEnabled = true;
+        OffImportProgress.Visibility = Visibility.Visible;
+        OffImportProgress.IsActive = true;
+        offImportCancellation = new CancellationTokenSource();
+        FoodEditorStatus.Text = N("Open Food Facts wird importiert. Das kann bei der vollständigen Exportdatei einige Zeit dauern.",
+            "Importing Open Food Facts. The full export may take some time.");
+        try
+        {
+            var token = offImportCancellation.Token;
+            var result = await Task.Run(() => store.ImportOpenFoodFacts(file.Path, token, rows =>
+            {
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    if (OffImportRunning && !token.IsCancellationRequested)
+                        FoodEditorStatus.Text = N($"Open Food Facts: {rows:N0} Zeilen geprüft …",
+                            $"Open Food Facts: {rows:N0} rows checked …");
+                });
+            }));
+            if (result.Imported == 0)
+                FoodEditorStatus.Text = N(
+                    $"Keine geeigneten Produkte gefunden: {result.Rows:N0} Zeilen geprüft, {result.Germany:N0} mit Deutschlandbezug, {result.Named:N0} mit Namen, {result.Nutrition:N0} mit Kohlenhydratwert. Der bisherige Bestand bleibt erhalten.",
+                    $"No matching products: {result.Rows:N0} rows checked, {result.Germany:N0} sold in Germany, {result.Named:N0} with names, {result.Nutrition:N0} with carbohydrate values. Existing data remains unchanged.");
+            else
+            {
+                ReloadNutrition();
+                FoodEditorStatus.Text = N($"{result.Imported} Open-Food-Facts-Produkte importiert oder aktualisiert.",
+                    $"{result.Imported} Open Food Facts products imported or updated.");
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            FoodEditorStatus.Text = N("Import abgebrochen. Die bisherigen Daten bleiben erhalten.",
+                "Import cancelled. Existing data remains unchanged.");
+        }
+        catch (Exception ex)
+        {
+            FoodEditorStatus.Text = N("Open-Food-Facts-Import fehlgeschlagen: ",
+                "Open Food Facts import failed: ") + ex.Message;
+        }
+        finally
+        {
+            offImportCancellation?.Dispose();
+            offImportCancellation = null;
+            ImportOffButton.IsEnabled = true;
+            CancelOffImportButton.Visibility = Visibility.Collapsed;
+            OffImportProgress.IsActive = false;
+            OffImportProgress.Visibility = Visibility.Collapsed;
+            if (closeAfterOffImport)
+            {
+                closeAfterOffImport = false;
+                Close();
+            }
+        }
     }
 
     private void SaveFood_Click(object sender, RoutedEventArgs e)
@@ -153,10 +277,9 @@ public sealed partial class MainWindow
                 CarbsPer100G = baseFood is not null && carbs == baseFood.CarbsPer100G ? null : carbs,
                 GlycemicIndex = gi, GlycemicLoadPer100G = gl,
                 Source = baseFood is not null && FoodSource.Text == baseFood.Source
-                    ? N("Eigene Ergänzung · BLS 4.0 (Max Rubner-Institut, CC BY 4.0)",
-                        "Personal override · BLS 4.0 (Max Rubner-Institut, CC BY 4.0)")
+                    ? N("Eigene Ergänzung · ", "Personal override · ") + baseFood.Source
                     : string.IsNullOrWhiteSpace(FoodSource.Text) ? N("Eigener Eintrag", "User entry") : FoodSource.Text.Trim(),
-                Note = FoodNote.Text.Trim(), BlsCode = baseFood?.BlsCode ?? "" });
+                Note = FoodNote.Text.Trim(), BlsCode = baseFood?.BlsCode ?? "", OffCode = baseFood?.OffCode ?? "" });
             editingFoodId = 0; ReloadNutrition(); NewFood_Click(sender, e);
             FoodEditorStatus.Text = N("Lebensmittel gespeichert.", "Food saved.");
         }
@@ -175,7 +298,7 @@ public sealed partial class MainWindow
         var index = FoodCatalogList.SelectedIndex;
         if (index < 0 || index >= visibleNutritionFoods.Count) return;
         var food = visibleNutritionFoods[index];
-        if (food.IsBlsBase) return;
+        if (food.IsBlsBase || food.IsOffBase) return;
         var dialog = new ContentDialog
         {
             Title = N("Lebensmittel entfernen?", "Remove food?"),
@@ -268,8 +391,9 @@ public sealed partial class MainWindow
     {
         if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput) return;
         var term = sender.Text.Trim();
-        sender.ItemsSource = term.Length < 2 ? [] : nutritionFoods.Where(food =>
-            food.Name.Contains(term, StringComparison.CurrentCultureIgnoreCase)).Take(25).Select(food => food.Name).ToArray();
+        sender.ItemsSource = term.Length < 2 ? [] : nutritionFoods.Where(food => FoodNameMatches(food.Name, term))
+            .OrderBy(food => food.Name.StartsWith(term, StringComparison.CurrentCultureIgnoreCase) ? 0 : 1)
+            .ThenBy(food => food.Name.Length).Take(25).Select(food => food.Name).ToArray();
     }
 
     private void MealFoodSearch_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args) =>
@@ -398,37 +522,42 @@ public sealed partial class MainWindow
             Windows.UI.Color.FromArgb(255, 160, 33, 33) : Windows.UI.Color.FromArgb(255, 32, 65, 80));
     }
 
-    private void SaveMeal(string status)
+    private async Task SaveMealAsync(string status)
     {
+        if (savingMeal) return;
         if (mealIngredients.Count == 0 || string.IsNullOrWhiteSpace(MealName.Text))
         { MealStatusText.Text = N("Bitte Bezeichnung und mindestens eine Zutat eintragen.",
             "Enter a name and at least one ingredient."); return; }
         if (MealDate.Date is not { } day || !TimeOnly.TryParseExact(MealTime.Text.Trim(), "HH:mm",
             CultureInfo.InvariantCulture, DateTimeStyles.None, out var time))
         { MealStatusText.Text = N("Bitte Datum und Uhrzeit prüfen.", "Check date and time."); return; }
+        var preserveOriginal = editingMealStatus == "template" && status != "template"
+            || editingMealStatus != "" && editingMealStatus != "template" && status == "template";
+        var meal = new MealRecord { Id = preserveOriginal ? 0 : editingMealId, Name = MealName.Text.Trim(),
+            At = day.Date.Add(time.ToTimeSpan()), Status = status,
+            Ingredients = mealIngredients.Select(item => new MealIngredient { FoodId = item.FoodId,
+                Name = item.Name, Grams = item.Grams, CarbsPer100G = item.CarbsPer100G,
+                GlycemicLoadPer100G = item.GlycemicLoadPer100G }).ToList(), Note = MealNote.Text.Trim() };
+        await BeginMealSaveAsync();
         try
         {
-            var preserveOriginal = editingMealStatus == "template" && status != "template"
-                || editingMealStatus != "" && editingMealStatus != "template" && status == "template";
-            store.SaveMeal(new MealRecord { Id = preserveOriginal ? 0 : editingMealId, Name = MealName.Text.Trim(),
-                At = day.Date.Add(time.ToTimeSpan()), Status = status,
-                Ingredients = mealIngredients.Select(item => new MealIngredient { FoodId = item.FoodId,
-                    Name = item.Name, Grams = item.Grams, CarbsPer100G = item.CarbsPer100G,
-                    GlycemicLoadPer100G = item.GlycemicLoadPer100G }).ToList(), Note = MealNote.Text.Trim() });
+            await Task.Run(() => store.SaveMeal(meal));
             ResetMeal(); ReloadNutrition();
             MealStatusText.Text = N("Mahlzeit gespeichert.", "Meal saved.");
         }
         catch (Exception ex) { MealStatusText.Text = N("Speichern fehlgeschlagen: ", "Save failed: ") + ex.Message; }
+        finally { EndMealSave(); }
     }
 
-    private void SavePlannedMeal_Click(object sender, RoutedEventArgs e) => SaveMeal("planned");
-    private void SaveConsumedMeal_Click(object sender, RoutedEventArgs e) => SaveMeal("consumed");
-    private void SaveMealTemplate_Click(object sender, RoutedEventArgs e) => SaveMeal("template");
+    private async void SavePlannedMeal_Click(object sender, RoutedEventArgs e) => await SaveMealAsync("planned");
+    private async void SaveConsumedMeal_Click(object sender, RoutedEventArgs e) => await SaveMealAsync("consumed");
+    private async void SaveMealTemplate_Click(object sender, RoutedEventArgs e) => await SaveMealAsync("template");
     private void ResetMeal_Click(object sender, RoutedEventArgs e) => ResetMeal();
 
     private void ResetMeal()
     {
         editingMealId = 0; editingMealStatus = ""; MealHistoryList.SelectedIndex = -1;
+        MealEditingBanner.Visibility = Visibility.Collapsed;
         UpdateMealSaveButtonColors("planned");
         editingIngredientIndex = -1; UpdateMealIngredientEditor();
         mealIngredients.Clear(); MealDate.Date = DateTimeOffset.Now;
@@ -544,6 +673,11 @@ public sealed partial class MainWindow
         NutritionTabs.SelectedIndex = 0;
         editingMealId = meal.Id;
         editingMealStatus = meal.Status;
+        MealEditingText.Text = meal.Status == "template"
+            ? N("Du bearbeitest die Vorlage „", "You are editing the template “") + meal.Name + N("“.", "”.")
+            : N("Du bearbeitest die Mahlzeit „", "You are editing the meal “") + meal.Name +
+                N("“ vom ", "” from ") + meal.At.ToString("dd.MM.yyyy, HH:mm") + N(" Uhr.", ".");
+        MealEditingBanner.Visibility = Visibility.Visible;
         UpdateMealSaveButtonColors(meal.Status);
         editingIngredientIndex = -1; UpdateMealIngredientEditor();
         MealFoodSearch.Text = ""; MealFoodGrams.Value = 100;
@@ -551,6 +685,7 @@ public sealed partial class MainWindow
         MealTime.Text = meal.At.ToString("HH:mm", CultureInfo.InvariantCulture);
         MealNote.Text = meal.Note; mealIngredients.Clear(); mealIngredients.AddRange(meal.Ingredients);
         RenderMealIngredients(); MealStatusText.Text = N("Gespeicherte Mahlzeit wird bearbeitet.", "Editing saved meal.");
+        DispatcherQueue.TryEnqueue(() => { MealName.Focus(FocusState.Programmatic); });
     }
 
     private void UpdateMealSaveButtonColors(string status)
@@ -578,24 +713,43 @@ public sealed partial class MainWindow
         return row;
     }
 
-    private void PlanSelectedMeal_Click(object sender, RoutedEventArgs e) => CopySelectedMeal("planned");
-    private void ConsumeSelectedMeal_Click(object sender, RoutedEventArgs e) => CopySelectedMeal("consumed");
+    private async void PlanSelectedMeal_Click(object sender, RoutedEventArgs e) => await CopySelectedMealAsync("planned");
+    private async void ConsumeSelectedMeal_Click(object sender, RoutedEventArgs e) => await CopySelectedMealAsync("consumed");
 
-    private void CopySelectedMeal(string status)
+    private async Task CopySelectedMealAsync(string status)
     {
+        if (savingMeal) return;
         var index = MealHistoryList.SelectedIndex;
         if (index < 0 || index >= displayedNutritionMeals.Count) return;
         var original = displayedNutritionMeals[index];
+        var at = DateTime.Now;
+        var meal = new MealRecord { Id = status == "consumed" && original.Status == "planned" ? original.Id : 0,
+            Name = original.Name, At = at, Status = status,
+            Ingredients = original.Ingredients, Note = original.Note };
+        await BeginMealSaveAsync();
         try
         {
-            store.SaveMeal(new MealRecord { Id = status == "consumed" && original.Status == "planned" ? original.Id : 0,
-                Name = original.Name, At = DateTime.Now, Status = status,
-                Ingredients = original.Ingredients, Note = original.Note });
+            await Task.Run(() => store.SaveMeal(meal));
             ReloadNutrition(); MealStatusText.Text = status == "planned"
                 ? N("Als geplant übernommen.", "Copied as planned.")
                 : N("Als gegessen erfasst.", "Recorded as consumed.");
+            if (status == "consumed" && original.Status == "template")
+                ShowMealTemplateFeedback(original.Name, at);
         }
         catch (Exception ex) { MealStatusText.Text = ex.Message; }
+        finally { EndMealSave(); }
+    }
+
+    private async void ShowMealTemplateFeedback(string name, DateTime at)
+    {
+        var generation = ++mealFeedbackGeneration;
+        MealTemplateFeedbackText.Text = N("„", "“") + name + N("“ wurde für heute um ",
+            "” was recorded as consumed today at ") + at.ToString("HH:mm") +
+            N(" Uhr als gegessen erfasst.", ".");
+        MealTemplateFeedback.Visibility = Visibility.Visible;
+        await Task.Delay(TimeSpan.FromSeconds(5));
+        if (generation == mealFeedbackGeneration)
+            MealTemplateFeedback.Visibility = Visibility.Collapsed;
     }
 
     private void DeleteSelectedMeal_Click(object sender, RoutedEventArgs e)

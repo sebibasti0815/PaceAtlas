@@ -68,6 +68,22 @@ public sealed partial class MainWindow : Window
             links.Children.Add(new HyperlinkButton { Content = english ? "License terms" : "Lizenzbedingungen",
                 NavigateUri = new Uri("https://creativecommons.org/licenses/by/4.0/legalcode.de"), Padding = new Thickness(0) });
             aboutContent.Children.Add(links);
+            aboutContent.Children.Add(new TextBlock { Text = english ? "Open Food Facts (imported products)" :
+                "Open Food Facts (importierte Produkte)", FontWeight = Microsoft.UI.Text.FontWeights.SemiBold });
+            aboutContent.Children.Add(new TextBlock { Text = english
+                ? "Product data: © Open Food Facts contributors, Open Database License (ODbL) 1.0; individual database contents: Database Contents License (DbCL) 1.0. Imported products are marked separately; personal entries and BLS data are kept separate. See LICENSE-OPEN-FOOD-FACTS.md for attribution and reuse terms."
+                : "Produktdaten: © Mitwirkende von Open Food Facts, Open Database License (ODbL) 1.0; einzelne Datenbankinhalte: Database Contents License (DbCL) 1.0. Importierte Produkte sind getrennt gekennzeichnet; eigene Einträge und BLS-Daten bleiben separat. Hinweise zur Namensnennung und Weiterverwendung stehen in LICENSE-OPEN-FOOD-FACTS.md.",
+                TextWrapping = TextWrapping.Wrap });
+            aboutContent.Children.Add(new TextBlock { Text = english
+                ? "Product and brand names are used solely to identify the listed products. All trademarks belong to their respective owners. Pace Atlas is not affiliated with, endorsed by, or sponsored by those owners."
+                : "Produkt- und Markennamen dienen ausschließlich der Identifikation der aufgeführten Produkte. Die Marken gehören ihren jeweiligen Inhabern. Pace Atlas steht mit diesen Unternehmen nicht in Verbindung und wird von ihnen weder unterstützt noch gesponsert.",
+                TextWrapping = TextWrapping.Wrap });
+            var offLinks = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10 };
+            offLinks.Children.Add(new HyperlinkButton { Content = english ? "OFF data export" : "OFF-Datenexport",
+                NavigateUri = new Uri("https://world.openfoodfacts.org/data"), Padding = new Thickness(0) });
+            offLinks.Children.Add(new HyperlinkButton { Content = english ? "ODbL license" : "ODbL-Lizenz",
+                NavigateUri = new Uri("https://opendatacommons.org/licenses/odbl/1-0/"), Padding = new Thickness(0) });
+            aboutContent.Children.Add(offLinks);
             var dialog = new ContentDialog
             {
                 XamlRoot = ((FrameworkElement)Content).XamlRoot,
@@ -268,7 +284,41 @@ public sealed partial class MainWindow : Window
 
     private bool MatchesTableFilters(string table, params string[] cells) =>
         !tableFilters.TryGetValue(table, out var filters) || filters.All(filter =>
-            filter.Key < cells.Length && cells[filter.Key].Contains(filter.Value, StringComparison.CurrentCultureIgnoreCase));
+            filter.Key < cells.Length && (table == "foods" && filter.Key == 0
+                ? FoodNameMatches(cells[0], filter.Value)
+                : cells[filter.Key].Contains(filter.Value, StringComparison.CurrentCultureIgnoreCase)));
+
+    private static string SearchWords(string value)
+    {
+        var decomposed = value.Normalize(System.Text.NormalizationForm.FormD);
+        var normalized = new System.Text.StringBuilder(decomposed.Length);
+        foreach (var character in decomposed)
+            if (CharUnicodeInfo.GetUnicodeCategory(character) == UnicodeCategory.NonSpacingMark) continue;
+            else normalized.Append(char.IsLetterOrDigit(character) ? char.ToLowerInvariant(character) : ' ');
+        return normalized.ToString().Replace("ß", "ss");
+    }
+
+    private static bool NearWord(string candidate, string query)
+    {
+        if (candidate.Contains(query, StringComparison.Ordinal)) return true;
+        if (query.Length < 5 || Math.Abs(candidate.Length - query.Length) > 1) return false;
+        var edits = 0;
+        for (int i = 0, j = 0; i < candidate.Length && j < query.Length;)
+        {
+            if (candidate[i] == query[j]) { i++; j++; continue; }
+            if (++edits > 1) return false;
+            if (candidate.Length >= query.Length) i++;
+            if (candidate.Length <= query.Length) j++;
+        }
+        return true;
+    }
+
+    private static bool FoodNameMatches(string name, string search)
+    {
+        var words = SearchWords(name).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return SearchWords(search).Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .All(term => words.Any(word => NearWord(word, term)));
+    }
 
     private string[]? TableFilterChoices(string table, int column) => (table, column) switch
     {
@@ -627,10 +677,10 @@ public sealed partial class MainWindow : Window
             heading.Tapped += (_, _) => SortTable(table, column);
             Grid.SetColumn(heading, i);
             grid.Children.Add(heading);
-            var filterButton = new Button { Content = new FontIcon { Glyph = "\uE721", FontSize = 13 }, Width = 25, Height = 26,
+            var filterButton = new Button { Content = new FontIcon { Glyph = "\uE721", FontSize = 13 }, Width = 26, Height = 26,
                 HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Center,
                 Padding = new Thickness(0), Margin = new Thickness(0, 0, 10, 0),
-                Background = headerBrush, BorderThickness = new Thickness(0), Tag = i };
+                Background = headerBrush, BorderThickness = new Thickness(0), CornerRadius = new CornerRadius(13), Tag = i };
             ToolTipService.SetToolTip(filterButton, N("Diese Spalte durchsuchen", "Filter this column"));
             var filterBox = new TextBox { Width = 240, PlaceholderText = N("Suchbegriff", "Search term") };
             var term = tableFilters.TryGetValue(table, out var active) && active.TryGetValue(i, out var saved)
@@ -727,11 +777,20 @@ public sealed partial class MainWindow : Window
             foreach (var button in headerGrid.Children.OfType<Button>())
             {
                 var column = (int)button.Tag;
-                button.Foreground = new SolidColorBrush(tableFilters.TryGetValue(table, out var filters) &&
-                    filters.ContainsKey(column) ? Windows.UI.Color.FromArgb(255, 16, 111, 128) :
+                var filtered = tableFilters.TryGetValue(table, out var filters) && filters.ContainsKey(column);
+                button.Background = filtered
+                    ? new SolidColorBrush(Windows.UI.Color.FromArgb(255, 22, 119, 137))
+                    : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 224, 236, 242));
+                button.Foreground = new SolidColorBrush(filtered ? Microsoft.UI.Colors.White :
                     Windows.UI.Color.FromArgb(255, 45, 65, 78));
-                button.FontWeight = tableFilters.TryGetValue(table, out var current) && current.ContainsKey(column)
+                button.FontWeight = filtered
                     ? Microsoft.UI.Text.FontWeights.Bold : Microsoft.UI.Text.FontWeights.Normal;
+                if (button.Content is FontIcon icon)
+                {
+                    icon.Foreground = button.Foreground;
+                    icon.FontWeight = filtered ? Microsoft.UI.Text.FontWeights.Bold : Microsoft.UI.Text.FontWeights.Normal;
+                    icon.FontSize = filtered ? 16 : 13;
+                }
             }
         }
     }
@@ -1292,7 +1351,7 @@ public sealed partial class MainWindow : Window
             .OrderBy(pair => pair.plan.Time).ThenBy(pair => pair.plan.Name);
         foreach (var (plan, record) in dayPlans)
         {
-            var row = new Grid { MinHeight = 34 };
+            var row = new Grid { Height = 36 };
             foreach (var width in columnWidths["intakes"])
                 row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(width) });
             var values = new[] { record?.Time ?? plan.Time, record?.Name ?? plan.Name,
@@ -1311,12 +1370,12 @@ public sealed partial class MainWindow : Window
                 Grid.SetColumn(label, i);
                 row.Children.Add(label);
             }
-            var status = new ComboBox { Margin = new Thickness(2, 1, 2, 1), MinHeight = 30,
+            var status = new ComboBox { Margin = new Thickness(2, 1, 2, 1), Height = 32,
                 VerticalAlignment = VerticalAlignment.Center };
             PopulateIntakeStatus(status, record?.Status == "Genommen" ? 1 : record?.Status == "Ausgelassen" ? 2 : 0);
-            var actualDose = new TextBox { Margin = new Thickness(2, 1, 2, 1), MinHeight = 30, Text = record?.ActualDose ?? plan.Dose,
+            var actualDose = new TextBox { Margin = new Thickness(2, 1, 2, 1), Height = 32, Text = record?.ActualDose ?? plan.Dose,
                 VerticalAlignment = VerticalAlignment.Center };
-            var actualQuantity = new TextBox { Margin = new Thickness(2, 1, 2, 1), MinHeight = 30, Text = record?.ActualQuantity ?? plan.Quantity,
+            var actualQuantity = new TextBox { Margin = new Thickness(2, 1, 2, 1), Height = 32, Text = record?.ActualQuantity ?? plan.Quantity,
                 VerticalAlignment = VerticalAlignment.Center };
             Grid.SetColumn(status, 5); Grid.SetColumn(actualDose, 6); Grid.SetColumn(actualQuantity, 7);
             row.Children.Add(status);
@@ -1333,7 +1392,11 @@ public sealed partial class MainWindow : Window
                 if (ReferenceEquals(hoveredIntakeRow, intakeRow)) hoveredIntakeRow = null;
                 RefreshMedicationDueIndicators();
             };
-            status.SelectionChanged += (_, _) => RefreshMedicationDueIndicators();
+            status.SelectionChanged += (_, _) =>
+            {
+                RefreshMedicationDueIndicators();
+                UpdateTakeSelectedTimeButton();
+            };
         }
         SortIntakeRows();
         var selectedTime = IntakeBulkTime.SelectedItem?.ToString();
@@ -1341,8 +1404,23 @@ public sealed partial class MainWindow : Window
             .OrderBy(time => time, StringComparer.Ordinal).ToArray();
         IntakeBulkTime.ItemsSource = times;
         IntakeBulkTime.SelectedItem = selectedTime is not null && times.Contains(selectedTime) ? selectedTime : times.FirstOrDefault();
-        TakeSelectedTimeButton.IsEnabled = times.Length > 0;
+        UpdateTakeSelectedTimeButton();
         RefreshMedicationDueIndicators();
+    }
+
+    private void IntakeBulkTime_SelectionChanged(object sender, SelectionChangedEventArgs e) =>
+        UpdateTakeSelectedTimeButton();
+
+    private void UpdateTakeSelectedTimeButton()
+    {
+        if (TakeSelectedTimeButton is null || IntakeBulkTime is null || IntakeDate is null) return;
+        var time = IntakeBulkTime.SelectedItem?.ToString();
+        var day = IntakeDate.Date?.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        TakeSelectedTimeButton.IsEnabled = time is not null && day is not null &&
+            intakeRows.Any(row => row.Plan.Time == time &&
+                (row.Status.SelectedIndex != 1 ||
+                 !intakes.Any(saved => saved.Day == day && saved.PlanId == row.Plan.Id &&
+                     saved.Status == "Genommen")));
     }
 
     private static bool IntakeIsDue(DateTime day, string time, DateTime now) =>
@@ -1376,10 +1454,12 @@ public sealed partial class MainWindow : Window
         MedicationDueIcon.Visibility = IntakeDueIcon.Visibility = hasDue ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    private void TakeSelectedTime_Click(object sender, RoutedEventArgs e)
+    private async void TakeSelectedTime_Click(object sender, RoutedEventArgs e)
     {
         var time = IntakeBulkTime.SelectedItem?.ToString();
         if (time is null) { IntakeStatus.Text = "Bitte zuerst eine Uhrzeit auswählen."; return; }
+        UpdateTakeSelectedTimeButton();
+        if (!TakeSelectedTimeButton.IsEnabled) return;
         var count = 0;
         foreach (var row in intakeRows.Where(row => row.Plan.Time == time))
         {
@@ -1388,6 +1468,25 @@ public sealed partial class MainWindow : Window
         }
         IntakeStatus.Text = N($"{count} Einnahme(n) um {time} als genommen markiert. Zum Übernehmen den Tag speichern.",
             $"{count} intake(s) at {time} marked as taken. Save the day to apply.");
+        if (count == 0) return;
+        var date = IntakeDate.Date?.Date.ToString("dd.MM.yyyy") ?? N("dem ausgewählten Tag", "the selected day");
+        var dialog = new ContentDialog
+        {
+            Title = N("Einnahmen jetzt speichern?", "Save intakes now?"),
+            Content = N($"Die Einnahmen um {time} Uhr wurden als genommen markiert. Möchtest du alle Angaben für den {date} jetzt speichern?",
+                $"The intakes at {time} were marked as taken. Save all entries for {date} now?"),
+            PrimaryButtonText = N("Tag speichern", "Save day"),
+            CloseButtonText = N("Später", "Later"),
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = (Content as FrameworkElement)?.XamlRoot
+        };
+        TakeSelectedTimeButton.IsEnabled = false;
+        try
+        {
+            if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+                SaveIntakes_Click(sender, e);
+        }
+        finally { UpdateTakeSelectedTimeButton(); }
     }
 
     private void SortIntakeRows()
@@ -1779,8 +1878,9 @@ public sealed partial class MainWindow : Window
         for (int i = 0; i < SymptomNames.Length; i++)
         {
             var name = SymptomNames[i];
-            var choice = new ComboBox { ItemsSource = Severities, SelectedIndex = previousSymptoms.GetValueOrDefault(name, 0), Width = 192 };
-            var field = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 5 };
+            var choice = new ComboBox { ItemsSource = Severities, SelectedIndex = previousSymptoms.GetValueOrDefault(name, 0),
+                Width = 192, Height = 44, VerticalAlignment = VerticalAlignment.Center };
+            var field = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 5, Height = 48 };
             var label = new TextBlock { Text = name == "Geräuschempfindlichkeit" ? "Geräuscheempf." : name,
                 Width = 110, FontSize = 12,
                 TextWrapping = TextWrapping.Wrap,
@@ -2137,6 +2237,13 @@ public sealed partial class MainWindow : Window
                 SetHearingProtection(data.HearingProtection);
             }
         }
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            if (entry.Kind == "Zustand") { StateTime.Focus(FocusState.Programmatic); FormScroller.ChangeView(null, 0, null); }
+            else if (entry.Kind == "Maßnahme") { MeasureTime.Focus(FocusState.Programmatic); MeasureFormScroller.ChangeView(null, 0, null); }
+            else if (entry.Kind is "Aktivität" or "Ruhe" or "Schlaf")
+            { IntervalStartTime.Focus(FocusState.Programmatic); IntervalFormScroller.ChangeView(null, 0, null); }
+        });
     }
 
     private void SetHearingProtection(IEnumerable<string>? protection)

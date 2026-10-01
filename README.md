@@ -50,3 +50,39 @@ Projektpaket mit der Datendatei gebaut und gestartet werden. Im Lebensmittel-Tab
 prüft „BLS-Aktualisierung prüfen“ die offizielle Download-Datei. Zusätzlich
 geschieht dies beim Start höchstens einmal täglich. Ein geänderter Download wird
 gemeldet, aber nicht ungeprüft in die lokale Datenbank importiert.
+
+## Open Food Facts importieren
+
+Die offizielle, tabulatorgetrennte CSV-Exportdatei (auch als `.gz`) steht unter
+https://world.openfoodfacts.org/data zur Verfügung. Im Register **Ernährung →
+Lebensmittel** auf **Open Food Facts importieren** klicken und diese Datei
+auswählen. Der vollständige Export ist groß; Einlesen und der erste Aufbau der
+Lebensmittelliste können entsprechend dauern. Produkte mit deutschem Namen,
+Kohlenhydratwert und Bezug zu Deutschland werden in einer eigenen SQLite-Tabelle
+gespeichert. Dafür wird `product_name_de` genutzt oder bei Hauptsprache `de`
+der allgemeine Produktname. Falls die CSV keine Sprachangabe enthält, wird
+für Produkte mit Deutschlandbezug der vorhandene Produktname übernommen;
+dieser kann im Einzelfall fremdsprachig sein. Vor dem Speichern werden HTML-Codes
+im Namen dekodiert, führende Nummern in Klammern und störende führende Zeichen
+entfernt, Packungsgewichte und Preisangaben gestrichen sowie Leerzeichen
+vereinheitlicht. Die ursprüngliche Groß- und Kleinschreibung von Produkt- und
+Markennamen bleibt erhalten. Prozentangaben wie „5 % Fett“ bleiben erhalten. Der Strichcode bleibt in
+der Quellenangabe statt im Namen. Offensichtliche Doppelungen mit gleicher
+normalisierter angezeigter Bezeichnung werden zusammengefasst, auch wenn
+Nährwerte oder Strichcodes abweichen. Der Datensatz mit mehr vorhandenen
+Nährwertfeldern wird bevorzugt; bei Gleichstand bleibt der zuerst gelesene.
+Die Werte verschiedener Produkte werden dabei nicht vermischt. Eine automatische
+Übersetzung anderer Sprachen findet nicht statt. Der Import kann mit einem
+neuen Export wiederholt werden und ersetzt dabei den gesamten vorherigen
+OFF-Import innerhalb einer Transaktion. Persönliche Ergänzungen bleiben
+erhalten. Die Exportdatei wird nicht mit dem
+Projektarchiv ausgeliefert; auf einem neuen Benutzerprofil muss sie erneut
+importiert werden. Die Suchfunktion ignoriert Akzente und Interpunktion,
+findet Wörter unabhängig von ihrer Reihenfolge und toleriert bei längeren
+Suchwörtern einen Schreibfehler. Die Quellen- und Lizenzangaben stehen im
+Infodialog und in `LICENSE-OPEN-FOOD-FACTS.md`.
+
+Während des Imports zeigt die Oberfläche die Zahl der geprüften Zeilen und
+einen Abbruchknopf. Ein Abbruch verwirft die laufende Transaktion; der bisherige
+Katalog bleibt erhalten. Beim Schließen während des Imports fragt die Anwendung
+nach und wartet vor dem Beenden auf diesen kontrollierten Abbruch.
