@@ -668,13 +668,6 @@
                             </Grid>
                           </Grid>
                         </TabViewItem>
-                        <TabViewItem Header="Auswertung" IsClosable="False">
-                          <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel Spacing="10" Margin="0,8,0,0">
-                            <TextBlock Text="Ernährung und späterer Zustand" FontSize="20" FontWeight="SemiBold" />
-                            <TextBlock Text="Zeitliche Nähe zeigt keine Ursache. Nur als gegessen gespeicherte Mahlzeiten werden verglichen; fehlende Zustandseinträge bleiben sichtbar." TextWrapping="Wrap" />
-                            <StackPanel x:Name="FoodAnalysisRows" Spacing="5" />
-                          </StackPanel></ScrollViewer>
-                        </TabViewItem>
                       </TabView>
                     </TabViewItem>
                     <TabViewItem x:Name="AnalysisTab" Header="Auswertung" IsClosable="False">
@@ -823,6 +816,21 @@
                                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"><StackPanel x:Name="LoadCumulativeRows" Spacing="4" /></ScrollViewer>
                                 <TextBlock Text="Einzelne Aktivitäten · experimenteller Belastungswert" FontWeight="SemiBold" />
                                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"><StackPanel x:Name="LoadActivityRows" Spacing="4" /></ScrollViewer>
+                              </StackPanel>
+                            </ScrollViewer>
+                          </TabViewItem>
+                          <TabViewItem Header="Ernährung" IsClosable="False">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="8,4,24,8">
+                              <StackPanel Spacing="10">
+                                <TextBlock Text="Kohlenhydratzufuhr" FontSize="20" FontWeight="SemiBold" />
+                                <TextBlock x:Name="FoodCarbChartSummary" TextWrapping="Wrap" />
+                                <ScrollViewer x:Name="FoodCarbChartViewport" Height="330" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" SizeChanged="FoodCarbChartViewport_SizeChanged"
+                                              BorderBrush="#D5E2EA" BorderThickness="1" Background="White">
+                                  <Canvas x:Name="FoodCarbChart" Height="300" Background="White" />
+                                </ScrollViewer>
+                                <TextBlock Text="Ernährung und späterer Zustand" FontSize="20" FontWeight="SemiBold" />
+                                <TextBlock Text="Zeitliche Nähe zeigt keine Ursache. Nur als gegessen gespeicherte Mahlzeiten werden verglichen; fehlende Zustandseinträge bleiben sichtbar." TextWrapping="Wrap" />
+                                <StackPanel x:Name="FoodAnalysisRows" Spacing="5" />
                               </StackPanel>
                             </ScrollViewer>
                           </TabViewItem>

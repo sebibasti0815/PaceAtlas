@@ -39,6 +39,7 @@ public sealed partial class MainWindow
     }
     private int mealFeedbackGeneration;
     private bool savingMeal;
+    private bool confirmingPendingMealIngredient;
     private Button? activeMealSaveButton;
     private object? activeMealSaveLabel;
 
@@ -122,7 +123,7 @@ public sealed partial class MainWindow
     private void ReloadMealData()
     {
         nutritionMeals.Clear(); nutritionMeals.AddRange(store.Meals());
-        RenderMealHistory(); RenderFoodAnalysis(); RefreshMealDueIndicators();
+        RenderMealHistory(); RenderFoodCarbChart(); RenderFoodAnalysis(); RefreshMealDueIndicators();
         if (EntryList is not null) DisplayEntries();
     }
 
@@ -138,7 +139,7 @@ public sealed partial class MainWindow
             nutritionRules.Clear(); nutritionRules.AddRange(store.FoodRules());
             nutritionMeals.Clear(); nutritionMeals.AddRange(store.Meals());
             if (nutritionFoodsLoaded) RenderFoodCatalog();
-            RenderFoodRules(); RenderMealHistory(); RenderMealIngredients(); RenderFoodAnalysis();
+            RenderFoodRules(); RenderMealHistory(); RenderMealIngredients(); RenderFoodCarbChart(); RenderFoodAnalysis();
             RefreshMealDueIndicators();
             if (EntryList is not null) DisplayEntries();
         }
@@ -462,16 +463,18 @@ public sealed partial class MainWindow
     private void MealFoodSearch_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args) =>
         sender.Text = args.SelectedItem?.ToString() ?? "";
 
-    private void MealAddFood_Click(object sender, RoutedEventArgs e)
+    private void MealAddFood_Click(object sender, RoutedEventArgs e) => TryAddMealIngredient();
+
+    private bool TryAddMealIngredient()
     {
         var food = nutritionFoods.FirstOrDefault(item => item.Name.Equals(MealFoodSearch.Text.Trim(), StringComparison.CurrentCultureIgnoreCase));
         var existing = editingIngredientIndex >= 0 && editingIngredientIndex < mealIngredients.Count
             ? mealIngredients[editingIngredientIndex] : null;
         if (food is null && (existing is null || !existing.Name.Equals(MealFoodSearch.Text.Trim(), StringComparison.CurrentCultureIgnoreCase)))
         { MealStatusText.Text = N("Bitte ein Lebensmittel aus der Liste auswählen oder unter „Lebensmittel“ anlegen.",
-            "Choose a food from the list or add it under Foods."); return; }
+            "Choose a food from the list or add it under Foods."); return false; }
         if (double.IsNaN(MealFoodGrams.Value) || MealFoodGrams.Value <= 0)
-        { MealStatusText.Text = N("Bitte eine positive Menge eingeben.", "Enter a positive amount."); return; }
+        { MealStatusText.Text = N("Bitte eine positive Menge eingeben.", "Enter a positive amount."); return false; }
         var ingredient = new MealIngredient { FoodId = food?.Id ?? existing!.FoodId,
             Name = food?.Name ?? existing!.Name, Grams = MealFoodGrams.Value,
             CarbsPer100G = food is null ? existing?.CarbsPer100G : food.CarbsPer100G,
@@ -486,6 +489,7 @@ public sealed partial class MainWindow
         UpdateMealIngredientEditor(); RenderMealIngredients();
         MealStatusText.Text = wasEditing ? N("Zutat geändert.", "Ingredient updated.") :
             N("Zutat hinzugefügt.", "Ingredient added.");
+        return true;
     }
 
     private void MealIngredients_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
@@ -588,7 +592,45 @@ public sealed partial class MainWindow
 
     private async Task SaveMealAsync(string status)
     {
-        if (savingMeal) return;
+        if (savingMeal || confirmingPendingMealIngredient) return;
+        if (status == "consumed" && !string.IsNullOrWhiteSpace(MealFoodSearch.Text))
+        {
+            var pendingName = MealFoodSearch.Text.Trim();
+            var food = nutritionFoods.FirstOrDefault(item => item.Name.Equals(pendingName, StringComparison.CurrentCultureIgnoreCase));
+            var existing = editingIngredientIndex >= 0 && editingIngredientIndex < mealIngredients.Count
+                ? mealIngredients[editingIngredientIndex] : null;
+            if (food is not null || existing?.Name.Equals(pendingName, StringComparison.CurrentCultureIgnoreCase) == true)
+            {
+                if (double.IsNaN(MealFoodGrams.Value) || MealFoodGrams.Value <= 0)
+                { MealStatusText.Text = N("Bitte eine positive Menge eingeben.", "Enter a positive amount."); return; }
+                confirmingPendingMealIngredient = true;
+                ContentDialogResult answer;
+                try
+                {
+                    var dialog = new ContentDialog
+                    {
+                        Title = N("Zutat übernehmen?", "Add ingredient?"),
+                        Content = N($"„{pendingName}“ ({MealFoodGrams.Value:0.#} g) ist noch nicht in der Zutatenliste. Zur Mahlzeit hinzufügen und als gegessen speichern?",
+                            $"“{pendingName}” ({MealFoodGrams.Value:0.#} g) is not yet in the ingredient list. Add it and save the meal as consumed?"),
+                        PrimaryButtonText = N("Hinzufügen und speichern", "Add and save"),
+                        CloseButtonText = N("Abbrechen", "Cancel"),
+                        DefaultButton = ContentDialogButton.Primary,
+                        XamlRoot = ((FrameworkElement)Content).XamlRoot
+                    };
+                    answer = await dialog.ShowAsync();
+                }
+                catch (Exception ex)
+                {
+                    MealStatusText.Text = N("Nachfrage konnte nicht angezeigt werden: ",
+                        "Could not show confirmation: ") + ex.Message;
+                    return;
+                }
+                finally { confirmingPendingMealIngredient = false; }
+                if (answer != ContentDialogResult.Primary) return;
+                if (!TryAddMealIngredient()) return;
+                if (string.IsNullOrWhiteSpace(MealName.Text)) MealName.Text = food?.Name ?? existing!.Name;
+            }
+        }
         if (mealIngredients.Count == 0 || string.IsNullOrWhiteSpace(MealName.Text))
         { MealStatusText.Text = N("Bitte Bezeichnung und mindestens eine Zutat eintragen.",
             "Enter a name and at least one ingredient."); return; }
@@ -828,11 +870,13 @@ public sealed partial class MainWindow
     {
         if (FoodAnalysisRows is null) return;
         FoodAnalysisRows.Children.Clear();
-        var consumed = nutritionMeals.Where(meal => meal.Status == "consumed").Take(80).ToArray();
+        var threshold = AnalysisPeriod?.SelectedIndex >= 0 ? AnalysisThreshold() : DateTime.MinValue;
+        var consumed = nutritionMeals.Where(meal => meal.Status == "consumed" && meal.At >= threshold)
+            .OrderByDescending(meal => meal.At).Take(80).ToArray();
         if (consumed.Length == 0)
         {
-            FoodAnalysisRows.Children.Add(new TextBlock { Text = N("Noch keine gegessenen Mahlzeiten erfasst.",
-                "No consumed meals recorded yet.") }); return;
+            FoodAnalysisRows.Children.Add(new TextBlock { Text = N("Keine gegessenen Mahlzeiten im gewählten Zeitraum.",
+                "No consumed meals in the selected period.") }); return;
         }
         var states = entries.Where(entry => entry.Kind == "Zustand").OrderBy(entry => entry.Start).ToArray();
         foreach (var meal in consumed)

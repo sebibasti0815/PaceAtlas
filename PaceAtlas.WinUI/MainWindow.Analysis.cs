@@ -141,6 +141,8 @@ public sealed partial class MainWindow
         RefreshActivityMatrix();
         RefreshLoadAnalysis();
         RefreshSymptomTrend();
+        RenderFoodCarbChart();
+        RenderFoodAnalysis();
     }
 
     private void UpdateAnalysisSummary()
