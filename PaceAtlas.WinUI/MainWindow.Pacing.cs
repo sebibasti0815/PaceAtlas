@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Windows.Graphics;
+using Windows.Media.Control;
 using PaceAtlas;
 
 namespace PaceAtlas.WinUI;
@@ -149,9 +150,37 @@ public sealed partial class MainWindow
     {
         pacingResting = true;
         pacingDeadline = DateTimeOffset.UtcNow.AddMinutes(pauseMinutes);
+        if (automatic) _ = PausePlayingMediaAsync();
         PlayPacingSound("PacingPause.wav");
         if (automatic) ShowPacingOverlays();
         UpdatePacingDisplay();
+    }
+
+    private static async Task PausePlayingMediaAsync()
+    {
+        try
+        {
+            var manager = await GlobalSystemMediaTransportControlsSessionManager.RequestAsync();
+            var pauseRequests = new List<Task>();
+            foreach (var session in manager.GetSessions())
+            {
+                try
+                {
+                    if (session.GetPlaybackInfo()?.PlaybackStatus ==
+                        GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
+                        pauseRequests.Add(PauseSessionAsync(session));
+                }
+                catch (Exception) { /* A closed or unresponsive player must not block the break. */ }
+            }
+            await Task.WhenAll(pauseRequests);
+        }
+        catch (Exception) { /* Media control may be unavailable; the break still starts. */ }
+    }
+
+    private static async Task PauseSessionAsync(GlobalSystemMediaTransportControlsSession session)
+    {
+        try { await session.TryPauseAsync(); }
+        catch (Exception) { /* One player must not prevent other sessions from pausing. */ }
     }
     private void EndPacingBreak()
     {
