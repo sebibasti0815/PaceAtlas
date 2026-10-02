@@ -1,5 +1,15 @@
 # Pace Atlas für Windows (WinUI 3)
 
+## Lizenz
+
+Pace Atlas steht unter der [PolyForm Noncommercial License 1.0.0](LICENSE).
+Nichtkommerzielle Nutzung, Bearbeitung und Weitergabe sind nach deren Bedingungen
+erlaubt. Für kommerzielle Nutzung ist eine gesonderte Erlaubnis des
+Rechteinhabers erforderlich. Dies gilt für den Programmcode; BLS-Daten,
+importierte Open-Food-Facts-Daten und Komponenten Dritter unterliegen ihren
+jeweiligen eigenen Lizenzbedingungen (siehe `THIRD-PARTY-NOTICES.md` und
+`LICENSE-OPEN-FOOD-FACTS.md`).
+
 Die Projektmappe `PaceAtlas.sln` enthält die Windows-Oberfläche `PaceAtlas.WinUI` und `PaceAtlas.Core`. Der ältere WinForms-Quellcode unter `PaceAtlas/` liefert weiterhin gemeinsam verwendete Ressourcen und Übersetzungen. Deshalb müssen alle drei Projektordner nebeneinander bleiben.
 
 ## Starten

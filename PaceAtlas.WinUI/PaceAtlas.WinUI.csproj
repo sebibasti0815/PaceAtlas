@@ -35,6 +35,7 @@
     <Content Include="Assets\flag-*.png" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\pace-atlas.png" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="app.ico" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\LICENSE" Link="LICENSE" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <Target Name="CreateInstaller" AfterTargets="Build"
           Condition="'$(Configuration)' == 'Installer' and '$(OS)' == 'Windows_NT' and '$(IsDesignTimeBuild)' != 'true'">

@@ -53,6 +53,14 @@ public sealed partial class MainWindow : Window
                 FontFamily = new FontFamily("Segoe Script"), FontStyle = Windows.UI.Text.FontStyle.Italic });
             slogan.Children.Add(new TextBlock { Text = MottoAnswer.Text, TextWrapping = TextWrapping.Wrap });
             aboutContent.Children.Add(slogan);
+            aboutContent.Children.Add(new TextBlock { Text = english ? "Pace Atlas license" : "Lizenz von Pace Atlas",
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold });
+            aboutContent.Children.Add(new TextBlock { Text = english
+                ? "Pace Atlas is licensed under the PolyForm Noncommercial License 1.0.0. Commercial use requires separate permission from the rights holder. The license text is included as LICENSE in the installation and source archive. Third-party data and components retain their own license terms."
+                : "Pace Atlas steht unter der PolyForm Noncommercial License 1.0.0. Für eine kommerzielle Nutzung ist eine gesonderte Erlaubnis des Rechteinhabers erforderlich. Der Lizenztext liegt als LICENSE der Installation und dem Quellarchiv bei. Für Daten und Komponenten Dritter gelten deren eigene Lizenzbedingungen.",
+                TextWrapping = TextWrapping.Wrap });
+            aboutContent.Children.Add(new HyperlinkButton { Content = english ? "PolyForm license terms" : "PolyForm-Lizenzbedingungen",
+                NavigateUri = new Uri("https://polyformproject.org/licenses/noncommercial/1.0.0/"), Padding = new Thickness(0) });
             aboutContent.Children.Add(new TextBlock { Text = english ? "Nutrition data: Bundeslebensmittelschlüssel (BLS) 4.0" :
                 "Nährstoffdaten: Bundeslebensmittelschlüssel (BLS) 4.0",
                 FontWeight = Microsoft.UI.Text.FontWeights.SemiBold });
