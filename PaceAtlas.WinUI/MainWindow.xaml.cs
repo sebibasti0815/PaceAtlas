@@ -563,7 +563,7 @@ public sealed partial class MainWindow : Window
 
     private Grid TableRow((string Text, int Width)[] cells, bool header = false, bool compact = false, string? table = null,
         IReadOnlyList<(string Symbol, SolidColorBrush Brush)>? badges = null, string? contentDescription = null,
-        string? contentForm = null)
+        string? contentForm = null, int recoveryLevel = -1)
     {
         var grid = new Grid { MinHeight = header ? 30 : 27 };
         foreach (var (value, width) in cells)
@@ -591,7 +591,16 @@ public sealed partial class MainWindow : Window
                 ToolTipService.SetToolTip(label, contentDescription ?? value);
                 Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(label, contentDescription ?? value);
             }
-            if (table == "entries" && index == 3 && !string.IsNullOrWhiteSpace(contentForm))
+            if (table == "entries" && index == 3 && recoveryLevel >= 0)
+            {
+                var content = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6,
+                    VerticalAlignment = VerticalAlignment.Center };
+                content.Children.Add(RecoveryBatteryIcon(recoveryLevel));
+                content.Children.Add(label);
+                Grid.SetColumn(content, index);
+                grid.Children.Add(content);
+            }
+            else if (table == "entries" && index == 3 && !string.IsNullOrWhiteSpace(contentForm))
             {
                 var content = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4,
                     VerticalAlignment = VerticalAlignment.Center };
@@ -613,7 +622,7 @@ public sealed partial class MainWindow : Window
     {
         row.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         row.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-        var label = row.Children.OfType<TextBlock>().First(child => Grid.GetColumn(child) == 3);
+        var label = row.Children.OfType<FrameworkElement>().First(child => Grid.GetColumn(child) == 3);
         row.Children.Remove(label);
         var content = new Grid();
         content.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
@@ -1799,7 +1808,7 @@ public sealed partial class MainWindow : Window
     {
         IntervalKind.ItemsSource = new[] { "Aktivität", "Ruhe" };
         IntervalIntensity.ItemsSource = new[] { "gering", "mittel", "hoch", "sehr hoch" };
-        SleepRecovery.ItemsSource = new[] { "nicht bewertet", "keine", "etwas", "mittel", "deutlich" };
+        PopulateRecoveryChoices();
         IntervalIntensity.SelectedIndex = 1;
         SleepRecovery.SelectedIndex = 0;
         var now = DateTime.Now;
@@ -2591,6 +2600,7 @@ public sealed partial class MainWindow : Window
                 displayedEntries.Add(entry);
                 string details;
                 int intensityLevel = 1;
+                int recoveryLevel = -1;
                 IReadOnlyList<string> protection = [];
                 try
                 {
@@ -2598,9 +2608,8 @@ public sealed partial class MainWindow : Window
                     {
                         var sleep = JsonSerializer.Deserialize<SleepData>(entry.Data);
                         protection = sleep?.HearingProtection ?? [];
-                        details = T("Geschlafen") + " · " + (selectedLanguage == "en" ? "Recovery: " : "Erholung: ") +
-                            T(new[] { "nicht bewertet", "keine", "etwas", "mittel", "deutlich" }[
-                                Math.Clamp(sleep?.Recovery ?? 0, 0, 4)]);
+                        recoveryLevel = Math.Clamp(sleep?.Recovery ?? 0, 0, 4);
+                        details = T("Geschlafen");
                     }
                     else
                     {
@@ -2609,9 +2618,7 @@ public sealed partial class MainWindow : Window
                         intensityLevel = Math.Clamp(interval?.Intensity ?? 1, 1, 4);
                         details = string.Join(", ", (interval?.Dimensions ?? []).Select(T));
                         if (entry.Kind == "Ruhe")
-                            details += " · " + (selectedLanguage == "en" ? "Recovery: " : "Erholung: ") +
-                                T(new[] { "nicht bewertet", "keine", "etwas", "mittel", "deutlich" }[
-                                    Math.Clamp(interval?.Recovery ?? 0, 0, 4)]);
+                            recoveryLevel = Math.Clamp(interval?.Recovery ?? 0, 0, 4);
                     }
                 }
                 catch (JsonException) { details = entry.Kind; }
@@ -2623,10 +2630,12 @@ public sealed partial class MainWindow : Window
                         : entry.End is null
                             ? [("◷", VisualScaleBrush(3)), (BarScale(intensityLevel), VisualScaleBrush(intensityLevel - 1, true))]
                             : [(BarScale(intensityLevel), VisualScaleBrush(intensityLevel - 1, true))],
-                    contentDescription: entry.Kind is "Schlaf" or "Ruhe" ? details :
+                    contentDescription: entry.Kind is "Schlaf" or "Ruhe" ?
+                        details + " · " + RecoveryDescription(recoveryLevel) :
                         (details.Length == 0 ? "" : details + " · ") +
                         (selectedLanguage == "en" ? "Intensity: " : "Intensität: ") +
-                        T(new[] { "gering", "mittel", "hoch", "sehr hoch" }[intensityLevel - 1]));
+                        T(new[] { "gering", "mittel", "hoch", "sehr hoch" }[intensityLevel - 1]),
+                    recoveryLevel: recoveryLevel);
                 if (entry.End is null)
                     intervalRow.Background = (Microsoft.UI.Xaml.Media.Brush)
                         ((FrameworkElement)Content).Resources["RunningIntervalBrush"];

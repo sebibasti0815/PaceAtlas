@@ -286,7 +286,7 @@ public sealed partial class MainWindow
         SelectTranslated(Pem, ["nein", "vermutet", "erkannt"], selectedLanguage);
         SelectTranslated(IntervalKind, ["Aktivität", "Ruhe"], selectedLanguage);
         SelectVisual(IntervalIntensity, ["gering", "mittel", "hoch", "sehr hoch"], true);
-        SelectTranslated(SleepRecovery, ["nicht bewertet", "keine", "etwas", "mittel", "deutlich"], selectedLanguage);
+        PopulateRecoveryChoices();
         foreach (var box in symptoms.Values) SelectVisual(box, Severities, false, symptom: true);
         RefreshLimitingSymptomOptions();
         PopulatePlanForms();

@@ -24,22 +24,22 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Button x:ConnectionId='274'                         Padding="0" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Info ...">
+                    <Button x:ConnectionId='275'                         Padding="0" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Info ...">
                         <Image Source="Assets/pace-atlas.png" Width="56" Height="56" />
                     </Button>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
                         <TextBlock Text="Pace Atlas" FontSize="23" FontWeight="SemiBold" Foreground="White" />
-                        <Path x:ConnectionId='278' x:Name="SymptomTrendNeedle" Data="M 8,0 L 15,13 L 10,11 L 10,24 L 6,24 L 6,11 L 1,13 Z"
+                        <Path x:ConnectionId='279' x:Name="SymptomTrendNeedle" Data="M 8,0 L 15,13 L 10,11 L 10,24 L 6,24 L 6,11 L 1,13 Z"
                               Fill="#D8E2E9" Width="16" Height="24" Stretch="None" HorizontalAlignment="Center">
-                            <Path.RenderTransform><RotateTransform x:ConnectionId='279' x:Name="SymptomTrendRotation" CenterX="8" CenterY="12" Angle="90" /></Path.RenderTransform>
+                            <Path.RenderTransform><RotateTransform x:ConnectionId='280' x:Name="SymptomTrendRotation" CenterX="8" CenterY="12" Angle="90" /></Path.RenderTransform>
                         </Path>
                     </StackPanel>
-                    <StackPanel x:ConnectionId='275' x:Name="AppSubtitle" Grid.Column="2" Spacing="1"
+                    <StackPanel x:ConnectionId='276' x:Name="AppSubtitle" Grid.Column="2" Spacing="1"
                                 VerticalAlignment="Center" Margin="8,0,12,0">
-                        <TextBlock x:ConnectionId='276' x:Name="MottoQuestion" Text="„Kann ich das, was ich tue, zweimal hintereinander tun?“"
+                        <TextBlock x:ConnectionId='277' x:Name="MottoQuestion" Text="„Kann ich das, was ich tue, zweimal hintereinander tun?“"
                                    TextWrapping="Wrap" FontFamily="Segoe Script" FontStyle="Italic"
                                    FontSize="14" Foreground="#E3F4F1" />
-                        <TextBlock x:ConnectionId='277' x:Name="MottoAnswer" Text="– ist die Antwort „nein“, tue es nicht."
+                        <TextBlock x:ConnectionId='278' x:Name="MottoAnswer" Text="– ist die Antwort „nein“, tue es nicht."
                                    TextWrapping="Wrap" FontSize="13" Foreground="#CEE0EB" />
                     </StackPanel>
                 </Grid>
@@ -49,21 +49,21 @@
                     <TextBlock Text="Pacing Timer" Foreground="White" FontSize="12" FontWeight="SemiBold" />
                     <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                     <TextBlock Text="Aktiv (Min.):" Foreground="White" VerticalAlignment="Center" />
-                    <NumberBox x:ConnectionId='269' x:Name="PacingActiveMinutes" Width="68" Minimum="2" Maximum="300"
+                    <NumberBox x:ConnectionId='270' x:Name="PacingActiveMinutes" Width="68" Minimum="2" Maximum="300"
                                SpinButtonPlacementMode="Compact"                                      />
                     <TextBlock Text="Pause (Min.):" Foreground="White" VerticalAlignment="Center" Margin="6,0,0,0" />
-                    <NumberBox x:ConnectionId='270' x:Name="PacingPauseMinutes" Width="68" Minimum="1" Maximum="120"
+                    <NumberBox x:ConnectionId='271' x:Name="PacingPauseMinutes" Width="68" Minimum="1" Maximum="120"
                                SpinButtonPlacementMode="Compact"                                      />
-                    <Button x:ConnectionId='271' x:Name="PacingStartButton" Width="38" Content="zZz"                          
+                    <Button x:ConnectionId='272' x:Name="PacingStartButton" Width="38" Content="zZz"                          
                             ToolTipService.ToolTip="Pacing starten" />
-                    <Button x:ConnectionId='272' x:Name="PacingBreakButton" Width="38" Content="Ⅱ"                          
+                    <Button x:ConnectionId='273' x:Name="PacingBreakButton" Width="38" Content="Ⅱ"                          
                             ToolTipService.ToolTip="Pause machen" />
-                    <TextBlock x:ConnectionId='273' x:Name="PacingStatus" Width="108" Foreground="White" VerticalAlignment="Center"
+                    <TextBlock x:ConnectionId='274' x:Name="PacingStatus" Width="108" Foreground="White" VerticalAlignment="Center"
                                Text="Timer aus" />
                     </StackPanel>
                    </StackPanel>
                   </Border>
-                  <ComboBox x:ConnectionId='268' x:Name="LanguageChoice" Width="93" VerticalAlignment="Center"
+                  <ComboBox x:ConnectionId='269' x:Name="LanguageChoice" Width="93" VerticalAlignment="Center"
                                                                                ToolTipService.ToolTip="Sprache / Language">
                     <ComboBoxItem Tag="de">
                       <Image Source="Assets/flag-de.png" Width="30" Height="19" />
@@ -98,11 +98,11 @@
                     <TabViewItem x:ConnectionId='20' x:Name="StateTab" Header="Zustand erfassen" IsClosable="False">
                 <Grid>
                     <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                <ScrollViewer x:ConnectionId='247' x:Name="FormScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel x:ConnectionId='252' x:Name="FormContent" Spacing="12" Margin="0,8,0,0">
+                <ScrollViewer x:ConnectionId='248' x:Name="FormScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel x:ConnectionId='253' x:Name="FormContent" Spacing="12" Margin="0,8,0,0">
                         <TextBlock Text="Zustand erfassen" FontSize="20" FontWeight="SemiBold" />
-                        <Border x:ConnectionId='253' x:Name="StateEditingBanner" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
-                            <TextBlock x:ConnectionId='267' x:Name="StateEditingText" Foreground="#174B57" TextWrapping="Wrap" />
+                        <Border x:ConnectionId='254' x:Name="StateEditingBanner" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
+                            <TextBlock x:ConnectionId='268' x:Name="StateEditingText" Foreground="#174B57" TextWrapping="Wrap" />
                         </Border>
                         <Grid ColumnSpacing="12">
                             <Grid.ColumnDefinitions>
@@ -112,21 +112,21 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                                 <TextBlock Text="Zeit:" VerticalAlignment="Center" />
-                                <CalendarDatePicker x:ConnectionId='265' x:Name="StateDate" Width="150" PlaceholderText="TT.MM.JJJJ" />
-                                <TextBox x:ConnectionId='266' x:Name="StateTime" Width="108" PlaceholderText="HH:mm" />
+                                <CalendarDatePicker x:ConnectionId='266' x:Name="StateDate" Width="150" PlaceholderText="TT.MM.JJJJ" />
+                                <TextBox x:ConnectionId='267' x:Name="StateTime" Width="108" PlaceholderText="HH:mm" />
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
                                 <TextBlock Text="Allgemein:" VerticalAlignment="Center" />
-                                <ComboBox x:ConnectionId='264' x:Name="Overall" MinWidth="205" />
+                                <ComboBox x:ConnectionId='265' x:Name="Overall" MinWidth="205" />
                             </StackPanel>
                             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
                                 <TextBlock Text="PEM:" VerticalAlignment="Center" />
-                                <ComboBox x:ConnectionId='263' x:Name="Pem" MinWidth="110" />
+                                <ComboBox x:ConnectionId='264' x:Name="Pem" MinWidth="110" />
                             </StackPanel>
-                            <CheckBox x:ConnectionId='261' x:Name="Crash" Grid.Column="3" Content="Crash" VerticalAlignment="Center" />
+                            <CheckBox x:ConnectionId='262' x:Name="Crash" Grid.Column="3" Content="Crash" VerticalAlignment="Center" />
                             <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
                                 <TextBlock Text="Puls:" VerticalAlignment="Center" />
-                                <NumberBox x:ConnectionId='262' x:Name="Pulse" Minimum="0" Maximum="250" Value="0"
+                                <NumberBox x:ConnectionId='263' x:Name="Pulse" Minimum="0" Maximum="250" Value="0"
                                            Width="100" SpinButtonPlacementMode="Compact" />
                             </StackPanel>
                         </Grid>
@@ -138,34 +138,34 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Orientation="Horizontal" Spacing="10">
                                 <TextBlock Text="Symptome" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                <Button x:ConnectionId='260' Content="…"                              ToolTipService.ToolTip="Symptome bearbeiten" />
+                                <Button x:ConnectionId='261' Content="…"                              ToolTipService.ToolTip="Symptome bearbeiten" />
                             </StackPanel>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" Margin="0,0,20,0">
-                                <Button x:ConnectionId='258' Content="Alle: keine"                        />
-                                <Button x:ConnectionId='259' Content="Alle: nicht beurteilt"                              />
+                                <Button x:ConnectionId='259' Content="Alle: keine"                        />
+                                <Button x:ConnectionId='260' Content="Alle: nicht beurteilt"                              />
                             </StackPanel>
                         </Grid>
-                        <Grid x:ConnectionId='254' x:Name="SymptomGrid" ColumnSpacing="12" RowSpacing="4"                                  />
+                        <Grid x:ConnectionId='255' x:Name="SymptomGrid" ColumnSpacing="12" RowSpacing="4"                                  />
                         <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                             <TextBlock Text="Welches Symptom schränkt dich gerade am meisten ein? (optional)"
                                        VerticalAlignment="Center" TextWrapping="Wrap" />
-                            <ComboBox x:ConnectionId='257' x:Name="MostLimitingSymptom" Width="280" VerticalAlignment="Center" />
+                            <ComboBox x:ConnectionId='258' x:Name="MostLimitingSymptom" Width="280" VerticalAlignment="Center" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <TextBlock Text="Schmerzorte" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
-                            <Button x:ConnectionId='256' Content="…"                                   ToolTipService.ToolTip="Schmerzorte bearbeiten" />
+                            <Button x:ConnectionId='257' Content="…"                                   ToolTipService.ToolTip="Schmerzorte bearbeiten" />
                         </StackPanel>
-                        <Grid x:ConnectionId='255' x:Name="PainGrid" ColumnSpacing="8" RowSpacing="2"                                    />
+                        <Grid x:ConnectionId='256' x:Name="PainGrid" ColumnSpacing="8" RowSpacing="2"                                    />
                     </StackPanel>
                 </ScrollViewer>
                                 <StackPanel Grid.Row="1" Spacing="8" Margin="0,8,0,0">
-                        <TextBox x:ConnectionId='248' x:Name="Note" Header="Notiz" PlaceholderText="Was ist dir sonst aufgefallen?"
+                        <TextBox x:ConnectionId='249' x:Name="Note" Header="Notiz" PlaceholderText="Was ist dir sonst aufgefallen?"
                                  AcceptsReturn="True" TextWrapping="Wrap" Height="74" />
                         <StackPanel Orientation="Horizontal" Spacing="12">
-                            <Button x:ConnectionId='249' x:Name="StateSaveButton" Content="Zustand speichern"                   
+                            <Button x:ConnectionId='250' x:Name="StateSaveButton" Content="Zustand speichern"                   
                                     Background="#167789" Foreground="White" />
-                            <Button x:ConnectionId='250' Content="Neuer Eintrag"                     />
-                            <TextBlock x:ConnectionId='251' x:Name="Status" VerticalAlignment="Center" Foreground="#316073" />
+                            <Button x:ConnectionId='251' Content="Neuer Eintrag"                     />
+                            <TextBlock x:ConnectionId='252' x:Name="Status" VerticalAlignment="Center" Foreground="#316073" />
                         </StackPanel>
                 </StackPanel>
                 </Grid>
@@ -173,49 +173,49 @@
                     <TabViewItem x:ConnectionId='21' x:Name="IntervalTab" Header="Aktivität und Ruhe" IsClosable="False">
                         <Grid>
                             <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                        <ScrollViewer x:ConnectionId='224' x:Name="IntervalFormScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <ScrollViewer x:ConnectionId='225' x:Name="IntervalFormScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                             <StackPanel Spacing="12" Margin="0,8,0,0">
                                 <TextBlock Text="Zeitraum erfassen" FontSize="20" FontWeight="SemiBold" />
-                                <Border x:ConnectionId='229' x:Name="IntervalEditingBanner" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
-                                    <TextBlock x:ConnectionId='246' x:Name="IntervalEditingText" Foreground="#174B57" TextWrapping="Wrap" />
+                                <Border x:ConnectionId='230' x:Name="IntervalEditingBanner" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
+                                    <TextBlock x:ConnectionId='247' x:Name="IntervalEditingText" Foreground="#174B57" TextWrapping="Wrap" />
                                 </Border>
                                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                                     <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                                         <TextBlock Text="Typ:" VerticalAlignment="Center" />
-                                        <ComboBox x:ConnectionId='240' x:Name="IntervalKind" MinWidth="145"                                                  />
+                                        <ComboBox x:ConnectionId='241' x:Name="IntervalKind" MinWidth="145"                                                  />
                                         <TextBlock Text="Beginn:" VerticalAlignment="Center" />
-                                        <CalendarDatePicker x:ConnectionId='241' x:Name="IntervalStartDate" Width="150" PlaceholderText="TT.MM.JJJJ" />
-                                        <TextBox x:ConnectionId='242' x:Name="IntervalStartTime" Width="108" PlaceholderText="HH:mm" />
+                                        <CalendarDatePicker x:ConnectionId='242' x:Name="IntervalStartDate" Width="150" PlaceholderText="TT.MM.JJJJ" />
+                                        <TextBox x:ConnectionId='243' x:Name="IntervalStartTime" Width="108" PlaceholderText="HH:mm" />
                                         <TextBlock Text="Ende:" VerticalAlignment="Center" />
-                                        <CalendarDatePicker x:ConnectionId='243' x:Name="IntervalEndDate" Width="150" PlaceholderText="TT.MM.JJJJ" />
-                                        <TextBox x:ConnectionId='244' x:Name="IntervalEndTime" Width="108" PlaceholderText="HH:mm" />
-                                        <CheckBox x:ConnectionId='245' x:Name="IntervalRunning" Content="Läuft noch – Ende später eintragen"
+                                        <CalendarDatePicker x:ConnectionId='244' x:Name="IntervalEndDate" Width="150" PlaceholderText="TT.MM.JJJJ" />
+                                        <TextBox x:ConnectionId='245' x:Name="IntervalEndTime" Width="108" PlaceholderText="HH:mm" />
+                                        <CheckBox x:ConnectionId='246' x:Name="IntervalRunning" Content="Läuft noch – Ende später eintragen"
                                                   VerticalAlignment="Center"                                                                       />
                                     </StackPanel>
                                 </ScrollViewer>
-                                <StackPanel x:ConnectionId='230' x:Name="ActivityTemplatePanel" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                <StackPanel x:ConnectionId='231' x:Name="ActivityTemplatePanel" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                                     <TextBlock Text="Aktivität:" VerticalAlignment="Center" />
-                                    <ComboBox x:ConnectionId='238' x:Name="ActivityTemplateChoice" MinWidth="225"                                                   />
-                                    <Button x:ConnectionId='239' Content="…"                                       ToolTipService.ToolTip="Aktivitäten verwalten" />
+                                    <ComboBox x:ConnectionId='239' x:Name="ActivityTemplateChoice" MinWidth="225"                                                   />
+                                    <Button x:ConnectionId='240' Content="…"                                       ToolTipService.ToolTip="Aktivitäten verwalten" />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="10">
-                                  <TextBlock x:ConnectionId='236' x:Name="IntervalDimensionsTitle" Text="Belastungsarten" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                  <Button x:ConnectionId='237' Content="…"                                />
+                                  <TextBlock x:ConnectionId='237' x:Name="IntervalDimensionsTitle" Text="Belastungsarten" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                  <Button x:ConnectionId='238' Content="…"                                />
                                 </StackPanel>
-                                <ItemsControl x:ConnectionId='231' x:Name="IntervalDimensions">
+                                <ItemsControl x:ConnectionId='232' x:Name="IntervalDimensions">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <WrapGrid Orientation="Horizontal" ItemWidth="175" ItemHeight="40" />
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                 </ItemsControl>
-                                <ComboBox x:ConnectionId='232' x:Name="IntervalIntensity" Header="Intensität" MinWidth="190" HorizontalAlignment="Left" />
-                                <ComboBox x:ConnectionId='233' x:Name="SleepRecovery" Header="Ruhequalität" MinWidth="205" HorizontalAlignment="Left" Visibility="Collapsed" />
+                                <ComboBox x:ConnectionId='233' x:Name="IntervalIntensity" Header="Intensität" MinWidth="190" HorizontalAlignment="Left" />
+                                <ComboBox x:ConnectionId='234' x:Name="SleepRecovery" Header="Ruhequalität" MinWidth="205" HorizontalAlignment="Left" Visibility="Collapsed" />
                                 <StackPanel Orientation="Horizontal" Spacing="10">
                                     <TextBlock Text="Schutzmaßnahmen" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                    <Button x:ConnectionId='235' Content="…"                                       ToolTipService.ToolTip="Schutzmaßnahmen bearbeiten" />
+                                    <Button x:ConnectionId='236' Content="…"                                       ToolTipService.ToolTip="Schutzmaßnahmen bearbeiten" />
                                 </StackPanel>
-                                <ItemsControl x:ConnectionId='234' x:Name="IntervalHearingProtection">
+                                <ItemsControl x:ConnectionId='235' x:Name="IntervalHearingProtection">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <WrapGrid Orientation="Horizontal" ItemWidth="175" ItemHeight="40" />
@@ -225,12 +225,12 @@
                             </StackPanel>
                         </ScrollViewer>
                         <StackPanel Grid.Row="1" Spacing="8" Margin="0,8,0,0">
-                                <TextBox x:ConnectionId='225' x:Name="IntervalNote" Header="Notiz" PlaceholderText="Was ist dir sonst aufgefallen?"
+                                <TextBox x:ConnectionId='226' x:Name="IntervalNote" Header="Notiz" PlaceholderText="Was ist dir sonst aufgefallen?"
                                          AcceptsReturn="True" TextWrapping="Wrap" Height="74" />
                                 <StackPanel Orientation="Horizontal" Spacing="12">
-                                    <Button x:ConnectionId='226' x:Name="IntervalSaveButton" Content="Zeitraum speichern"                            Background="#167789" Foreground="White" />
-                                    <Button x:ConnectionId='227' Content="Neuer Eintrag"                             />
-                                    <TextBlock x:ConnectionId='228' x:Name="IntervalStatus" VerticalAlignment="Center" Foreground="#316073" />
+                                    <Button x:ConnectionId='227' x:Name="IntervalSaveButton" Content="Zeitraum speichern"                            Background="#167789" Foreground="White" />
+                                    <Button x:ConnectionId='228' Content="Neuer Eintrag"                             />
+                                    <TextBlock x:ConnectionId='229' x:Name="IntervalStatus" VerticalAlignment="Center" Foreground="#316073" />
                                 </StackPanel>
                             </StackPanel>
                         </Grid>
@@ -238,24 +238,24 @@
                     <TabViewItem x:ConnectionId='22' x:Name="MeasureTab" Header="Sofortmaßnahme" IsClosable="False">
                         <Grid>
                             <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                            <ScrollViewer x:ConnectionId='200' x:Name="MeasureFormScroller" Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                            <ScrollViewer x:ConnectionId='201' x:Name="MeasureFormScroller" Grid.Row="0" VerticalScrollBarVisibility="Auto">
                                 <StackPanel Spacing="12" Margin="0,8,24,0" MaxWidth="1100" HorizontalAlignment="Left">
                                     <TextBlock Text="Maßnahme erfassen" FontSize="20" FontWeight="SemiBold" />
-                                    <Border x:ConnectionId='204' x:Name="MeasureEditingBanner" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
-                                        <TextBlock x:ConnectionId='223' x:Name="MeasureEditingText" Foreground="#174B57" TextWrapping="Wrap" />
+                                    <Border x:ConnectionId='205' x:Name="MeasureEditingBanner" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
+                                        <TextBlock x:ConnectionId='224' x:Name="MeasureEditingText" Foreground="#174B57" TextWrapping="Wrap" />
                                     </Border>
                                     <StackPanel Orientation="Horizontal" Spacing="10">
                                         <TextBlock Text="Zeit:" VerticalAlignment="Center" />
-                                        <CalendarDatePicker x:ConnectionId='218' x:Name="MeasureDate" Width="150" PlaceholderText="TT.MM.JJJJ" />
-                                        <TextBox x:ConnectionId='219' x:Name="MeasureTime" Width="108" PlaceholderText="HH:mm" />
+                                        <CalendarDatePicker x:ConnectionId='219' x:Name="MeasureDate" Width="150" PlaceholderText="TT.MM.JJJJ" />
+                                        <TextBox x:ConnectionId='220' x:Name="MeasureTime" Width="108" PlaceholderText="HH:mm" />
                                         <TextBlock Text="Maßnahme:" VerticalAlignment="Center" />
-                                        <ComboBox x:ConnectionId='220' x:Name="MeasureName" Width="190" />
-                                        <Button x:ConnectionId='221' Content="…"                              />
+                                        <ComboBox x:ConnectionId='221' x:Name="MeasureName" Width="190" />
+                                        <Button x:ConnectionId='222' Content="…"                              />
                                         <TextBlock Text="Dosis (optional):" VerticalAlignment="Center" />
-                                        <TextBox x:ConnectionId='222' x:Name="MeasureDose" Width="150" />
+                                        <TextBox x:ConnectionId='223' x:Name="MeasureDose" Width="150" />
                                     </StackPanel>
                                     <TextBlock Text="Grund / betroffene Symptome (optional)" FontWeight="SemiBold" />
-                                    <ItemsControl x:ConnectionId='205' x:Name="MeasureReasons">
+                                    <ItemsControl x:ConnectionId='206' x:Name="MeasureReasons">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
                                                 <WrapGrid Orientation="Horizontal" ItemWidth="220" ItemHeight="40" />
@@ -269,23 +269,23 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Anderer Grund (optional):" VerticalAlignment="Center" />
-                                        <TextBox x:ConnectionId='216' x:Name="MeasureReasonOther" Grid.Column="1" PlaceholderText="Nur wenn kein Symptom passt" />
-                                        <CheckBox x:ConnectionId='217' x:Name="MeasureTrack" Grid.Column="2" Content="Verlauf beobachten"                                                                 />
+                                        <TextBox x:ConnectionId='217' x:Name="MeasureReasonOther" Grid.Column="1" PlaceholderText="Nur wenn kein Symptom passt" />
+                                        <CheckBox x:ConnectionId='218' x:Name="MeasureTrack" Grid.Column="2" Content="Verlauf beobachten"                                                                 />
                                     </Grid>
-                                    <StackPanel x:ConnectionId='206' x:Name="MeasureTrackingFields" Spacing="10" Visibility="Collapsed">
-                                        <TextBox x:ConnectionId='209' x:Name="MeasureGoal" Header="Ziel / Problem" PlaceholderText="Was soll sich verbessern?" />
-                                        <TextBox x:ConnectionId='210' x:Name="MeasureBaseline" Header="Ausgangslage (optional)" PlaceholderText="Wie war es vor Beginn der Maßnahme?" AcceptsReturn="True" TextWrapping="Wrap" Height="72" />
+                                    <StackPanel x:ConnectionId='207' x:Name="MeasureTrackingFields" Spacing="10" Visibility="Collapsed">
+                                        <TextBox x:ConnectionId='210' x:Name="MeasureGoal" Header="Ziel / Problem" PlaceholderText="Was soll sich verbessern?" />
+                                        <TextBox x:ConnectionId='211' x:Name="MeasureBaseline" Header="Ausgangslage (optional)" PlaceholderText="Wie war es vor Beginn der Maßnahme?" AcceptsReturn="True" TextWrapping="Wrap" Height="72" />
                                         <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <CalendarDatePicker x:ConnectionId='214' x:Name="MeasureReviewDate" Header="Rückblick geplant am (optional)" Width="220" PlaceholderText="TT.MM.JJJJ" />
-                                            <TextBox x:ConnectionId='215' x:Name="MeasureReviewTime" Header="Uhrzeit" Width="110" PlaceholderText="HH:mm" />
+                                            <CalendarDatePicker x:ConnectionId='215' x:Name="MeasureReviewDate" Header="Rückblick geplant am (optional)" Width="220" PlaceholderText="TT.MM.JJJJ" />
+                                            <TextBox x:ConnectionId='216' x:Name="MeasureReviewTime" Header="Uhrzeit" Width="110" PlaceholderText="HH:mm" />
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" Spacing="12">
-                                            <ComboBox x:ConnectionId='212' x:Name="MeasureProgressStatus" Header="Status" Width="175">
+                                            <ComboBox x:ConnectionId='213' x:Name="MeasureProgressStatus" Header="Status" Width="175">
                                                 <ComboBoxItem Content="Läuft" Tag="active" />
                                                 <ComboBoxItem Content="Pausiert" Tag="paused" />
                                                 <ComboBoxItem Content="Abgeschlossen" Tag="completed" />
                                             </ComboBox>
-                                            <ComboBox x:ConnectionId='213' x:Name="MeasureOutcome" Header="Beobachtetes Ergebnis" Width="220">
+                                            <ComboBox x:ConnectionId='214' x:Name="MeasureOutcome" Header="Beobachtetes Ergebnis" Width="220">
                                                 <ComboBoxItem Content="Noch nicht beurteilt" Tag="" />
                                                 <ComboBoxItem Content="Deutlich geholfen" Tag="much" />
                                                 <ComboBoxItem Content="Etwas geholfen" Tag="some" />
@@ -295,20 +295,20 @@
                                             </ComboBox>
                                         </StackPanel>
                                         <TextBlock Text="Das Ergebnis beschreibt deine Beobachtung; zeitliche Nähe allein belegt keine Ursache." TextWrapping="Wrap" Opacity="0.75" />
-                                        <TextBox x:ConnectionId='211' x:Name="MeasureReviewNote" Header="Rückblick / Beobachtungen" PlaceholderText="Was hat sich verändert? Gab es unerwünschte Effekte oder andere gleichzeitige Änderungen?"
+                                        <TextBox x:ConnectionId='212' x:Name="MeasureReviewNote" Header="Rückblick / Beobachtungen" PlaceholderText="Was hat sich verändert? Gab es unerwünschte Effekte oder andere gleichzeitige Änderungen?"
                                                  AcceptsReturn="True" TextWrapping="Wrap" Height="150" />
                                     </StackPanel>
-                                    <TextBox x:ConnectionId='207' x:Name="MeasureNote" Header="Notiz zur Maßnahme" PlaceholderText="Was ist dir sonst aufgefallen?"
+                                    <TextBox x:ConnectionId='208' x:Name="MeasureNote" Header="Notiz zur Maßnahme" PlaceholderText="Was ist dir sonst aufgefallen?"
                                              AcceptsReturn="True" TextWrapping="Wrap" Height="100" />
                                     <TextBlock Text="Laufende Maßnahmen" FontSize="18" FontWeight="SemiBold" Margin="0,12,0,0" />
-                                    <StackPanel x:ConnectionId='208' x:Name="OngoingMeasures" Spacing="5" />
+                                    <StackPanel x:ConnectionId='209' x:Name="OngoingMeasures" Spacing="5" />
                                 </StackPanel>
                             </ScrollViewer>
                             <StackPanel Grid.Row="1" Spacing="8" Margin="0,8,0,0">
                                 <StackPanel Orientation="Horizontal" Spacing="12">
-                                    <Button x:ConnectionId='201' x:Name="MeasureSaveButton" Content="Maßnahme speichern"                           Background="#167789" Foreground="White" />
-                                    <Button x:ConnectionId='202' Content="Neuer Eintrag"                            />
-                                    <TextBlock x:ConnectionId='203' x:Name="MeasureStatus" VerticalAlignment="Center" Foreground="#316073" />
+                                    <Button x:ConnectionId='202' x:Name="MeasureSaveButton" Content="Maßnahme speichern"                           Background="#167789" Foreground="White" />
+                                    <Button x:ConnectionId='203' Content="Neuer Eintrag"                            />
+                                    <TextBlock x:ConnectionId='204' x:Name="MeasureStatus" VerticalAlignment="Center" Foreground="#316073" />
                                 </StackPanel>
                             </StackPanel>
                         </Grid>
@@ -316,13 +316,13 @@
                     <TabViewItem x:ConnectionId='23' x:Name="MedicationTab" IsClosable="False">
                       <TabViewItem.Header>
                         <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
-                          <TextBlock x:ConnectionId='145' x:Name="MedicationTabTitle" Text="Medikamente und Supplemente" VerticalAlignment="Center" />
-                          <Border x:ConnectionId='146' x:Name="MedicationDueIcon" Width="18" Height="18" CornerRadius="9" Background="#C62828" Visibility="Collapsed" VerticalAlignment="Center">
+                          <TextBlock x:ConnectionId='146' x:Name="MedicationTabTitle" Text="Medikamente und Supplemente" VerticalAlignment="Center" />
+                          <Border x:ConnectionId='147' x:Name="MedicationDueIcon" Width="18" Height="18" CornerRadius="9" Background="#C62828" Visibility="Collapsed" VerticalAlignment="Center">
                             <TextBlock Text="!" FontSize="14" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0" />
                           </Border>
                         </StackPanel>
                       </TabViewItem.Header>
-                      <TabView x:ConnectionId='147' x:Name="MedicationTabs" IsAddTabButtonVisible="False" CanReorderTabs="True"
+                      <TabView x:ConnectionId='148' x:Name="MedicationTabs" IsAddTabButtonVisible="False" CanReorderTabs="True"
                                                                                  >
                         <TabView.Resources>
                           <SolidColorBrush x:Key="TabViewSelectionIndicatorForeground" Color="#167789" />
@@ -332,11 +332,11 @@
                           <SolidColorBrush x:Key="TabViewItemHeaderBackgroundSelected" Color="White" />
                           <SolidColorBrush x:Key="TabViewItemHeaderBackgroundSelectedPointerOver" Color="White" />
                         </TabView.Resources>
-                        <TabViewItem x:ConnectionId='148' x:Name="IntakeTab" IsClosable="False">
+                        <TabViewItem x:ConnectionId='149' x:Name="IntakeTab" IsClosable="False">
                           <TabViewItem.Header>
                             <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
-                              <TextBlock x:ConnectionId='189' x:Name="IntakeTabTitle" Text="Tagesprotokoll" VerticalAlignment="Center" />
-                              <Border x:ConnectionId='190' x:Name="IntakeDueIcon" Width="18" Height="18" CornerRadius="9" Background="#C62828" Visibility="Collapsed" VerticalAlignment="Center">
+                              <TextBlock x:ConnectionId='190' x:Name="IntakeTabTitle" Text="Tagesprotokoll" VerticalAlignment="Center" />
+                              <Border x:ConnectionId='191' x:Name="IntakeDueIcon" Width="18" Height="18" CornerRadius="9" Background="#C62828" Visibility="Collapsed" VerticalAlignment="Center">
                                 <TextBlock Text="!" FontSize="14" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0" />
                               </Border>
                             </StackPanel>
@@ -348,63 +348,63 @@
                               <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                               <StackPanel Spacing="3">
                                 <StackPanel Orientation="Horizontal" Spacing="12">
-                                  <CalendarDatePicker x:ConnectionId='197' x:Name="IntakeDate" Header="Einnahmen am" Width="170" PlaceholderText="TT.MM.JJJJ"                                      />
-                                  <ComboBox x:ConnectionId='198' x:Name="IntakeBulkTime" Header="Uhrzeit" Width="125"                                                    />
-                                  <Button x:ConnectionId='199' x:Name="TakeSelectedTimeButton" Content="Eingenommen" VerticalAlignment="Bottom"
+                                  <CalendarDatePicker x:ConnectionId='198' x:Name="IntakeDate" Header="Einnahmen am" Width="170" PlaceholderText="TT.MM.JJJJ"                                      />
+                                  <ComboBox x:ConnectionId='199' x:Name="IntakeBulkTime" Header="Uhrzeit" Width="125"                                                    />
+                                  <Button x:ConnectionId='200' x:Name="TakeSelectedTimeButton" Content="Eingenommen" VerticalAlignment="Bottom"
                                           IsEnabled="False"                                />
                                 </StackPanel>
                                 <TextBlock Text="Offen bedeutet: keine Angabe zur tatsächlichen Einnahme." />
                               </StackPanel>
                               <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Bottom">
-                                <Button x:ConnectionId='195' Content="Alles genommen"                        />
-                                <Button x:ConnectionId='196' Content="Alles offen"                          />
+                                <Button x:ConnectionId='196' Content="Alles genommen"                        />
+                                <Button x:ConnectionId='197' Content="Alles offen"                          />
                               </StackPanel>
                             </Grid>
                             <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto">
                               <Grid>
                                 <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
-                                <Grid x:ConnectionId='193' x:Name="IntakeHeader" />
+                                <Grid x:ConnectionId='194' x:Name="IntakeHeader" />
                                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                  <StackPanel x:ConnectionId='194' x:Name="IntakeRows" Spacing="2" />
+                                  <StackPanel x:ConnectionId='195' x:Name="IntakeRows" Spacing="2" />
                                 </ScrollViewer>
                               </Grid>
                             </ScrollViewer>
                             <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
-                              <Button x:ConnectionId='191' Content="Einnahmen für diesen Tag speichern"                           Background="#167789" Foreground="White" />
-                              <TextBlock x:ConnectionId='192' x:Name="IntakeStatus" VerticalAlignment="Center" Foreground="#316073" />
+                              <Button x:ConnectionId='192' Content="Einnahmen für diesen Tag speichern"                           Background="#167789" Foreground="White" />
+                              <TextBlock x:ConnectionId='193' x:Name="IntakeStatus" VerticalAlignment="Center" Foreground="#316073" />
                             </StackPanel>
                           </Grid>
                         </TabViewItem>
-                        <TabViewItem x:ConnectionId='149' x:Name="StockTab" Header="Packungen und Vorrat" IsClosable="False">
+                        <TabViewItem x:ConnectionId='150' x:Name="StockTab" Header="Packungen und Vorrat" IsClosable="False">
                           <Grid>
                             <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                             <TextBlock Text="Packungen und Vorrat" FontSize="20" FontWeight="SemiBold" Margin="0,8,0,8" />
-                            <Border x:ConnectionId='174' x:Name="StockEditingBanner" Grid.Row="1" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6" Margin="0,0,0,8">
-                              <TextBlock x:ConnectionId='188' x:Name="StockEditingText" Foreground="#174B57" TextWrapping="Wrap" />
+                            <Border x:ConnectionId='175' x:Name="StockEditingBanner" Grid.Row="1" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6" Margin="0,0,0,8">
+                              <TextBlock x:ConnectionId='189' x:Name="StockEditingText" Foreground="#174B57" TextWrapping="Wrap" />
                             </Border>
                             <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10" Margin="0,8,0,8">
-                              <AutoSuggestBox x:ConnectionId='183' x:Name="StockManufacturer" Header="Hersteller" Width="160"                                             />
-                              <AutoSuggestBox x:ConnectionId='184' x:Name="StockSupplier" Header="Lieferant" Width="160"                                         />
-                              <NumberBox x:ConnectionId='185' x:Name="StockPackUnits" Header="Inhalt je Packung" Width="140" Minimum="0" SpinButtonPlacementMode="Compact" />
-                              <NumberBox x:ConnectionId='186' x:Name="StockPackPrice" Header="Preis €" Width="120" Minimum="0" SpinButtonPlacementMode="Compact" />
-                              <Button x:ConnectionId='187' Content="Packungsdaten speichern" VerticalAlignment="Bottom"                                Background="#167789" Foreground="White" />
+                              <AutoSuggestBox x:ConnectionId='184' x:Name="StockManufacturer" Header="Hersteller" Width="160"                                             />
+                              <AutoSuggestBox x:ConnectionId='185' x:Name="StockSupplier" Header="Lieferant" Width="160"                                         />
+                              <NumberBox x:ConnectionId='186' x:Name="StockPackUnits" Header="Inhalt je Packung" Width="140" Minimum="0" SpinButtonPlacementMode="Compact" />
+                              <NumberBox x:ConnectionId='187' x:Name="StockPackPrice" Header="Preis €" Width="120" Minimum="0" SpinButtonPlacementMode="Compact" />
+                              <Button x:ConnectionId='188' Content="Packungsdaten speichern" VerticalAlignment="Bottom"                                Background="#167789" Foreground="White" />
                             </StackPanel>
                             <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="10" Margin="0,0,0,8">
-                              <NumberBox x:ConnectionId='179' x:Name="StockPurchasePacks" Header="Gekaufte Packungen" Width="160" Minimum="0" SpinButtonPlacementMode="Compact" />
-                              <Button x:ConnectionId='180' Content="Nachkauf erfassen" VerticalAlignment="Bottom"                              Background="#167789" Foreground="White" />
-                              <NumberBox x:ConnectionId='181' x:Name="StockCounted" Header="Gezählter Bestand" Width="160" Minimum="0" SpinButtonPlacementMode="Compact" />
-                              <Button x:ConnectionId='182' Content="Bestand setzen" VerticalAlignment="Bottom"                        Background="#167789" Foreground="White" />
+                              <NumberBox x:ConnectionId='180' x:Name="StockPurchasePacks" Header="Gekaufte Packungen" Width="160" Minimum="0" SpinButtonPlacementMode="Compact" />
+                              <Button x:ConnectionId='181' Content="Nachkauf erfassen" VerticalAlignment="Bottom"                              Background="#167789" Foreground="White" />
+                              <NumberBox x:ConnectionId='182' x:Name="StockCounted" Header="Gezählter Bestand" Width="160" Minimum="0" SpinButtonPlacementMode="Compact" />
+                              <Button x:ConnectionId='183' Content="Bestand setzen" VerticalAlignment="Bottom"                        Background="#167789" Foreground="White" />
                             </StackPanel>
                             <StackPanel Grid.Row="4" Margin="0,0,0,8" Spacing="2">
-                              <TextBlock x:ConnectionId='177' x:Name="StockSummary" TextWrapping="Wrap" />
-                              <TextBlock x:ConnectionId='178' x:Name="StockStatus" Foreground="#316073" />
+                              <TextBlock x:ConnectionId='178' x:Name="StockSummary" TextWrapping="Wrap" />
+                              <TextBlock x:ConnectionId='179' x:Name="StockStatus" Foreground="#316073" />
                             </StackPanel>
                             <ScrollViewer Grid.Row="5" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                               <Grid>
                                 <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
-                                <Grid x:ConnectionId='175' x:Name="StockHeader" />
+                                <Grid x:ConnectionId='176' x:Name="StockHeader" />
                                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                  <ListView x:ConnectionId='176' x:Name="StockList"                                                                                    
+                                  <ListView x:ConnectionId='177' x:Name="StockList"                                                                                    
                                             ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.HorizontalScrollMode="Disabled">
                                     <ListView.ItemContainerStyle>
                                       <Style TargetType="ListViewItem"><Setter Property="MinHeight" Value="27" /><Setter Property="Padding" Value="0" /></Style>
@@ -415,41 +415,41 @@
                             </ScrollViewer>
                           </Grid>
                         </TabViewItem>
-                        <TabViewItem x:ConnectionId='150' x:Name="PlanTab" Header="Einnahmeplan" IsClosable="False">
-                        <Grid x:ConnectionId='151' x:Name="PlanLayout">
+                        <TabViewItem x:ConnectionId='151' x:Name="PlanTab" Header="Einnahmeplan" IsClosable="False">
+                        <Grid x:ConnectionId='152' x:Name="PlanLayout">
                             <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="170" /></Grid.RowDefinitions>
                             <ScrollViewer Grid.Row="0" Background="White" VerticalScrollBarVisibility="Auto">
                                 <StackPanel Spacing="12" Margin="0,8,0,8">
                                     <TextBlock Text="Einnahme bearbeiten" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,2" />
-                                    <Border x:ConnectionId='157' x:Name="PlanEditingBanner" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
-                                        <TextBlock x:ConnectionId='173' x:Name="PlanEditingText" Foreground="#174B57" TextWrapping="Wrap" />
+                                    <Border x:ConnectionId='158' x:Name="PlanEditingBanner" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
+                                        <TextBlock x:ConnectionId='174' x:Name="PlanEditingText" Foreground="#174B57" TextWrapping="Wrap" />
                                     </Border>
                                     <StackPanel Orientation="Horizontal" Spacing="10">
-                                        <TextBox x:ConnectionId='165' x:Name="PlanTime" Header="Uhrzeit (HH:mm)" Width="150" />
-                                        <TextBox x:ConnectionId='166' x:Name="PlanName" Header="Präparat" Width="240" />
-                                        <TextBox x:ConnectionId='167' x:Name="PlanQuantity" Header="Anzahl" Width="100" />
-                                        <ComboBox x:ConnectionId='168' x:Name="PlanForm" Header="Form" Width="180" />
-                                        <TextBox x:ConnectionId='169' x:Name="PlanDose" Header="Dosierung" Width="145" />
-                                        <CalendarDatePicker x:ConnectionId='170' x:Name="PlanStartDate" Header="Ab wann" Width="175" PlaceholderText="TT.MM.JJJJ" />
-                                        <CalendarDatePicker x:ConnectionId='171' x:Name="PlanEndDate" Header="Bis wann" Width="175" PlaceholderText="TT.MM.JJJJ" IsEnabled="False" />
-                                        <CheckBox x:ConnectionId='172' x:Name="PlanOngoing" Content="Läuft noch" IsChecked="True" VerticalAlignment="Bottom" Margin="0,0,0,6"
+                                        <TextBox x:ConnectionId='166' x:Name="PlanTime" Header="Uhrzeit (HH:mm)" Width="150" />
+                                        <TextBox x:ConnectionId='167' x:Name="PlanName" Header="Präparat" Width="240" />
+                                        <TextBox x:ConnectionId='168' x:Name="PlanQuantity" Header="Anzahl" Width="100" />
+                                        <ComboBox x:ConnectionId='169' x:Name="PlanForm" Header="Form" Width="180" />
+                                        <TextBox x:ConnectionId='170' x:Name="PlanDose" Header="Dosierung" Width="145" />
+                                        <CalendarDatePicker x:ConnectionId='171' x:Name="PlanStartDate" Header="Ab wann" Width="175" PlaceholderText="TT.MM.JJJJ" />
+                                        <CalendarDatePicker x:ConnectionId='172' x:Name="PlanEndDate" Header="Bis wann" Width="175" PlaceholderText="TT.MM.JJJJ" IsEnabled="False" />
+                                        <CheckBox x:ConnectionId='173' x:Name="PlanOngoing" Content="Läuft noch" IsChecked="True" VerticalAlignment="Bottom" Margin="0,0,0,6"
                                                                                                                 />
                                     </StackPanel>
                                     <TextBlock Text="Warum? (Mehrfachauswahl)" FontWeight="SemiBold" />
-                                    <ItemsControl x:ConnectionId='158' x:Name="PlanGoals">
+                                    <ItemsControl x:ConnectionId='159' x:Name="PlanGoals">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate><WrapGrid Orientation="Horizontal" ItemWidth="230" ItemHeight="38" /></ItemsPanelTemplate>
                                         </ItemsControl.ItemsPanel>
                                     </ItemsControl>
                                     <StackPanel Orientation="Horizontal" Spacing="10">
-                                        <TextBox x:ConnectionId='163' x:Name="NewGoalName" Header="Grund ergänzen" Width="220" />
-                                        <Button x:ConnectionId='164' Content="Hinzufügen" VerticalAlignment="Bottom"                       />
+                                        <TextBox x:ConnectionId='164' x:Name="NewGoalName" Header="Grund ergänzen" Width="220" />
+                                        <Button x:ConnectionId='165' Content="Hinzufügen" VerticalAlignment="Bottom"                       />
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
-                                        <Button x:ConnectionId='159' x:Name="PlanSaveButton" Content="Eintrag speichern"                        Background="#167789" Foreground="White" />
-                                        <Button x:ConnectionId='160' Content="Neuer Eintrag"                         />
-                                        <Button x:ConnectionId='161' Content="Eintrag löschen"                          />
-                                        <TextBlock x:ConnectionId='162' x:Name="PlanStatus" VerticalAlignment="Center" Foreground="#316073" />
+                                        <Button x:ConnectionId='160' x:Name="PlanSaveButton" Content="Eintrag speichern"                        Background="#167789" Foreground="White" />
+                                        <Button x:ConnectionId='161' Content="Neuer Eintrag"                         />
+                                        <Button x:ConnectionId='162' Content="Eintrag löschen"                          />
+                                        <TextBlock x:ConnectionId='163' x:Name="PlanStatus" VerticalAlignment="Center" Foreground="#316073" />
                                     </StackPanel>
                                 </StackPanel>
                             </ScrollViewer>
@@ -458,19 +458,19 @@
                                 <Grid>
                                   <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                   <TextBlock Text="Hinterlegte Einnahmen" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,6" />
-                                  <Button x:ConnectionId='154' x:Name="TogglePlanButton" Grid.Column="1" Width="34" Height="34" Padding="0"
+                                  <Button x:ConnectionId='155' x:Name="TogglePlanButton" Grid.Column="1" Width="34" Height="34" Padding="0"
                                           HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                                                    ToolTipService.ToolTip="Hinterlegte Einnahmen ausklappen">
                                     <Grid Width="18" Height="18">
-                                      <Path x:ConnectionId='155' x:Name="ExpandPlanIcon" Data="M 2,12 L 9,5 L 16,12"
+                                      <Path x:ConnectionId='156' x:Name="ExpandPlanIcon" Data="M 2,12 L 9,5 L 16,12"
                                             Stroke="#20334C" StrokeThickness="2" StrokeLineJoin="Round" />
-                                      <Path x:ConnectionId='156' x:Name="CollapsePlanIcon" Data="M 2,5 L 9,12 L 16,5"
+                                      <Path x:ConnectionId='157' x:Name="CollapsePlanIcon" Data="M 2,5 L 9,12 L 16,5"
                                             Stroke="#20334C" StrokeThickness="2" StrokeLineJoin="Round" Visibility="Collapsed" />
                                     </Grid>
                                   </Button>
                                 </Grid>
-                                <Grid x:ConnectionId='152' x:Name="PlanHeader" Grid.Row="1" />
-                                <ListView x:ConnectionId='153' x:Name="PlanList" Grid.Row="2"                                                                                  
+                                <Grid x:ConnectionId='153' x:Name="PlanHeader" Grid.Row="1" />
+                                <ListView x:ConnectionId='154' x:Name="PlanList" Grid.Row="2"                                                                                  
                                           ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                                   <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem"><Setter Property="MinHeight" Value="27" /><Setter Property="Padding" Value="0" /></Style>
@@ -494,8 +494,8 @@
                         <TabViewItem IsClosable="False">
                           <TabViewItem.Header>
                             <StackPanel Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
-                              <TextBlock x:ConnectionId='108' x:Name="MealsTabTitle" Text="Mahlzeiten" VerticalAlignment="Center" />
-                              <Border x:ConnectionId='109' x:Name="MealsDueIcon" Width="18" Height="18" CornerRadius="9" Background="#C62828" Visibility="Collapsed" VerticalAlignment="Center">
+                              <TextBlock x:ConnectionId='109' x:Name="MealsTabTitle" Text="Mahlzeiten" VerticalAlignment="Center" />
+                              <Border x:ConnectionId='110' x:Name="MealsDueIcon" Width="18" Height="18" CornerRadius="9" Background="#C62828" Visibility="Collapsed" VerticalAlignment="Center">
                                 <TextBlock Text="!" FontSize="14" FontWeight="ExtraBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-2,0,0" />
                               </Border>
                             </StackPanel>
@@ -509,14 +509,14 @@
                               <Grid RowSpacing="6" ColumnSpacing="16">
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="740" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                                <Border x:ConnectionId='110' x:Name="MealEditingBanner" Grid.ColumnSpan="2" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
-                                  <TextBlock x:ConnectionId='144' x:Name="MealEditingText" Foreground="#174B57" TextWrapping="Wrap" />
+                                <Border x:ConnectionId='111' x:Name="MealEditingBanner" Grid.ColumnSpan="2" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
+                                  <TextBlock x:ConnectionId='145' x:Name="MealEditingText" Foreground="#174B57" TextWrapping="Wrap" />
                                 </Border>
                                 <StackPanel Grid.Row="1" Grid.Column="1" Spacing="8">
-                                  <ScrollViewer x:ConnectionId='141' x:Name="MealIngredientsViewport" Height="300" Margin="0,0,16,0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"                                                  >
+                                  <ScrollViewer x:ConnectionId='142' x:Name="MealIngredientsViewport" Height="300" Margin="0,0,16,0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"                                                  >
                                     <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
-                                      <Grid x:ConnectionId='142' x:Name="MealIngredientsHeader" />
-                                      <ListView x:ConnectionId='143' x:Name="MealIngredientsList" Grid.Row="1" SelectionMode="Single"                                                                                                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                      <Grid x:ConnectionId='143' x:Name="MealIngredientsHeader" />
+                                      <ListView x:ConnectionId='144' x:Name="MealIngredientsList" Grid.Row="1" SelectionMode="Single"                                                                                                 ScrollViewer.VerticalScrollBarVisibility="Auto">
                                         <ListView.ItemContainerStyle><Style TargetType="ListViewItem"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="27" /><Setter Property="Padding" Value="0" /></Style></ListView.ItemContainerStyle>
                                       </ListView>
                                     </Grid>
@@ -524,50 +524,50 @@
                                 </StackPanel>
                                 <StackPanel Grid.Row="1" Grid.Column="0" Spacing="10" Width="740" HorizontalAlignment="Left">
                                 <StackPanel Orientation="Horizontal" Spacing="10">
-                                  <CalendarDatePicker x:ConnectionId='138' x:Name="MealDate" Header="Datum" Width="170" PlaceholderText="TT.MM.JJJJ" />
-                                  <TextBox x:ConnectionId='139' x:Name="MealTime" Header="Uhrzeit (HH:mm)" Width="130" />
-                                  <TextBox x:ConnectionId='140' x:Name="MealName" Header="Mahlzeit / Getränk" Width="400" />
+                                  <CalendarDatePicker x:ConnectionId='139' x:Name="MealDate" Header="Datum" Width="170" PlaceholderText="TT.MM.JJJJ" />
+                                  <TextBox x:ConnectionId='140' x:Name="MealTime" Header="Uhrzeit (HH:mm)" Width="130" />
+                                  <TextBox x:ConnectionId='141' x:Name="MealName" Header="Mahlzeit / Getränk" Width="400" />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="10">
-                                  <AutoSuggestBox x:ConnectionId='135' x:Name="MealFoodSearch" Header="Zutat" Width="420" PlaceholderText="Lebensmittel suchen"
+                                  <AutoSuggestBox x:ConnectionId='136' x:Name="MealFoodSearch" Header="Zutat" Width="420" PlaceholderText="Lebensmittel suchen"
                                                                                                                                               />
-                                  <NumberBox x:ConnectionId='136' x:Name="MealFoodGrams" Header="Menge in g / ml" Width="150" Minimum="0.1" SpinButtonPlacementMode="Compact" />
-                                  <Button x:ConnectionId='137' x:Name="MealAddFoodButton" Content="Zutat hinzufügen"                           VerticalAlignment="Bottom" />
+                                  <NumberBox x:ConnectionId='137' x:Name="MealFoodGrams" Header="Menge in g / ml" Width="150" Minimum="0.1" SpinButtonPlacementMode="Compact" />
+                                  <Button x:ConnectionId='138' x:Name="MealAddFoodButton" Content="Zutat hinzufügen"                           VerticalAlignment="Bottom" />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Spacing="10">
-                                  <Button x:ConnectionId='133' x:Name="MealUpdateFoodButton" Content="Zutat ändern"                           Visibility="Collapsed" Background="#167789" Foreground="White" />
-                                  <Button x:ConnectionId='134' x:Name="MealCancelFoodEditButton" Content="Zutat-Bearbeitung abbrechen"                                  Visibility="Collapsed" />
+                                  <Button x:ConnectionId='134' x:Name="MealUpdateFoodButton" Content="Zutat ändern"                           Visibility="Collapsed" Background="#167789" Foreground="White" />
+                                  <Button x:ConnectionId='135' x:Name="MealCancelFoodEditButton" Content="Zutat-Bearbeitung abbrechen"                                  Visibility="Collapsed" />
                                 </StackPanel>
                                 <Border Background="#F1F7FA" Padding="12" CornerRadius="6" Width="720" HorizontalAlignment="Left">
-                                  <TextBlock x:ConnectionId='132' x:Name="MealAssessment" TextWrapping="Wrap" />
+                                  <TextBlock x:ConnectionId='133' x:Name="MealAssessment" TextWrapping="Wrap" />
                                 </Border>
-                                <TextBox x:ConnectionId='131' x:Name="MealNote" Header="Notiz / Zubereitung" Width="720" HorizontalAlignment="Left" TextWrapping="Wrap" AcceptsReturn="True" Height="75" />
+                                <TextBox x:ConnectionId='132' x:Name="MealNote" Header="Notiz / Zubereitung" Width="720" HorizontalAlignment="Left" TextWrapping="Wrap" AcceptsReturn="True" Height="75" />
                                 </StackPanel>
-                                <Button x:ConnectionId='111' x:Name="MealRemoveFoodButton" Grid.Row="2" Grid.Column="1" Content="Ausgewählte Zutat entfernen"                              HorizontalAlignment="Left" IsEnabled="False" />
+                                <Button x:ConnectionId='112' x:Name="MealRemoveFoodButton" Grid.Row="2" Grid.Column="1" Content="Ausgewählte Zutat entfernen"                              HorizontalAlignment="Left" IsEnabled="False" />
                                 <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Spacing="10">
-                                  <ProgressRing x:ConnectionId='126' x:Name="MealSaveProgress" Width="24" Height="24" IsActive="False" Visibility="Collapsed" VerticalAlignment="Center" AutomationProperties.Name="Mahlzeit wird gespeichert" />
-                                  <Button x:ConnectionId='127' x:Name="SavePlannedMealButton" Content="Als geplant speichern"                               Background="#167789" Foreground="White" />
-                                  <Button x:ConnectionId='128' x:Name="SaveConsumedMealButton" Content="Als gegessen speichern"                                Background="White" Foreground="#1F1F1F" />
-                                  <Button x:ConnectionId='129' x:Name="SaveMealTemplateButton" Content="Als Vorlage speichern"                                />
-                                  <Button x:ConnectionId='130' Content="Neue Mahlzeit"                         />
+                                  <ProgressRing x:ConnectionId='127' x:Name="MealSaveProgress" Width="24" Height="24" IsActive="False" Visibility="Collapsed" VerticalAlignment="Center" AutomationProperties.Name="Mahlzeit wird gespeichert" />
+                                  <Button x:ConnectionId='128' x:Name="SavePlannedMealButton" Content="Als geplant speichern"                               Background="#167789" Foreground="White" />
+                                  <Button x:ConnectionId='129' x:Name="SaveConsumedMealButton" Content="Als gegessen speichern"                                Background="White" Foreground="#1F1F1F" />
+                                  <Button x:ConnectionId='130' x:Name="SaveMealTemplateButton" Content="Als Vorlage speichern"                                />
+                                  <Button x:ConnectionId='131' Content="Neue Mahlzeit"                         />
                                 </StackPanel>
-                                <TextBlock x:ConnectionId='112' x:Name="MealStatusText" Grid.Row="3" Grid.Column="0" Width="720" HorizontalAlignment="Left" Foreground="#316073" TextWrapping="Wrap" />
+                                <TextBlock x:ConnectionId='113' x:Name="MealStatusText" Grid.Row="3" Grid.Column="0" Width="720" HorizontalAlignment="Left" Foreground="#316073" TextWrapping="Wrap" />
                                 <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Spacing="10" Margin="0,-6,0,0">
-                                <Border x:ConnectionId='113' x:Name="MealTemplateFeedback" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
-                                  <TextBlock x:ConnectionId='125' x:Name="MealTemplateFeedbackText" Foreground="#174B57" TextWrapping="Wrap" />
+                                <Border x:ConnectionId='114' x:Name="MealTemplateFeedback" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6">
+                                  <TextBlock x:ConnectionId='126' x:Name="MealTemplateFeedbackText" Foreground="#174B57" TextWrapping="Wrap" />
                                 </Border>
                                 <TextBlock Text="Geplante Mahlzeiten und Vorlagen" FontSize="18" FontWeight="SemiBold" />
                                 <ScrollViewer Height="210" Margin="0,0,16,0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                                   <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
-                                    <Grid x:ConnectionId='118' x:Name="MealHistoryHeader" />
-                                    <ListView x:ConnectionId='119' x:Name="MealHistoryList" Grid.Row="1"                                                                               ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                    <Grid x:ConnectionId='119' x:Name="MealHistoryHeader" />
+                                    <ListView x:ConnectionId='120' x:Name="MealHistoryList" Grid.Row="1"                                                                               ScrollViewer.VerticalScrollBarVisibility="Auto">
                                       <ListView.ContextFlyout>
-                                        <MenuFlyout x:ConnectionId='120'                                  >
-                                          <MenuFlyoutItem x:ConnectionId='121' x:Name="EditMealMenu" Text="Auswahl bearbeiten"                                        />
-                                          <MenuFlyoutItem x:ConnectionId='122' x:Name="PlanMealMenu" Text="Auswahl als geplant übernehmen"                                />
-                                          <MenuFlyoutItem x:ConnectionId='123' x:Name="ConsumeMealMenu" Text="Auswahl als gegessen übernehmen"                                   />
+                                        <MenuFlyout x:ConnectionId='121'                                  >
+                                          <MenuFlyoutItem x:ConnectionId='122' x:Name="EditMealMenu" Text="Auswahl bearbeiten"                                        />
+                                          <MenuFlyoutItem x:ConnectionId='123' x:Name="PlanMealMenu" Text="Auswahl als geplant übernehmen"                                />
+                                          <MenuFlyoutItem x:ConnectionId='124' x:Name="ConsumeMealMenu" Text="Auswahl als gegessen übernehmen"                                   />
                                           <MenuFlyoutSeparator />
-                                          <MenuFlyoutItem x:ConnectionId='124' x:Name="DeleteMealMenu" Text="Auswahl entfernen"                                  />
+                                          <MenuFlyoutItem x:ConnectionId='125' x:Name="DeleteMealMenu" Text="Auswahl entfernen"                                  />
                                         </MenuFlyout>
                                       </ListView.ContextFlyout>
                                       <ListView.ItemContainerStyle><Style TargetType="ListViewItem"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="MinHeight" Value="27" /><Setter Property="Padding" Value="0" /></Style></ListView.ItemContainerStyle>
@@ -575,10 +575,10 @@
                                   </Grid>
                                 </ScrollViewer>
                                 <StackPanel Orientation="Horizontal" Spacing="10">
-                                  <Button x:ConnectionId='114' Content="Auswahl als geplant übernehmen"                                />
-                                  <Button x:ConnectionId='115' Content="Auswahl als gegessen übernehmen"                                   />
-                                  <Button x:ConnectionId='116' Content="Auswahl bearbeiten"                                        />
-                                  <Button x:ConnectionId='117' Content="Auswahl entfernen"                                  />
+                                  <Button x:ConnectionId='115' Content="Auswahl als geplant übernehmen"                                />
+                                  <Button x:ConnectionId='116' Content="Auswahl als gegessen übernehmen"                                   />
+                                  <Button x:ConnectionId='117' Content="Auswahl bearbeiten"                                        />
+                                  <Button x:ConnectionId='118' Content="Auswahl entfernen"                                  />
                                 </StackPanel>
                               </StackPanel>
                               </Grid>
@@ -592,10 +592,10 @@
                             <TextBlock Grid.ColumnSpan="2" Text="Lebensmittel und Werte je 100 g" FontSize="20" FontWeight="SemiBold" />
                             <TextBlock Grid.Row="1" Text="Ärztlicher Plan, BLS 4.0 und importierte Open-Food-Facts-Produkte. Eigene Werte und persönliche Regeln haben Vorrang. Ohne GI bleibt die GL unbekannt." TextWrapping="Wrap" VerticalAlignment="Center" />
                             <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="8" Margin="12,0,0,0">
-                              <Button x:ConnectionId='104' Content="BLS-Aktualisierung prüfen"                            />
-                              <Button x:ConnectionId='105' x:Name="ImportOffButton" Content="Open Food Facts importieren"                                   />
-                              <Button x:ConnectionId='106' x:Name="CancelOffImportButton" Content="Import abbrechen"                                         Visibility="Collapsed" />
-                              <ProgressRing x:ConnectionId='107' x:Name="OffImportProgress" IsActive="False" Width="24" Height="24" Visibility="Collapsed" AutomationProperties.Name="Open Food Facts import" />
+                              <Button x:ConnectionId='105' Content="BLS-Aktualisierung prüfen"                            />
+                              <Button x:ConnectionId='106' x:Name="ImportOffButton" Content="Open Food Facts importieren"                                   />
+                              <Button x:ConnectionId='107' x:Name="CancelOffImportButton" Content="Import abbrechen"                                         Visibility="Collapsed" />
+                              <ProgressRing x:ConnectionId='108' x:Name="OffImportProgress" IsActive="False" Width="24" Height="24" Visibility="Collapsed" AutomationProperties.Name="Open Food Facts import" />
                             </StackPanel>
                             <Grid Grid.Row="2" Grid.ColumnSpan="2" RowSpacing="4">
                               <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
@@ -606,15 +606,16 @@
                                 <TextBox x:ConnectionId='95' x:Name="FoodNote" Grid.Column="1" Header="Eigene Notiz / Zubereitung" TextWrapping="Wrap" />
                                 <Grid Grid.Row="1" ColumnSpacing="10">
                                   <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                                  <NumberBox x:ConnectionId='101' x:Name="FoodCarbs" Header="Kohlenhydrate / 100 g" Minimum="0" />
-                                  <NumberBox x:ConnectionId='102' x:Name="FoodGi" Grid.Column="1" Header="Glykämischer Index" Minimum="0" />
-                                  <NumberBox x:ConnectionId='103' x:Name="FoodGl" Grid.Column="2" Header="Glykämische Last / 100 g" Minimum="0" />
+                                  <NumberBox x:ConnectionId='102' x:Name="FoodCarbs" Header="Kohlenhydrate / 100 g" Minimum="0" />
+                                  <NumberBox x:ConnectionId='103' x:Name="FoodGi" Grid.Column="1" Header="Glykämischer Index" Minimum="0" />
+                                  <NumberBox x:ConnectionId='104' x:Name="FoodGl" Grid.Column="2" Header="Glykämische Last / 100 g" Minimum="0" />
                                 </Grid>
                                 <TextBox x:ConnectionId='96' x:Name="FoodSource" Grid.Row="1" Grid.Column="1" Header="Quelle" />
                                 <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="10">
-                                  <Button x:ConnectionId='98' Content="Lebensmittel speichern"                        Background="#167789" Foreground="White" />
-                                  <Button x:ConnectionId='99' Content="Neues Lebensmittel"                       />
-                                  <Button x:ConnectionId='100' x:Name="DeleteFoodButton" Content="Lebensmittel entfernen"                          IsEnabled="False" />
+                                  <Button x:ConnectionId='98' x:Name="SaveFoodButton" Content="Lebensmittel speichern"                        Background="#167789" Foreground="White" />
+                                  <ProgressRing x:ConnectionId='99' x:Name="FoodSaveProgress" Width="24" Height="24" IsActive="False" Visibility="Collapsed" VerticalAlignment="Center" AutomationProperties.Name="Lebensmittel wird gespeichert" />
+                                  <Button x:ConnectionId='100' Content="Neues Lebensmittel"                       />
+                                  <Button x:ConnectionId='101' x:Name="DeleteFoodButton" Content="Lebensmittel entfernen"                          IsEnabled="False" />
                                 </StackPanel>
                                 <TextBlock x:ConnectionId='97' x:Name="FoodEditorStatus" Grid.Row="3" Grid.ColumnSpan="2" Foreground="#316073" TextWrapping="Wrap" />
                               </Grid>
