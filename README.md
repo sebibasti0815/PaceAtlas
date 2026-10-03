@@ -2,6 +2,186 @@
 
 # Pace Atlas
 
+**Track life with ME/CFS, recognize patterns, and pace more deliberately.**
+
+[Deutsch](#deutsch)
+
+Pace Atlas is a Windows application for people with ME/CFS. It brings symptoms,
+activities, rest, interventions, medication, and nutrition together in a
+timeline. Its analyses help you spot your own patterns, such as activities that
+preceded post-exertional malaise (PEM). Your entries are stored in a local
+SQLite database.
+
+> “Can I do what I am doing twice in a row?” If the answer is “no,” don't do it.
+
+## What you can do with Pace Atlas
+
+- **Record your condition and symptoms:** Document your overall condition, PEM,
+  crashes, pulse, individual symptoms, and pain locations.
+- **Keep track of exertion and recovery:** Record activities, rest, and sleep,
+  including duration, intensity, types of exertion, and protective measures.
+  A pacing timer reminds you to take breaks.
+- **Manage interventions and medication:** Note interventions and their effects,
+  mark doses as taken in the daily log, and monitor packages and supplies.
+- **Record meals and foods:** Bring together planned and eaten meals, templates,
+  carbohydrates, and available glycemic index (GI) and glycemic load (GL) values.
+- **Explore your history:** View charts, heatmaps, symptom trends, and PEM risks.
+  A local interpretation and an optional configurable AI connection are also
+  available.
+
+## A look at the interface
+
+These English views are translated adaptations of screenshots from a development
+version. Layout and labels may change in later versions.
+
+### Record your condition
+
+![Condition entry showing overall condition, PEM, and symptoms](docs/screenshots/condition-en.png)
+
+### Plan or record a meal
+
+![Meal form with an ingredient list and planned meals](docs/screenshots/meals-en.png)
+
+### Foods and nutritional values
+
+![Food table with carbohydrates, GI, and GL](docs/screenshots/foods-en.png)
+
+## Try it
+
+Pace Atlas runs on **Windows x64**. If a ready-made installer is available,
+you can find it under [Releases](https://github.com/sebibasti0815/PaceAtlas/releases).
+You can also build the application from source; see [Running from source](#running-from-source).
+**Pace Atlas itself is completely free for noncommercial use.**
+
+---
+
+## Project, license, and technical notes
+
+The `PaceAtlas.sln` solution contains the Windows UI in `PaceAtlas.WinUI` and
+`PaceAtlas.Core`. The older WinForms source in `PaceAtlas/` still supplies shared
+resources and translations, so all three project directories must remain together.
+
+### License
+
+Pace Atlas is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE).
+Noncommercial use, modification, and redistribution are permitted under its
+terms. Commercial use requires separate permission from the rights holder. This
+applies to the application code; BLS data, imported Open Food Facts data, and
+third-party components have their own licenses (see `THIRD-PARTY-NOTICES.md` and
+`LICENSE-OPEN-FOOD-FACTS.md`).
+
+### Running from source
+
+Use Visual Studio with the WinUI workload, the .NET 10 SDK, and Windows SDK
+10.0.26100 or newer. Open `PaceAtlas.sln` and select `PaceAtlas.WinUI` as the
+startup project. Alternatively:
+
+```powershell
+dotnet run --project .\PaceAtlas.WinUI\PaceAtlas.WinUI.csproj
+```
+
+The application targets Windows x64 and requires .NET Desktop Runtime 10 and
+Windows App SDK Runtime 1.8. Both user interfaces use the database at
+`%LOCALAPPDATA%\PaceAtlas\paceatlas.db`.
+Launching the WinUI application again activates its existing window, including
+when it is hidden in the system tray.
+If the first window takes more than 500 ms to appear, a borderless splash screen
+shows the large logo and application name on a background matching the app
+header. Once shown, it remains visible for at least 1.5 seconds. Startup stages
+are logged to `%LOCALAPPDATA%\PaceAtlas.WinUI\startup-timing.log` on these starts.
+When closing the window, a dialog offers to minimize to the tray, quit, or
+cancel. “Always use this choice today” remembers the tray or quit choice until
+the next local calendar day. The tray menu's explicit quit command is unaffected.
+
+### Installer
+
+Provide Inno Setup 6 and the signed runtime installers described in
+`installer/prerequisites/README.md`. Build the `Installer|x64` configuration in
+Visual Studio or run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\installer\build-installer.ps1
+```
+
+The installer is written to
+`artifacts\installer\PaceAtlas-Setup-<Version>-win-x64.exe`. The installer identity
+is preserved. An upgrade removes the old `PaceAtlas.WinUIPrototype.exe`, installs
+`PaceAtlas.WinUI.exe`, and updates shortcuts.
+
+### Settings and data
+
+WinUI settings are stored in `%LOCALAPPDATA%\PaceAtlas.WinUI`. On first launch,
+existing language, window position, tab order, column widths, filters, tray,
+and update settings are copied from `%LOCALAPPDATA%\PaceAtlas.WinUIPrototype`
+where no corresponding file exists at the new location. The previous settings
+directory remains available as a fallback. The shared database is not moved.
+
+The information dialog and automatic daily check read published releases from
+`https://github.com/sebibasti0815/PaceAtlas`. A higher regular version tag may
+trigger an update offer; installation and data migration are not automatic.
+
+### Offline BLS catalog
+
+The embedded `PaceAtlas.Core/Bls4Catalog.tsv.gz` catalog was derived from the
+German Nutrient Database (Bundeslebensmittelschlüssel) 4.0: Max Rubner-Institut
+(2025), *Bundeslebensmittelschlüssel (BLS), Version 4.0 — Deutsche
+Nährstoffdatenbank*, Karlsruhe,
+DOI: https://doi.org/10.25826/Data20251217-134202-0.
+License: Creative Commons Attribution 4.0 International (CC BY 4.0),
+https://creativecommons.org/licenses/by/4.0/.
+Full attribution and license information is in `THIRD-PARTY-NOTICES.md` and
+the application's information dialog. Original data: https://blsdb.de/download.
+The file contains all 7,140 foods, nutrient values, and provenance data. To
+recreate it, run `tools/build-bls-catalog.py` with the official Excel file as
+input. Personal entries are stored separately in `foods`; the BLS catalog is
+loaded offline on a new installation.
+
+Smaller project archives may omit `Bls4Catalog.tsv.gz`. The application will
+continue to work on an existing user profile where the BLS catalog has already
+been imported. For a new installation, the complete project package including
+the data file must be built and launched once. In the food tab, “Check for BLS
+updates” checks the official download file; the application also checks at
+startup at most once per day. A changed download is reported but is not
+imported into the local database without review.
+
+### Importing Open Food Facts
+
+The official tab-separated CSV export, also available as `.gz`, can be obtained
+from https://world.openfoodfacts.org/data. In **Nutrition → Foods**, click
+**Import Open Food Facts** and select that file. The full export is large, so
+reading it and initially loading the food list may take time. Products with a
+German name, a carbohydrate value, and a connection to Germany are stored in a
+separate SQLite table. The importer uses `product_name_de` or, when the main
+language is `de`, the generic product name. If the CSV lacks a language field,
+the existing product name is used for products associated with Germany; in
+individual cases, it may be in another language.
+
+Before saving, HTML entities in names are decoded; leading parenthesized
+numbers and stray characters, package weights, and prices are removed; and
+whitespace is normalized. The original capitalization of product and brand
+names is retained. Percentage values such as “5% fat” remain. The barcode is
+kept in the source information rather than the name. Obvious duplicates with
+the same normalized display name are merged even if nutritional values or
+barcodes differ. The record with more available nutrient fields wins; ties
+retain the first record read. Values from different products are not combined.
+Other languages are not translated automatically.
+
+Repeating the import with a newer export replaces the entire previous Open Food
+Facts import in one transaction. Personal additions remain intact. The export
+file is not distributed with the project archive and must be imported again on
+a new user profile. Search ignores accents and punctuation, finds words in any
+order, and tolerates one typo in longer terms. Attribution and license details
+are in the information dialog and `LICENSE-OPEN-FOOD-FACTS.md`.
+
+During import, the UI shows the number of rows checked and a cancel button.
+Canceling rolls back the current transaction, leaving the previous catalog
+intact. If you close the application during import, it asks first and waits
+for a controlled cancellation before quitting.
+
+---
+
+## Deutsch
+
 **Den eigenen Alltag mit ME/CFS erfassen, Zusammenhänge erkennen und Pacing bewusster gestalten.**
 
 Pace Atlas ist eine Windows-Anwendung für Menschen mit ME/CFS. Sie verbindet
