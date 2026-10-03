@@ -300,7 +300,7 @@
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
-    "version": "0.16.0",
+    "version": "0.16.5",
     "restore": {
       "projectUniqueName": "L:\\source\\repos\\PaceAtlas\\PaceAtlas.Core\\PaceAtlas.Core.csproj",
       "projectName": "PaceAtlas.Core",

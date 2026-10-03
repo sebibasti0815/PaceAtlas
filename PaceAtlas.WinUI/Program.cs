@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
@@ -6,31 +7,68 @@ namespace PaceAtlas.WinUI;
 
 internal static class Program
 {
+    private const string InstanceName = @"Local\PaceAtlas.WinUI.Instance";
+    private static int pendingActivation;
+    private static readonly Stopwatch startupClock = new();
+    private static LoadingSplash? loadingSplash;
+    internal static long StartupElapsedMilliseconds => startupClock.ElapsedMilliseconds;
+
+    internal static void HideLoadingSplash() => Interlocked.Exchange(ref loadingSplash, null)?.Dispose();
+
     [STAThread]
     private static void Main()
     {
         try
         {
+            using var instance = new Mutex(true, InstanceName, out var firstInstance);
+            using var activation = new EventWaitHandle(false, EventResetMode.AutoReset, InstanceName + ".Activate");
+            if (!firstInstance)
+            {
+                activation.Set();
+                return;
+            }
+
+            startupClock.Start();
+            loadingSplash = LoadingSplash.Start();
             WinRT.ComWrappersSupport.InitializeComWrappers();
             Application.Start(unused =>
             {
                 try
                 {
-                    SynchronizationContext.SetSynchronizationContext(
-                        new DispatcherQueueSynchronizationContext(DispatcherQueue.GetForCurrentThread()));
+                    var dispatcher = DispatcherQueue.GetForCurrentThread();
+                    SynchronizationContext.SetSynchronizationContext(new DispatcherQueueSynchronizationContext(dispatcher));
+                    var activationListener = new Thread(() =>
+                    {
+                        while (true)
+                        {
+                            activation.WaitOne();
+                            Interlocked.Exchange(ref pendingActivation, 1);
+                            dispatcher.TryEnqueue(() =>
+                            {
+                                if (Application.Current is App app && app.ShowFromSecondLaunch())
+                                    Interlocked.Exchange(ref pendingActivation, 0);
+                            });
+                        }
+                    }) { IsBackground = true, Name = "PaceAtlas activation listener" };
+                    activationListener.Start();
                     _ = new App();
                 }
                 catch (Exception ex)
                 {
+                    HideLoadingSplash();
                     ReportStartupError(ex);
                 }
             });
         }
         catch (Exception ex)
         {
+            HideLoadingSplash();
             ReportStartupError(ex);
         }
+        finally { HideLoadingSplash(); }
     }
+
+    internal static bool ConsumePendingActivation() => Interlocked.Exchange(ref pendingActivation, 0) != 0;
 
     internal static void ReportStartupError(Exception ex)
     {

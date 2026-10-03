@@ -21,6 +21,10 @@ dotnet run --project .\PaceAtlas.WinUI\PaceAtlas.WinUI.csproj
 ```
 
 Die Anwendung ist für Windows x64 ausgelegt und benötigt .NET Desktop Runtime 10 und Windows App SDK Runtime 1.8. Beide Oberflächen verwenden die Datenbank `%LOCALAPPDATA%\PaceAtlas\paceatlas.db`.
+Ein erneuter Start der WinUI-Anwendung aktiviert das bereits laufende Fenster und holt es gegebenenfalls aus dem Tray zurück.
+Wenn der erste Fensteraufbau länger als 500 ms dauert, erscheint ein rahmenloser Ladebildschirm in der Farbe des Programmheaders mit großem Logo und einem rechts davon zentrierten Anwendungsnamen. Sobald er sichtbar ist, bleibt er mindestens 1,5 Sekunden stehen. Die Dauer einzelner Startabschnitte wird bei solchen Starts in `%LOCALAPPDATA%\PaceAtlas.WinUI\startup-timing.log` protokolliert.
+Beim Schließen des Fensters bietet ein Dialog die Auswahl zwischen dem Tray, dem Beenden der Anwendung und Abbrechen.
+Mit „Für heute immer diese Auswahl“ wird „Ins Tray“ oder „Beenden“ bis zum nächsten lokalen Kalendertag gespeichert. Der ausdrückliche Befehl „Beenden“ im Tray-Menü bleibt davon unabhängig.
 
 ## Installer
 

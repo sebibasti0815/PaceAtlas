@@ -16,11 +16,37 @@ public sealed partial class MainWindow
     private readonly List<(Window Window, TextBlock Countdown)> pacingOverlays = new();
     private PacingTrayIcon? pacingTray;
     private bool pacingRunning, pacingResting, settingPacingControls;
-    private bool hiddenToTray, restoringFromTray, startInTray, wasMaximized;
+    private bool hiddenToTray, restoringFromTray, startInTray, wasMaximized, foregroundRequested;
+    private bool exitRequestedFromTray, closeAfterChoice, closingDialogOpen;
     private int activeMinutes = 60, pauseMinutes = 30;
     private DateTimeOffset pacingDeadline;
     private static string TimerSettingsPath => Path.Combine(Store.Folder, "pacing-timer.json");
     private static string TraySettingsPath => Path.Combine(WinUiSettingsFolder, "tray-settings.json");
+    private static string DailyCloseChoicePath => Path.Combine(WinUiSettingsFolder, "close-choice.json");
+
+    private sealed class DailyCloseChoice
+    {
+        public string Day { get; set; } = "";
+        public string Action { get; set; } = "";
+    }
+
+    private static string TodayForCloseChoice() => DateTime.Today.ToString("yyyy-MM-dd",
+        System.Globalization.CultureInfo.InvariantCulture);
+
+    private static string? ReadDailyCloseChoice()
+    {
+        try
+        {
+            if (!File.Exists(DailyCloseChoicePath)) return null;
+            var saved = JsonSerializer.Deserialize<DailyCloseChoice>(File.ReadAllText(DailyCloseChoicePath));
+            if (saved is null || saved.Day != TodayForCloseChoice()) return null;
+            return saved.Action is "tray" or "exit" ? saved.Action : null;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
+        {
+            return null;
+        }
+    }
 
     private void InitializePacing()
     {
@@ -71,7 +97,7 @@ public sealed partial class MainWindow
             pacingTray = new PacingTrayIcon(hwnd, iconFile, () => pacingRunning, () => pacingResting,
                 () => startInTray, () => selectedLanguage, RestoreFromPacingTray, StartPacing, TogglePacingBreak, StopPacing,
                 () => { startInTray = !startInTray; SaveTraySettings(); },
-                () => Close(),
+                () => { exitRequestedFromTray = true; Close(); },
                 () =>
                 {
                     if (AppWindow.Presenter is OverlappedPresenter presenter &&
@@ -93,7 +119,10 @@ public sealed partial class MainWindow
         };
         AppWindow.Closing += PacingWindow_Closing;
         if (startInTray && pacingTray is not null)
-            (Content as FrameworkElement)!.Loaded += (_, _) => HideToPacingTray();
+            (Content as FrameworkElement)!.Loaded += (_, _) =>
+            {
+                if (!foregroundRequested) HideToPacingTray();
+            };
         Closed += (_, _) =>
         {
             pacingClock.Stop();
@@ -316,10 +345,19 @@ public sealed partial class MainWindow
         }
         Activate();
     }
+
+    internal void ShowFromSecondLaunch()
+    {
+        foregroundRequested = true;
+        RestoreFromPacingTray();
+    }
     private void PacingWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
     {
+        var exitingFromTray = exitRequestedFromTray;
+        exitRequestedFromTray = false;
         if (databaseMaintenanceRunning)
         {
+            closeAfterChoice = false;
             args.Cancel = true;
             MessageBoxW(hiddenToTray ? IntPtr.Zero : WinRT.Interop.WindowNative.GetWindowHandle(this),
                 N("Die Datenbankwartung läuft noch. Bitte warte, bis sie abgeschlossen ist.",
@@ -329,6 +367,7 @@ public sealed partial class MainWindow
         }
         if (OffImportRunning)
         {
+            closeAfterChoice = false;
             args.Cancel = true;
             if (closeAfterOffImport) return;
             if (MessageBoxW(hiddenToTray ? IntPtr.Zero : WinRT.Interop.WindowNative.GetWindowHandle(this),
@@ -341,9 +380,103 @@ public sealed partial class MainWindow
             }
             return;
         }
-        if (!pacingRunning) return;
-        args.Cancel = MessageBoxW(hiddenToTray ? IntPtr.Zero : WinRT.Interop.WindowNative.GetWindowHandle(this),
-            "Der Pacing Timer läuft noch. PaceAtlas wirklich beenden?", "Pacing Timer", 0x40024) != 6;
+        if (closeAfterChoice)
+        {
+            closeAfterChoice = false;
+            return;
+        }
+        if (!exitingFromTray && pacingTray is not null)
+        {
+            args.Cancel = true;
+            var dailyChoice = ReadDailyCloseChoice();
+            if (dailyChoice == "tray")
+            {
+                DispatcherQueue.TryEnqueue(HideToPacingTray);
+                return;
+            }
+            if (dailyChoice == "exit")
+            {
+                closeAfterChoice = true;
+                DispatcherQueue.TryEnqueue(Close);
+                return;
+            }
+            if (!closingDialogOpen)
+                DispatcherQueue.TryEnqueue(() => _ = AskCloseActionAsync());
+            return;
+        }
+        if (pacingRunning)
+            args.Cancel = MessageBoxW(hiddenToTray ? IntPtr.Zero : WinRT.Interop.WindowNative.GetWindowHandle(this),
+                N("Der Pacing Timer läuft noch. Pace Atlas wirklich beenden?",
+                  "The pacing timer is still running. Exit Pace Atlas?"), "Pacing Timer", 0x40024) != 6;
+    }
+
+    private async Task AskCloseActionAsync()
+    {
+        if (closingDialogOpen) return;
+        closingDialogOpen = true;
+        try
+        {
+            var dialog = new ContentDialog
+            {
+                XamlRoot = ((FrameworkElement)Content).XamlRoot,
+                Title = N("Pace Atlas schließen", "Close Pace Atlas"),
+                MinWidth = 520
+            };
+            var body = new StackPanel { Spacing = 12 };
+            body.Children.Add(new TextBlock
+            {
+                Text = N(pacingRunning
+                    ? "Der Pacing Timer läuft noch. Was möchtest du tun?"
+                    : "Was möchtest du tun?",
+                    pacingRunning
+                    ? "The pacing timer is still running. What would you like to do?"
+                    : "What would you like to do?"),
+                TextWrapping = TextWrapping.Wrap
+            });
+            var actions = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8,
+                HorizontalAlignment = HorizontalAlignment.Right };
+            var trayButton = new Button { Content = N("Ins Tray", "Move to tray"), MinWidth = 110,
+                Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 22, 119, 137)),
+                Foreground = new SolidColorBrush(Microsoft.UI.Colors.White) };
+            var exitButton = new Button { Content = N("Beenden", "Exit"), MinWidth = 110 };
+            var cancelButton = new Button { Content = N("Abbrechen", "Cancel"), MinWidth = 110 };
+            actions.Children.Add(trayButton);
+            actions.Children.Add(exitButton);
+            actions.Children.Add(cancelButton);
+            body.Children.Add(actions);
+            var remember = new CheckBox { Content = N("Für heute immer diese Auswahl", "Always use this choice today"),
+                HorizontalAlignment = HorizontalAlignment.Right };
+            body.Children.Add(remember);
+            dialog.Content = body;
+
+            string? choice = null;
+            trayButton.Click += (_, _) => { choice = "tray"; dialog.Hide(); };
+            exitButton.Click += (_, _) => { choice = "exit"; dialog.Hide(); };
+            cancelButton.Click += (_, _) => dialog.Hide();
+            await dialog.ShowAsync();
+            if (choice is ("tray" or "exit") && remember.IsChecked == true)
+            {
+                try { SaveJson(DailyCloseChoicePath, new DailyCloseChoice { Day = TodayForCloseChoice(), Action = choice }); }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    PacingStatus.Text = N("Tagesauswahl konnte nicht gespeichert werden: ",
+                        "Could not save today's choice: ") + ex.Message;
+                }
+            }
+            if (choice == "tray") HideToPacingTray();
+            else if (choice == "exit")
+            {
+                closeAfterChoice = true;
+                Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            closeAfterChoice = false;
+            PacingStatus.Text = N("Schließen-Dialog konnte nicht geöffnet werden: ",
+                "Could not open the close dialog: ") + ex.Message;
+        }
+        finally { closingDialogOpen = false; }
     }
 
     private static List<RectInt32> MonitorBounds()

@@ -343,7 +343,7 @@ public sealed partial class MainWindow
         Title = "Pace Atlas";
     }
 
-    private void ApplyUiLanguage()
+    private void ApplyUiLanguage(bool initialLoad = false)
     {
         if (applyingLanguage) return;
         applyingLanguage = true;
@@ -360,15 +360,23 @@ public sealed partial class MainWindow
             if (EntryList.ContextFlyout is MenuFlyout menu)
                 foreach (var item in menu.Items.OfType<MenuFlyoutItem>())
                     item.Text = Localized(item, item.Text);
-            RenderGoals();
-            RenderPlans();
-            RenderIntakes();
-            RenderStock();
-            DisplayEntries();
-            RenderOngoingMeasures();
+            // The constructor has already rendered these with the selected language.
+            // A later language change still needs to rebuild their visible rows.
+            if (!initialLoad)
+            {
+                RenderGoals();
+                RenderPlans();
+                RenderIntakes();
+                RenderStock();
+                DisplayEntries();
+                RenderOngoingMeasures();
+            }
             LocalizeAnalysisPeriod();
-            RefreshAnalysis();
-            ReloadNutrition(reloadFoods: false);
+            if (!initialLoad)
+            {
+                RefreshAnalysis();
+                ReloadNutrition(reloadFoods: false);
+            }
             UpdateMealIngredientEditor();
             UpdateEditingIndicators();
             foreach (var status in originalStatus.Keys) TranslateStatus(status);

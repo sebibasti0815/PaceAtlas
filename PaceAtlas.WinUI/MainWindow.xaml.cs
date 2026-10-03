@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -429,7 +430,18 @@ public sealed partial class MainWindow : Window
 
     public MainWindow()
     {
+        var startup = Stopwatch.StartNew();
+        var phases = new List<string>();
+        long measured = 0;
+        void Mark(string name)
+        {
+            var milliseconds = startup.ElapsedMilliseconds;
+            measured += milliseconds;
+            phases.Add($"{name} {milliseconds} ms");
+            startup.Restart();
+        }
         InitializeComponent();
+        Mark("XAML");
         MigrateWinUiSettings();
         SetInitialWindowSize();
         RestoreWindowPlacement();
@@ -440,6 +452,7 @@ public sealed partial class MainWindow : Window
         InitializePacing();
         TrackWindowPlacement();
         InitializeReminder();
+        Mark("Fenster/Tray");
         ConfigureTabColors(MainTabs);
         ConfigureTabColors(MedicationTabs);
         ConfigureTabColors(AnalysisTabs);
@@ -451,26 +464,36 @@ public sealed partial class MainWindow : Window
         RestoreEntryFilters();
         LoadColumnWidths();
         InitializeTableHeaders();
+        Mark("Tabellen");
         LoadConditionChoices();
         BuildFields();
         RenderMeasureReasons();
         InitializeIntervals();
         InitializeMeasuresAndPlans();
         InitializeAnalysis();
+        Mark("Eingaben/Medikamente/Auswertung");
         ResetForm();
         LoadEntries();
+        Mark("Verlauf");
         InitializeNutrition();
+        Mark("Ernährung");
         AttachStatusLocalization();
-        ApplyUiLanguage();
+        ApplyUiLanguage(initialLoad: true);
         UpdateEditingIndicators();
         todaySummaryTimer.Tick += (_, _) => { RefreshTodaySummary(); RefreshMedicationDueIndicators(); RefreshMealDueIndicators(); };
         todaySummaryTimer.Start();
+        Mark("Sprache/Status");
+        StartupConstructorMs = measured;
+        StartupTiming = string.Join(", ", phases);
         ((FrameworkElement)Content).Loaded += async (_, _) =>
         {
             await CheckForUpdatesAsync(false);
             await CheckBlsDataAsync(false);
         };
     }
+
+    internal string StartupTiming { get; private set; } = "";
+    internal long StartupConstructorMs { get; private set; }
 
     private static void ConfigureTabColors(TabView view)
     {
