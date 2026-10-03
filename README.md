@@ -1,6 +1,65 @@
-# Pace Atlas für Windows (WinUI 3)
+<img src="PaceAtlas.WinUI/Assets/pace-atlas.png" alt="Pace Atlas Logo" width="96" align="right">
 
-## Lizenz
+# Pace Atlas
+
+**Den eigenen Alltag mit ME/CFS erfassen, Zusammenhänge erkennen und Pacing bewusster gestalten.**
+
+Pace Atlas ist eine Windows-Anwendung für Menschen mit ME/CFS. Sie verbindet
+Zustand und Symptome mit Aktivitäten, Ruhezeiten, Maßnahmen, Medikamenten und
+Ernährung in einem zeitlichen Verlauf. Die Auswertungen helfen dir, deine
+eigenen Muster zu entdecken – zum Beispiel, welche Belastungen einem PEM
+vorausgingen. Deine Einträge liegen in einer lokalen SQLite-Datenbank.
+
+> „Kann ich das, was ich tue, zweimal hintereinander tun?“ – Ist die Antwort „nein“, tue es nicht.
+
+## Was du mit Pace Atlas machen kannst
+
+- **Zustand und Symptome festhalten:** Allgemeinzustand, PEM, Crash, Puls,
+  einzelne Symptome und Schmerzorte dokumentieren.
+- **Belastung und Erholung im Blick behalten:** Aktivitäten, Ruhe und Schlaf mit
+  Dauer, Intensität, Belastungsarten und Schutzmaßnahmen erfassen. Ein Pacing
+  Timer erinnert an Pausen.
+- **Maßnahmen und Medikamente verwalten:** Maßnahmen mit Anlass und Verlauf
+  notieren, Einnahmen im Tagesprotokoll abhaken und Packungen sowie Vorräte
+  überblicken.
+- **Mahlzeiten und Lebensmittel erfassen:** Geplante und gegessene Mahlzeiten,
+  Vorlagen, Kohlenhydrate sowie vorhandene GI- und GL-Werte zusammenführen.
+- **Den Verlauf auswerten:** Diagramme, Heatmaps, Symptomverläufe und
+  PEM-Risiken betrachten. Ergänzend gibt es eine lokale Einordnung und eine
+  optional konfigurierbare KI-Anbindung.
+
+## Einblicke in die Oberfläche
+
+Die Bilder zeigen Ausschnitte aus einer Entwicklungsversion. Anordnung und
+Beschriftungen können sich in neueren Versionen unterscheiden.
+
+### Zustand erfassen
+
+![Zustandserfassung mit Allgemeinzustand, PEM und einzelnen Symptomen](docs/screenshots/zustand-erfassen.png)
+
+### Mahlzeiten planen oder erfassen
+
+![Mahlzeitenformular mit Zutatenliste und geplanten Mahlzeiten](docs/screenshots/mahlzeiten.png)
+
+### Lebensmittel und Nährwerte
+
+![Lebensmitteltabelle mit Kohlenhydraten, GI und GL](docs/screenshots/lebensmittel.png)
+
+## Ausprobieren
+
+Pace Atlas läuft unter **Windows x64**. Falls ein fertiges Setup veröffentlicht
+ist, findest du es bei den [Releases](https://github.com/sebibasti0815/PaceAtlas/releases).
+Du kannst die Anwendung auch aus dem Quellcode bauen; die Anleitung steht
+[weiter unten](#starten). **Pace Atlas selbst ist für die nichtkommerzielle
+Nutzung vollständig kostenfrei.**
+
+---
+
+## Projekt, Lizenz und technische Hinweise
+
+Die Projektmappe `PaceAtlas.sln` enthält die Windows-Oberfläche `PaceAtlas.WinUI` und `PaceAtlas.Core`. Der ältere WinForms-Quellcode unter `PaceAtlas/` liefert weiterhin gemeinsam verwendete Ressourcen und Übersetzungen. Deshalb müssen alle drei Projektordner nebeneinander bleiben.
+
+### Lizenz
 
 Pace Atlas steht unter der [PolyForm Noncommercial License 1.0.0](LICENSE).
 Nichtkommerzielle Nutzung, Bearbeitung und Weitergabe sind nach deren Bedingungen
@@ -10,9 +69,7 @@ importierte Open-Food-Facts-Daten und Komponenten Dritter unterliegen ihren
 jeweiligen eigenen Lizenzbedingungen (siehe `THIRD-PARTY-NOTICES.md` und
 `LICENSE-OPEN-FOOD-FACTS.md`).
 
-Die Projektmappe `PaceAtlas.sln` enthält die Windows-Oberfläche `PaceAtlas.WinUI` und `PaceAtlas.Core`. Der ältere WinForms-Quellcode unter `PaceAtlas/` liefert weiterhin gemeinsam verwendete Ressourcen und Übersetzungen. Deshalb müssen alle drei Projektordner nebeneinander bleiben.
-
-## Starten
+### Starten
 
 Visual Studio mit WinUI-Workload, .NET 10 SDK und Windows SDK 10.0.26100 oder neuer verwenden. `PaceAtlas.sln` öffnen und `PaceAtlas.WinUI` als Startprojekt auswählen. Alternativ:
 
@@ -26,7 +83,7 @@ Wenn der erste Fensteraufbau länger als 500 ms dauert, erscheint ein rahmenlose
 Beim Schließen des Fensters bietet ein Dialog die Auswahl zwischen dem Tray, dem Beenden der Anwendung und Abbrechen.
 Mit „Für heute immer diese Auswahl“ wird „Ins Tray“ oder „Beenden“ bis zum nächsten lokalen Kalendertag gespeichert. Der ausdrückliche Befehl „Beenden“ im Tray-Menü bleibt davon unabhängig.
 
-## Installer
+### Installer
 
 Inno Setup 6 und die signierten Laufzeitinstaller aus `installer/prerequisites/README.md` bereitstellen. In Visual Studio `Installer|x64` bauen oder ausführen:
 
@@ -36,12 +93,13 @@ powershell -ExecutionPolicy Bypass -File .\installer\build-installer.ps1
 
 Das Setup erscheint unter `artifacts\installer\PaceAtlas-Setup-<Version>-win-x64.exe`. Die bestehende Installer-Kennung bleibt erhalten. Ein Upgrade entfernt die alte EXE `PaceAtlas.WinUIPrototype.exe`, legt `PaceAtlas.WinUI.exe` an und aktualisiert die Verknüpfungen.
 
-## Einstellungen und Daten
+### Einstellungen und Daten
 
 Die WinUI-Einstellungen liegen nun unter `%LOCALAPPDATA%\PaceAtlas.WinUI`. Beim ersten Start werden vorhandene Sprache, Fensterposition, Tab-Reihenfolge, Spaltenbreiten, Filter, Tray- und Update-Einstellungen aus `%LOCALAPPDATA%\PaceAtlas.WinUIPrototype` übernommen, sofern am neuen Ort noch keine entsprechende Datei existiert. Der alte Einstellungsordner bleibt als Rückfallmöglichkeit erhalten. Die gemeinsame Datenbank wird dabei nicht verschoben.
 
 Der Info-Dialog und die automatische tägliche Prüfung lesen die veröffentlichten Releases von `https://github.com/sebibasti0815/PaceAtlas`. Ein höheres reguläres Versions-Tag kann ein Update anbieten; Installation und Datenübernahme erfolgen nicht automatisch.
-# BLS-Offlinekatalog
+
+### BLS-Offlinekatalog
 
 Der eingebettete Katalog `PaceAtlas.Core/Bls4Catalog.tsv.gz` wurde aus dem
 Bundeslebensmittelschlüssel 4.0 erstellt: Max Rubner-Institut (2025),
@@ -65,7 +123,7 @@ prüft „BLS-Aktualisierung prüfen“ die offizielle Download-Datei. Zusätzli
 geschieht dies beim Start höchstens einmal täglich. Ein geänderter Download wird
 gemeldet, aber nicht ungeprüft in die lokale Datenbank importiert.
 
-## Open Food Facts importieren
+### Open Food Facts importieren
 
 Die offizielle, tabulatorgetrennte CSV-Exportdatei (auch als `.gz`) steht unter
 https://world.openfoodfacts.org/data zur Verfügung. Im Register **Ernährung →
