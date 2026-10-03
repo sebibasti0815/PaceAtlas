@@ -138,6 +138,7 @@ public sealed partial class MainWindow
         DrawWeeklyHeatmap();
         RestoreAiResponse();
         RefreshSymptomPatterns();
+        RefreshSymptomCooccurrence();
         RefreshActivityMatrix();
         RefreshLoadAnalysis();
         RefreshSymptomTrend();

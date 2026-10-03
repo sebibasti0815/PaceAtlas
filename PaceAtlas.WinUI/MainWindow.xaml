@@ -777,6 +777,11 @@
                           <TabViewItem Header="Mehrfachsymptome" IsClosable="False">
                             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="8,8,24,8">
                               <StackPanel Spacing="12">
+                                <TextBlock Text="Gemeinsames Auftreten" FontSize="16" FontWeight="SemiBold" />
+                                <TextBlock x:Name="SymptomCooccurrenceNote" TextWrapping="Wrap" />
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                  <StackPanel x:Name="SymptomCooccurrenceTable" Spacing="0" />
+                                </ScrollViewer>
                                 <TextBlock Text="Prägende Symptome" FontSize="16" FontWeight="SemiBold" />
                                 <TextBlock x:Name="DominantSymptomsNote" TextWrapping="Wrap" />
                                 <StackPanel x:Name="DominantSymptomsRows" Spacing="5" />
