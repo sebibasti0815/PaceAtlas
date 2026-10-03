@@ -13,11 +13,11 @@ using System.Reflection;
 
 [assembly: System.Reflection.AssemblyCompanyAttribute("PaceAtlas.WinUI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
-[assembly: System.Reflection.AssemblyFileVersionAttribute("0.16.5.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("0.16.5+239d1ee205c5fa76ac3e65614645f1dc3052fafe")]
+[assembly: System.Reflection.AssemblyFileVersionAttribute("0.16.7.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("0.16.7+23b2b57785463f4e7e96ebc6dfed5285468a3fbd")]
 [assembly: System.Reflection.AssemblyProductAttribute("PaceAtlas.WinUI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PaceAtlas.WinUI")]
-[assembly: System.Reflection.AssemblyVersionAttribute("0.16.5.0")]
+[assembly: System.Reflection.AssemblyVersionAttribute("0.16.7.0")]
 [assembly: System.Runtime.Versioning.TargetPlatformAttribute("Windows10.0.26100.0")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("Windows10.0.19041.0")]
 
