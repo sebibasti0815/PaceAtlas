@@ -139,6 +139,7 @@ public sealed partial class MainWindow
             presenter.IsAlwaysOnTop = true;
             presenter.IsResizable = false;
         }
+        popup.AppWindow.IsShownInSwitchers = false;
         var work = PrimaryWorkArea();
         var popupHandle = WinRT.Interop.WindowNative.GetWindowHandle(popup);
         // AppWindow uses physical pixels; XAML content is measured in effective pixels.
@@ -151,19 +152,9 @@ public sealed partial class MainWindow
         popup.AppWindow.MoveAndResize(new RectInt32(work.X + work.Width - width - 18,
             work.Y + 18, width, height));
         reminderPopup = popup;
-        // Show without stealing keyboard focus from the current application.
-        var style = GetWindowLongPtrW(popupHandle, -16); // GWL_STYLE
-        // WS_POPUP without caption, sizing frame or dialog border leaves only the XAML surface.
-        SetWindowLongPtrW(popupHandle, -16,
-            new IntPtr((style.ToInt64() & ~0x00CF0000L) | unchecked((long)0x80000000)));
-        var extendedStyle = GetWindowLongPtrW(popupHandle, -20); // GWL_EXSTYLE
-        SetWindowLongPtrW(popupHandle, -20,
-            new IntPtr((extendedStyle.ToInt64() & ~0x00000300L) | 0x08000080L)); // no edge; NOACTIVATE | TOOLWINDOW
-        SetWindowPos(popupHandle, IntPtr.Zero, 0, 0, 0, 0, 0x0027); // FRAMECHANGED | NOMOVE | NOSIZE | NOZORDER
-        int noBorder = unchecked((int)0xFFFFFFFE); // DWMWA_COLOR_NONE
-        DwmSetWindowAttribute(popupHandle, 34, ref noBorder, sizeof(int)); // DWMWA_BORDER_COLOR
-        ShowWindow(popupHandle, 4); // SW_SHOWNOACTIVATE
-        DwmSetWindowAttribute(popupHandle, 34, ref noBorder, sizeof(int));
+        // Do not take focus on appearance; a subsequent click may activate the window
+        // normally so WinUI can dispatch Button.Click to either action.
+        popup.AppWindow.Show(false);
         reminderDismiss.Start();
     }
 
@@ -217,14 +208,4 @@ public sealed partial class MainWindow
         CloseReminderPopup();
     }
 
-    [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hwnd, int command);
-    [DllImport("dwmapi.dll")] private static extern int DwmSetWindowAttribute(
-        IntPtr hwnd, uint attribute, ref int value, int valueSize);
-    [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW")]
-    private static extern IntPtr GetWindowLongPtrW(IntPtr hwnd, int index);
-    [DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW")]
-    private static extern IntPtr SetWindowLongPtrW(IntPtr hwnd, int index, IntPtr value);
-    [DllImport("user32.dll")]
-    private static extern bool SetWindowPos(IntPtr hwnd, IntPtr insertAfter,
-        int x, int y, int width, int height, uint flags);
 }
