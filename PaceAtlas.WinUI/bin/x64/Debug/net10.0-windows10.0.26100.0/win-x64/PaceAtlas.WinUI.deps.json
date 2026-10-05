@@ -7,11 +7,11 @@
   "targets": {
     ".NETCoreApp,Version=v10.0": {},
     ".NETCoreApp,Version=v10.0/win-x64": {
-      "PaceAtlas.WinUI/0.17.6": {
+      "PaceAtlas.WinUI/0.17.8": {
         "dependencies": {
           "Microsoft.WindowsAppSDK": "1.8.260921001",
           "PDFsharp-MigraDoc-GDI": "6.2.4",
-          "PaceAtlas.Core": "0.17.6",
+          "PaceAtlas.Core": "0.17.8",
           "Microsoft.Web.WebView2.Core.Projection": "1.0.3179.45",
           "runtimepack.Microsoft.Windows.SDK.NET.Ref": "10.0.26100.57"
         },
@@ -361,14 +361,14 @@
           }
         }
       },
-      "PaceAtlas.Core/0.17.6": {
+      "PaceAtlas.Core/0.17.8": {
         "dependencies": {
           "Microsoft.Data.Sqlite": "10.0.12"
         },
         "runtime": {
           "PaceAtlas.Core.dll": {
-            "assemblyVersion": "0.17.6.0",
-            "fileVersion": "0.17.6.0"
+            "assemblyVersion": "0.17.8.0",
+            "fileVersion": "0.17.8.0"
           }
         }
       },
@@ -383,7 +383,7 @@
     }
   },
   "libraries": {
-    "PaceAtlas.WinUI/0.17.6": {
+    "PaceAtlas.WinUI/0.17.8": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -526,7 +526,7 @@
       "path": "system.numerics.tensors/9.0.0",
       "hashPath": "system.numerics.tensors.9.0.0.nupkg.sha512"
     },
-    "PaceAtlas.Core/0.17.6": {
+    "PaceAtlas.Core/0.17.8": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

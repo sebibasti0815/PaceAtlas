@@ -670,7 +670,7 @@
           }
         }
       },
-      "PaceAtlas.Core/0.17.6": {
+      "PaceAtlas.Core/0.17.8": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
         "dependencies": {
@@ -1219,7 +1219,7 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "PaceAtlas.Core/0.17.6": {
+      "PaceAtlas.Core/0.17.8": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
         "dependencies": {
@@ -3580,7 +3580,7 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "PaceAtlas.Core/0.17.6": {
+    "PaceAtlas.Core/0.17.8": {
       "type": "project",
       "path": "../PaceAtlas.Core/PaceAtlas.Core.csproj",
       "msbuildProject": "../PaceAtlas.Core/PaceAtlas.Core.csproj"
@@ -3590,7 +3590,7 @@
     "net10.0-windows10.0.26100.0": [
       "Microsoft.WindowsAppSDK >= 1.8.260921001",
       "PDFsharp-MigraDoc-GDI >= 6.2.4",
-      "PaceAtlas.Core >= 0.17.6"
+      "PaceAtlas.Core >= 0.17.8"
     ]
   },
   "packageFolders": {
@@ -3598,7 +3598,7 @@
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
-    "version": "0.17.6",
+    "version": "0.17.8",
     "restore": {
       "projectUniqueName": "L:\\source\\repos\\PaceAtlas\\PaceAtlas.WinUI\\PaceAtlas.WinUI.csproj",
       "projectName": "PaceAtlas.WinUI",

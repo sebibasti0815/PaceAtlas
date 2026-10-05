@@ -117,8 +117,9 @@ public sealed partial class MainWindow
             Foreground = new SolidColorBrush(Microsoft.UI.Colors.White) };
         var record = new Button { Content = english ? "Record condition" : "Zustand erfassen",
             Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 22, 119, 137)),
-            Foreground = new SolidColorBrush(Microsoft.UI.Colors.White), MinWidth = 175,
-            MinHeight = 40, HorizontalContentAlignment = HorizontalAlignment.Center,
+            Foreground = new SolidColorBrush(Microsoft.UI.Colors.White),
+            Height = 40, CornerRadius = new CornerRadius(5),
+            HorizontalContentAlignment = HorizontalAlignment.Center,
             VerticalContentAlignment = VerticalAlignment.Center };
         record.Click += (_, _) =>
         {
@@ -128,13 +129,19 @@ public sealed partial class MainWindow
             MainTabs.SelectedItem = StateTab;
             Activate();
         };
-        var later = new Button { Content = english ? "Later" : "Später", MinWidth = 100,
-            MinHeight = 40, HorizontalContentAlignment = HorizontalAlignment.Center,
+        var later = new Button { Content = english ? "Later" : "Später",
+            Height = 40, CornerRadius = new CornerRadius(5),
+            HorizontalContentAlignment = HorizontalAlignment.Center,
             VerticalContentAlignment = VerticalAlignment.Center };
         later.Click += (_, _) => CloseReminderPopup();
-        var buttons = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 12,
+        var buttons = new Grid { ColumnSpacing = 12, Width = 362,
             Margin = new Thickness(0, 12, 0, 0) };
+        buttons.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(175) });
+        buttons.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(175) });
+        record.HorizontalAlignment = HorizontalAlignment.Stretch;
+        later.HorizontalAlignment = HorizontalAlignment.Stretch;
         buttons.Children.Add(record);
+        Grid.SetColumn(later, 1);
         buttons.Children.Add(later);
         var body = new StackPanel { Spacing = 14, Margin = new Thickness(22, 20, 18, 28) };
         body.Children.Add(title);
