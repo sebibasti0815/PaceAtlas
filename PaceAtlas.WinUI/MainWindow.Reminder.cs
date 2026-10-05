@@ -21,6 +21,11 @@ public sealed partial class MainWindow
     private readonly DispatcherTimer reminderClock = new() { Interval = TimeSpan.FromSeconds(10) };
     private readonly DispatcherTimer reminderDismiss = new() { Interval = TimeSpan.FromSeconds(20) };
     private Window? reminderPopup;
+    private TextBlock? reminderTitle;
+    private TextBlock? reminderDescription;
+    private Button? reminderRecord;
+    private Button? reminderLater;
+    private bool reminderVisible;
     private DateTimeOffset nextReminder;
     private int reminderMinutes;
     private bool reminderCustom;
@@ -81,13 +86,27 @@ public sealed partial class MainWindow
     {
         if (DateTimeOffset.UtcNow < nextReminder || reminderMinutes == 0) return;
         nextReminder = DateTimeOffset.UtcNow.AddMinutes(reminderMinutes);
-        if (reminderPopup is not null) return;
+        if (reminderVisible) return;
         ShowReminderPopup();
     }
 
     private void ShowReminderPopup()
     {
         bool english = selectedLanguage == "en";
+        if (reminderPopup is not null)
+        {
+            reminderPopup.Title = english ? "Condition reminder" : "Zustandserinnerung";
+            reminderTitle!.Text = english ? "How are you feeling?" : "Wie geht es dir gerade?";
+            reminderDescription!.Text = english
+                ? "A quick entry helps you notice changes over time."
+                : "Ein kurzer Eintrag hilft dir, Veränderungen im Verlauf zu erkennen.";
+            reminderRecord!.Content = english ? "Record condition" : "Zustand erfassen";
+            reminderLater!.Content = english ? "Later" : "Später";
+            reminderPopup.AppWindow.Show(false);
+            reminderVisible = true;
+            reminderDismiss.Start();
+            return;
+        }
         var title = new TextBlock { Text = english ? "How are you feeling?" : "Wie geht es dir gerade?",
             FontSize = 19, FontWeight = Microsoft.UI.Text.FontWeights.Bold,
             Foreground = new SolidColorBrush(Microsoft.UI.Colors.White) };
@@ -131,7 +150,11 @@ public sealed partial class MainWindow
         popup.Closed += (_, _) =>
         {
             reminderDismiss.Stop();
-            if (ReferenceEquals(reminderPopup, popup)) reminderPopup = null;
+            if (ReferenceEquals(reminderPopup, popup))
+            {
+                reminderPopup = null;
+                reminderVisible = false;
+            }
         };
         if (popup.AppWindow.Presenter is OverlappedPresenter presenter)
         {
@@ -152,9 +175,14 @@ public sealed partial class MainWindow
         popup.AppWindow.MoveAndResize(new RectInt32(work.X + work.Width - width - 18,
             work.Y + 18, width, height));
         reminderPopup = popup;
+        reminderTitle = title;
+        reminderDescription = description;
+        reminderRecord = record;
+        reminderLater = later;
         // Do not take focus on appearance; a subsequent click may activate the window
         // normally so WinUI can dispatch Button.Click to either action.
         popup.AppWindow.Show(false);
+        reminderVisible = true;
         reminderDismiss.Start();
     }
 
@@ -177,9 +205,9 @@ public sealed partial class MainWindow
     private void CloseReminderPopup()
     {
         reminderDismiss.Stop();
-        var popup = reminderPopup;
-        reminderPopup = null;
-        popup?.Close();
+        if (!reminderVisible) return;
+        reminderVisible = false;
+        reminderPopup?.AppWindow.Hide();
     }
 
     private async void ConfigureReminderInterval()
@@ -206,6 +234,9 @@ public sealed partial class MainWindow
     {
         reminderClock.Stop();
         CloseReminderPopup();
+        var popup = reminderPopup;
+        reminderPopup = null;
+        popup?.Close();
     }
 
 }
