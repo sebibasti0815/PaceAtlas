@@ -93,3 +93,17 @@ L:\source\repos\PaceAtlas\PaceAtlas.WinUI\obj\x64\Debug\net10.0-windows10.0.2610
 L:\source\repos\PaceAtlas\PaceAtlas.WinUI\obj\x64\Debug\net10.0-windows10.0.26100.0\win-x64\MultipleQualifiersPerDimensionFound.txt
 L:\source\repos\PaceAtlas\PaceAtlas.WinUI\obj\x64\Debug\net10.0-windows10.0.26100.0\win-x64\PaceAtlas.WinUI.sourcelink.json
 L:\source\repos\PaceAtlas\PaceAtlas.WinUI\bin\x64\Debug\net10.0-windows10.0.26100.0\win-x64\LICENSE
+L:\source\repos\PaceAtlas\PaceAtlas.WinUI\bin\x64\Debug\net10.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+L:\source\repos\PaceAtlas\PaceAtlas.WinUI\bin\x64\Debug\net10.0-windows10.0.26100.0\win-x64\Microsoft.Extensions.Logging.Abstractions.dll
+L:\source\repos\PaceAtlas\PaceAtlas.WinUI\bin\x64\Debug\net10.0-windows10.0.26100.0\win-x64\PdfSharp-gdi.dll
+L:\source\repos\PaceAtlas\PaceAtlas.WinUI\bin\x64\Debug\net10.0-windows10.0.26100.0\win-x64\PdfSharp.BarCodes-gdi.dll
+L:\source\repos\PaceAtlas\PaceAtlas.WinUI\bin\x64\Debug\net10.0-windows10.0.26100.0\win-x64\PdfSharp.Charting-gdi.dll
+L:\source\repos\PaceAtlas\PaceAtlas.WinUI\bin\x64\Debug\net10.0-windows10.0.26100.0\win-x64\PdfSharp.Cryptography.dll
+L:\source\repos\PaceAtlas\PaceAtlas.WinUI\bin\x64\Debug\net10.0-windows10.0.26100.0\win-x64\PdfSharp.Quality-gdi.dll
+L:\source\repos\PaceAtlas\PaceAtlas.WinUI\bin\x64\Debug\net10.0-windows10.0.26100.0\win-x64\PdfSharp.Shared.dll
+L:\source\repos\PaceAtlas\PaceAtlas.WinUI\bin\x64\Debug\net10.0-windows10.0.26100.0\win-x64\PdfSharp.Snippets-gdi.dll
+L:\source\repos\PaceAtlas\PaceAtlas.WinUI\bin\x64\Debug\net10.0-windows10.0.26100.0\win-x64\PdfSharp.System.dll
+L:\source\repos\PaceAtlas\PaceAtlas.WinUI\bin\x64\Debug\net10.0-windows10.0.26100.0\win-x64\PdfSharp.WPFonts.dll
+L:\source\repos\PaceAtlas\PaceAtlas.WinUI\bin\x64\Debug\net10.0-windows10.0.26100.0\win-x64\MigraDoc.DocumentObjectModel.dll
+L:\source\repos\PaceAtlas\PaceAtlas.WinUI\bin\x64\Debug\net10.0-windows10.0.26100.0\win-x64\MigraDoc.Rendering-gdi.dll
+L:\source\repos\PaceAtlas\PaceAtlas.WinUI\bin\x64\Debug\net10.0-windows10.0.26100.0\win-x64\MigraDoc.RtfRendering-gdi.dll

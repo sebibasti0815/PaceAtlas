@@ -2378,7 +2378,7 @@ public sealed partial class MainWindow : Window
         if (save)
         {
             var picker = new Windows.Storage.Pickers.FileSavePicker { SuggestedFileName = suggestedName };
-            picker.FileTypeChoices.Add(extension == ".csv" ? "CSV-Datei" : "SQLite-Backup", [extension]);
+            picker.FileTypeChoices.Add(extension switch { ".csv" => "CSV-Datei", ".pdf" => "PDF-Datei", _ => "SQLite-Backup" }, [extension]);
             WinRT.Interop.InitializeWithWindow.Initialize(picker, handle);
             return (await picker.PickSaveFileAsync())?.Path;
         }

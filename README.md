@@ -28,6 +28,8 @@ SQLite database.
 - **Explore your history:** View charts, heatmaps, symptom trends, and PEM risks.
   A local interpretation and an optional configurable AI connection are also
   available.
+- **Create a medical report:** Export a PDF for a chosen period, with optional
+  nutrition, medication, personal notes, and a short daily history.
 
 ## A look at the interface
 
@@ -56,6 +58,11 @@ You can also build the application from source; see [Running from source](#runni
 ---
 
 ## Project, license, and technical notes
+
+Under **Analysis → Medical report**, choose a date range and the sections to
+include, then save the PDF. It summarizes recorded data only: unassessed
+symptoms and missing meals remain unknown. Nutrition includes only meals saved
+as eaten; carbohydrate averages use days with complete values.
 
 The `PaceAtlas.sln` solution contains the Windows UI in `PaceAtlas.WinUI` and
 `PaceAtlas.Core`. The older WinForms source in `PaceAtlas/` still supplies shared
@@ -207,6 +214,8 @@ vorausgingen. Deine Einträge liegen in einer lokalen SQLite-Datenbank.
 - **Den Verlauf auswerten:** Diagramme, Heatmaps, Symptomverläufe und
   PEM-Risiken betrachten. Ergänzend gibt es eine lokale Einordnung und eine
   optional konfigurierbare KI-Anbindung.
+- **Arztbericht erstellen:** Für einen gewählten Zeitraum ein PDF mit optionaler
+  Ernährung, Einnahmeplan, persönlichen Notizen und kurzem Tagesverlauf exportieren.
 
 ## Einblicke in die Oberfläche
 
@@ -236,6 +245,11 @@ Nutzung vollständig kostenfrei.**
 ---
 
 ## Projekt, Lizenz und technische Hinweise
+
+Unter **Auswertung → Arztbericht** Zeitraum und gewünschte Abschnitte auswählen
+und das PDF speichern. Der Bericht fasst ausschließlich erfasste Daten zusammen:
+Nicht beurteilte Symptome und fehlende Mahlzeiten bleiben unbekannt. Für
+Kohlenhydratmittelwerte zählen nur Tage mit vollständigen Werten.
 
 Die Projektmappe `PaceAtlas.sln` enthält die Windows-Oberfläche `PaceAtlas.WinUI` und `PaceAtlas.Core`. Der ältere WinForms-Quellcode unter `PaceAtlas/` liefert weiterhin gemeinsam verwendete Ressourcen und Übersetzungen. Deshalb müssen alle drei Projektordner nebeneinander bleiben.
 

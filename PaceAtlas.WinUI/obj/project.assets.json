@@ -32,6 +32,41 @@
           }
         }
       },
+      "Microsoft.Extensions.DependencyInjection.Abstractions/8.0.2": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net6.0/_._": {}
+        }
+      },
+      "Microsoft.Extensions.Logging.Abstractions/8.0.3": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.2"
+        },
+        "compile": {
+          "lib/net8.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net6.0/Microsoft.Extensions.Logging.Abstractions.targets": {}
+        }
+      },
       "Microsoft.Web.WebView2/1.0.3179.45": {
         "type": "package",
         "build": {
@@ -360,6 +395,107 @@
           "buildTransitive/Microsoft.WindowsAppSDK.WinUI.targets": {}
         }
       },
+      "PDFsharp-GDI/6.2.4": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
+          "System.Security.Cryptography.Pkcs": "8.0.1"
+        },
+        "compile": {
+          "lib/net10.0-windows7.0/PdfSharp-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.BarCodes-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Charting-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Cryptography.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Quality-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Shared.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Snippets-gdi.dll": {
+            "related": ".pdb"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.System.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.WPFonts.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0-windows7.0/PdfSharp-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.BarCodes-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Charting-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Cryptography.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Quality-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Shared.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Snippets-gdi.dll": {
+            "related": ".pdb"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.System.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.WPFonts.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.WindowsDesktop.App.WindowsForms"
+        ]
+      },
+      "PDFsharp-MigraDoc-GDI/6.2.4": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
+          "PDFsharp-GDI": "6.2.4",
+          "System.Security.Cryptography.Pkcs": "8.0.1"
+        },
+        "compile": {
+          "lib/net10.0-windows7.0/MigraDoc.DocumentObjectModel.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/MigraDoc.Rendering-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/MigraDoc.RtfRendering-gdi.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0-windows7.0/MigraDoc.DocumentObjectModel.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/MigraDoc.Rendering-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/MigraDoc.RtfRendering-gdi.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.WindowsDesktop.App.WindowsForms"
+        ]
+      },
       "SQLitePCLRaw.bundle_e_sqlite3/2.1.12": {
         "type": "package",
         "dependencies": {
@@ -512,7 +648,578 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
-      "PaceAtlas.Core/0.17.1": {
+      "System.Security.Cryptography.Pkcs/8.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/System.Security.Cryptography.Pkcs.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/System.Security.Cryptography.Pkcs.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net6.0/_._": {}
+        },
+        "runtimeTargets": {
+          "runtimes/win/lib/net8.0/System.Security.Cryptography.Pkcs.dll": {
+            "assetType": "runtime",
+            "rid": "win"
+          }
+        }
+      },
+      "PaceAtlas.Core/0.17.5": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "Microsoft.Data.Sqlite": "10.0.12"
+        },
+        "compile": {
+          "bin/placeholder/PaceAtlas.Core.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/PaceAtlas.Core.dll": {}
+        }
+      }
+    },
+    "net10.0-windows10.0.26100.0/win-arm64": {
+      "Microsoft.Data.Sqlite/10.0.12": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Data.Sqlite.Core": "10.0.12",
+          "SQLitePCLRaw.bundle_e_sqlite3": "2.1.12",
+          "SQLitePCLRaw.core": "2.1.12"
+        },
+        "compile": {
+          "lib/netstandard2.0/_._": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/_._": {}
+        }
+      },
+      "Microsoft.Data.Sqlite.Core/10.0.12": {
+        "type": "package",
+        "dependencies": {
+          "SQLitePCLRaw.core": "2.1.12"
+        },
+        "compile": {
+          "lib/net8.0/Microsoft.Data.Sqlite.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.Data.Sqlite.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Microsoft.Extensions.DependencyInjection.Abstractions/8.0.2": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net6.0/_._": {}
+        }
+      },
+      "Microsoft.Extensions.Logging.Abstractions/8.0.3": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.2"
+        },
+        "compile": {
+          "lib/net8.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net6.0/Microsoft.Extensions.Logging.Abstractions.targets": {}
+        }
+      },
+      "Microsoft.Web.WebView2/1.0.3179.45": {
+        "type": "package",
+        "native": {
+          "runtimes/win-arm64/native/WebView2Loader.dll": {}
+        },
+        "build": {
+          "buildTransitive/Microsoft.Web.WebView2.targets": {}
+        }
+      },
+      "Microsoft.Windows.SDK.BuildTools/10.0.26100.4654": {
+        "type": "package",
+        "build": {
+          "buildTransitive/Microsoft.Windows.SDK.BuildTools.props": {},
+          "buildTransitive/Microsoft.Windows.SDK.BuildTools.targets": {}
+        }
+      },
+      "Microsoft.Windows.SDK.BuildTools.MSIX/1.7.20250829.1": {
+        "type": "package",
+        "build": {
+          "buildTransitive/Microsoft.Windows.SDK.BuildTools.MSIX.props": {},
+          "buildTransitive/Microsoft.Windows.SDK.BuildTools.MSIX.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK/1.8.260921001": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.WindowsAppSDK.AI": "[1.8.79]",
+          "Microsoft.WindowsAppSDK.Base": "[1.8.251216001]",
+          "Microsoft.WindowsAppSDK.DWrite": "[1.8.25122902]",
+          "Microsoft.WindowsAppSDK.Foundation": "[1.8.260803002]",
+          "Microsoft.WindowsAppSDK.InteractiveExperiences": "[1.8.260708001]",
+          "Microsoft.WindowsAppSDK.ML": "[1.8.2223]",
+          "Microsoft.WindowsAppSDK.Runtime": "[1.8.260921001]",
+          "Microsoft.WindowsAppSDK.Widgets": "[1.8.251231004]",
+          "Microsoft.WindowsAppSDK.WinUI": "[1.8.260803003]"
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK.AI/1.8.79": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.WindowsAppSDK.Base": "1.8.251216001",
+          "Microsoft.WindowsAppSDK.Foundation": "1.8.260501000"
+        },
+        "compile": {
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Graphics.Imaging.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.ContentSafety.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.Foundation.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.Imaging.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.Text.Projection.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Graphics.Imaging.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.ContentSafety.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.Foundation.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.Imaging.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.Text.Projection.dll": {}
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.AI.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.AI.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK.Base/1.8.251216001": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Windows.SDK.BuildTools": "10.0.26100.4654",
+          "Microsoft.Windows.SDK.BuildTools.MSIX": "1.7.20250829.1"
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.Base.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.Base.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK.DWrite/1.8.25122902": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.WindowsAppSDK.Base": "1.8.251216001"
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.DWrite.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.DWrite.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK.Foundation/1.8.260803002": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.WindowsAppSDK.Base": "1.8.251216001",
+          "Microsoft.WindowsAppSDK.InteractiveExperiences": "1.8.260708001"
+        },
+        "compile": {
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Security.Authentication.OAuth.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AppLifecycle.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AppNotifications.Builder.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AppNotifications.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.ApplicationModel.Background.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.ApplicationModel.DynamicDependency.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.ApplicationModel.Resources.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.ApplicationModel.WindowsAppRuntime.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.BadgeNotifications.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Foundation.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Management.Deployment.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Media.Capture.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.PushNotifications.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Security.AccessControl.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Storage.Pickers.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Storage.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.System.Power.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.System.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.WindowsAppRuntime.Bootstrap.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Security.Authentication.OAuth.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AppLifecycle.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AppNotifications.Builder.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AppNotifications.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.ApplicationModel.Background.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.ApplicationModel.DynamicDependency.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.ApplicationModel.Resources.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.ApplicationModel.WindowsAppRuntime.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.BadgeNotifications.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Foundation.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Management.Deployment.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Media.Capture.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.PushNotifications.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Security.AccessControl.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Storage.Pickers.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Storage.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.System.Power.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.System.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.WindowsAppRuntime.Bootstrap.Net.dll": {}
+        },
+        "native": {
+          "runtimes/win-arm64/native/Microsoft.Windows.ApplicationModel.Background.UniversalBGTask.dll": {},
+          "runtimes/win-arm64/native/Microsoft.WindowsAppRuntime.Bootstrap.dll": {}
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.Foundation.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.Foundation.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK.InteractiveExperiences/1.8.260708001": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.WindowsAppSDK.Base": "1.8.251216001"
+        },
+        "compile": {
+          "lib/net6.0-windows10.0.18362.0/Microsoft.InteractiveExperiences.Projection.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0-windows10.0.18362.0/Microsoft.InteractiveExperiences.Projection.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.InteractiveExperiences.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.InteractiveExperiences.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK.ML/1.8.2223": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.WindowsAppSDK.Base": "1.8.251216001",
+          "Microsoft.WindowsAppSDK.Foundation": "1.8.260803002",
+          "System.Numerics.Tensors": "9.0.0"
+        },
+        "compile": {
+          "lib/net8.0-windows10.0.17763.0/Microsoft.ML.OnnxRuntime.dll": {},
+          "lib/net8.0-windows10.0.17763.0/Microsoft.Windows.AI.MachineLearning.Projection.dll": {}
+        },
+        "runtime": {
+          "lib/net8.0-windows10.0.17763.0/Microsoft.ML.OnnxRuntime.dll": {},
+          "lib/net8.0-windows10.0.17763.0/Microsoft.Windows.AI.MachineLearning.Projection.dll": {}
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.ML.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.ML.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK.Runtime/1.8.260921001": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.WindowsAppSDK.Base": "1.8.251216001"
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.Runtime.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.Runtime.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK.Widgets/1.8.251231004": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.WindowsAppSDK.Base": "1.8.251216001"
+        },
+        "compile": {
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Widgets.Projection.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Widgets.Projection.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.Widgets.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.Widgets.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK.WinUI/1.8.260803003": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Web.WebView2": "1.0.3179.45",
+          "Microsoft.WindowsAppSDK.Base": "1.8.251216001",
+          "Microsoft.WindowsAppSDK.Foundation": "1.8.260803002",
+          "Microsoft.WindowsAppSDK.InteractiveExperiences": "1.8.260708001"
+        },
+        "compile": {
+          "lib/net6.0-windows10.0.17763.0/Microsoft.WinUI.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0-windows10.0.17763.0/Microsoft.WinUI.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.WinUI.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.WinUI.targets": {}
+        }
+      },
+      "PDFsharp-GDI/6.2.4": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
+          "System.Security.Cryptography.Pkcs": "8.0.1"
+        },
+        "compile": {
+          "lib/net10.0-windows7.0/PdfSharp-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.BarCodes-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Charting-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Cryptography.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Quality-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Shared.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Snippets-gdi.dll": {
+            "related": ".pdb"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.System.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.WPFonts.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0-windows7.0/PdfSharp-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.BarCodes-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Charting-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Cryptography.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Quality-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Shared.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Snippets-gdi.dll": {
+            "related": ".pdb"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.System.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.WPFonts.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.WindowsDesktop.App.WindowsForms"
+        ]
+      },
+      "PDFsharp-MigraDoc-GDI/6.2.4": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
+          "PDFsharp-GDI": "6.2.4",
+          "System.Security.Cryptography.Pkcs": "8.0.1"
+        },
+        "compile": {
+          "lib/net10.0-windows7.0/MigraDoc.DocumentObjectModel.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/MigraDoc.Rendering-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/MigraDoc.RtfRendering-gdi.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0-windows7.0/MigraDoc.DocumentObjectModel.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/MigraDoc.Rendering-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/MigraDoc.RtfRendering-gdi.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.WindowsDesktop.App.WindowsForms"
+        ]
+      },
+      "SQLitePCLRaw.bundle_e_sqlite3/2.1.12": {
+        "type": "package",
+        "dependencies": {
+          "SQLitePCLRaw.lib.e_sqlite3": "2.1.12",
+          "SQLitePCLRaw.provider.e_sqlite3": "2.1.12"
+        },
+        "compile": {
+          "lib/netstandard2.0/SQLitePCLRaw.batteries_v2.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/SQLitePCLRaw.batteries_v2.dll": {}
+        }
+      },
+      "SQLitePCLRaw.core/2.1.12": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/SQLitePCLRaw.core.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/SQLitePCLRaw.core.dll": {}
+        }
+      },
+      "SQLitePCLRaw.lib.e_sqlite3/2.1.12": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/_._": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/_._": {}
+        },
+        "native": {
+          "runtimes/win-arm64/native/e_sqlite3.dll": {}
+        },
+        "build": {
+          "buildTransitive/net9.0/SQLitePCLRaw.lib.e_sqlite3.targets": {}
+        }
+      },
+      "SQLitePCLRaw.provider.e_sqlite3/2.1.12": {
+        "type": "package",
+        "dependencies": {
+          "SQLitePCLRaw.core": "2.1.12"
+        },
+        "compile": {
+          "lib/net6.0-windows7.0/SQLitePCLRaw.provider.e_sqlite3.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0-windows7.0/SQLitePCLRaw.provider.e_sqlite3.dll": {}
+        }
+      },
+      "System.Numerics.Tensors/9.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net9.0/System.Numerics.Tensors.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/System.Numerics.Tensors.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
+        }
+      },
+      "System.Security.Cryptography.Pkcs/8.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/System.Security.Cryptography.Pkcs.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "runtimes/win/lib/net8.0/System.Security.Cryptography.Pkcs.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net6.0/_._": {}
+        }
+      },
+      "PaceAtlas.Core/0.17.5": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
         "dependencies": {
@@ -555,6 +1262,41 @@
           "lib/net8.0/Microsoft.Data.Sqlite.dll": {
             "related": ".xml"
           }
+        }
+      },
+      "Microsoft.Extensions.DependencyInjection.Abstractions/8.0.2": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net6.0/_._": {}
+        }
+      },
+      "Microsoft.Extensions.Logging.Abstractions/8.0.3": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.2"
+        },
+        "compile": {
+          "lib/net8.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net6.0/Microsoft.Extensions.Logging.Abstractions.targets": {}
         }
       },
       "Microsoft.Web.WebView2/1.0.3179.45": {
@@ -844,6 +1586,107 @@
           "buildTransitive/Microsoft.WindowsAppSDK.WinUI.targets": {}
         }
       },
+      "PDFsharp-GDI/6.2.4": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
+          "System.Security.Cryptography.Pkcs": "8.0.1"
+        },
+        "compile": {
+          "lib/net10.0-windows7.0/PdfSharp-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.BarCodes-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Charting-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Cryptography.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Quality-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Shared.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Snippets-gdi.dll": {
+            "related": ".pdb"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.System.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.WPFonts.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0-windows7.0/PdfSharp-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.BarCodes-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Charting-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Cryptography.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Quality-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Shared.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Snippets-gdi.dll": {
+            "related": ".pdb"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.System.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.WPFonts.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.WindowsDesktop.App.WindowsForms"
+        ]
+      },
+      "PDFsharp-MigraDoc-GDI/6.2.4": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
+          "PDFsharp-GDI": "6.2.4",
+          "System.Security.Cryptography.Pkcs": "8.0.1"
+        },
+        "compile": {
+          "lib/net10.0-windows7.0/MigraDoc.DocumentObjectModel.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/MigraDoc.Rendering-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/MigraDoc.RtfRendering-gdi.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0-windows7.0/MigraDoc.DocumentObjectModel.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/MigraDoc.Rendering-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/MigraDoc.RtfRendering-gdi.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.WindowsDesktop.App.WindowsForms"
+        ]
+      },
       "SQLitePCLRaw.bundle_e_sqlite3/2.1.12": {
         "type": "package",
         "dependencies": {
@@ -909,7 +1752,572 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
-      "PaceAtlas.Core/0.17.1": {
+      "System.Security.Cryptography.Pkcs/8.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/System.Security.Cryptography.Pkcs.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "runtimes/win/lib/net8.0/System.Security.Cryptography.Pkcs.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net6.0/_._": {}
+        }
+      },
+      "PaceAtlas.Core/0.17.5": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "Microsoft.Data.Sqlite": "10.0.12"
+        },
+        "compile": {
+          "bin/placeholder/PaceAtlas.Core.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/PaceAtlas.Core.dll": {}
+        }
+      }
+    },
+    "net10.0-windows10.0.26100.0/win-x86": {
+      "Microsoft.Data.Sqlite/10.0.12": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Data.Sqlite.Core": "10.0.12",
+          "SQLitePCLRaw.bundle_e_sqlite3": "2.1.12",
+          "SQLitePCLRaw.core": "2.1.12"
+        },
+        "compile": {
+          "lib/netstandard2.0/_._": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/_._": {}
+        }
+      },
+      "Microsoft.Data.Sqlite.Core/10.0.12": {
+        "type": "package",
+        "dependencies": {
+          "SQLitePCLRaw.core": "2.1.12"
+        },
+        "compile": {
+          "lib/net8.0/Microsoft.Data.Sqlite.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.Data.Sqlite.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Microsoft.Extensions.DependencyInjection.Abstractions/8.0.2": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net6.0/_._": {}
+        }
+      },
+      "Microsoft.Extensions.Logging.Abstractions/8.0.3": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.2"
+        },
+        "compile": {
+          "lib/net8.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net6.0/Microsoft.Extensions.Logging.Abstractions.targets": {}
+        }
+      },
+      "Microsoft.Web.WebView2/1.0.3179.45": {
+        "type": "package",
+        "native": {
+          "runtimes/win-x86/native/WebView2Loader.dll": {}
+        },
+        "build": {
+          "buildTransitive/Microsoft.Web.WebView2.targets": {}
+        }
+      },
+      "Microsoft.Windows.SDK.BuildTools/10.0.26100.4654": {
+        "type": "package",
+        "build": {
+          "buildTransitive/Microsoft.Windows.SDK.BuildTools.props": {},
+          "buildTransitive/Microsoft.Windows.SDK.BuildTools.targets": {}
+        }
+      },
+      "Microsoft.Windows.SDK.BuildTools.MSIX/1.7.20250829.1": {
+        "type": "package",
+        "build": {
+          "buildTransitive/Microsoft.Windows.SDK.BuildTools.MSIX.props": {},
+          "buildTransitive/Microsoft.Windows.SDK.BuildTools.MSIX.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK/1.8.260921001": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.WindowsAppSDK.AI": "[1.8.79]",
+          "Microsoft.WindowsAppSDK.Base": "[1.8.251216001]",
+          "Microsoft.WindowsAppSDK.DWrite": "[1.8.25122902]",
+          "Microsoft.WindowsAppSDK.Foundation": "[1.8.260803002]",
+          "Microsoft.WindowsAppSDK.InteractiveExperiences": "[1.8.260708001]",
+          "Microsoft.WindowsAppSDK.ML": "[1.8.2223]",
+          "Microsoft.WindowsAppSDK.Runtime": "[1.8.260921001]",
+          "Microsoft.WindowsAppSDK.Widgets": "[1.8.251231004]",
+          "Microsoft.WindowsAppSDK.WinUI": "[1.8.260803003]"
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK.AI/1.8.79": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.WindowsAppSDK.Base": "1.8.251216001",
+          "Microsoft.WindowsAppSDK.Foundation": "1.8.260501000"
+        },
+        "compile": {
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Graphics.Imaging.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.ContentSafety.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.Foundation.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.Imaging.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.Text.Projection.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Graphics.Imaging.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.ContentSafety.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.Foundation.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.Imaging.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AI.Text.Projection.dll": {}
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.AI.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.AI.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK.Base/1.8.251216001": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Windows.SDK.BuildTools": "10.0.26100.4654",
+          "Microsoft.Windows.SDK.BuildTools.MSIX": "1.7.20250829.1"
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.Base.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.Base.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK.DWrite/1.8.25122902": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.WindowsAppSDK.Base": "1.8.251216001"
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.DWrite.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.DWrite.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK.Foundation/1.8.260803002": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.WindowsAppSDK.Base": "1.8.251216001",
+          "Microsoft.WindowsAppSDK.InteractiveExperiences": "1.8.260708001"
+        },
+        "compile": {
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Security.Authentication.OAuth.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AppLifecycle.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AppNotifications.Builder.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AppNotifications.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.ApplicationModel.Background.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.ApplicationModel.DynamicDependency.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.ApplicationModel.Resources.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.ApplicationModel.WindowsAppRuntime.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.BadgeNotifications.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Foundation.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Management.Deployment.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Media.Capture.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.PushNotifications.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Security.AccessControl.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Storage.Pickers.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Storage.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.System.Power.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.System.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.WindowsAppRuntime.Bootstrap.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Security.Authentication.OAuth.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AppLifecycle.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AppNotifications.Builder.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.AppNotifications.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.ApplicationModel.Background.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.ApplicationModel.DynamicDependency.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.ApplicationModel.Resources.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.ApplicationModel.WindowsAppRuntime.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.BadgeNotifications.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Foundation.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Management.Deployment.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Media.Capture.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.PushNotifications.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Security.AccessControl.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Storage.Pickers.Projection.dll": {},
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Storage.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.System.Power.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.System.Projection.dll": {
+            "related": ".xml"
+          },
+          "lib/net6.0-windows10.0.17763.0/Microsoft.WindowsAppRuntime.Bootstrap.Net.dll": {}
+        },
+        "native": {
+          "runtimes/win-x86/native/Microsoft.Windows.ApplicationModel.Background.UniversalBGTask.dll": {},
+          "runtimes/win-x86/native/Microsoft.WindowsAppRuntime.Bootstrap.dll": {}
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.Foundation.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.Foundation.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK.InteractiveExperiences/1.8.260708001": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.WindowsAppSDK.Base": "1.8.251216001"
+        },
+        "compile": {
+          "lib/net6.0-windows10.0.18362.0/Microsoft.InteractiveExperiences.Projection.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0-windows10.0.18362.0/Microsoft.InteractiveExperiences.Projection.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.InteractiveExperiences.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.InteractiveExperiences.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK.ML/1.8.2223": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.WindowsAppSDK.Base": "1.8.251216001",
+          "Microsoft.WindowsAppSDK.Foundation": "1.8.260803002",
+          "System.Numerics.Tensors": "9.0.0"
+        },
+        "compile": {
+          "lib/net8.0-windows10.0.17763.0/Microsoft.ML.OnnxRuntime.dll": {},
+          "lib/net8.0-windows10.0.17763.0/Microsoft.Windows.AI.MachineLearning.Projection.dll": {}
+        },
+        "runtime": {
+          "lib/net8.0-windows10.0.17763.0/Microsoft.ML.OnnxRuntime.dll": {},
+          "lib/net8.0-windows10.0.17763.0/Microsoft.Windows.AI.MachineLearning.Projection.dll": {}
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.ML.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.ML.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK.Runtime/1.8.260921001": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.WindowsAppSDK.Base": "1.8.251216001"
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.Runtime.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.Runtime.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK.Widgets/1.8.251231004": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.WindowsAppSDK.Base": "1.8.251216001"
+        },
+        "compile": {
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Widgets.Projection.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0-windows10.0.17763.0/Microsoft.Windows.Widgets.Projection.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.Widgets.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.Widgets.targets": {}
+        }
+      },
+      "Microsoft.WindowsAppSDK.WinUI/1.8.260803003": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Web.WebView2": "1.0.3179.45",
+          "Microsoft.WindowsAppSDK.Base": "1.8.251216001",
+          "Microsoft.WindowsAppSDK.Foundation": "1.8.260803002",
+          "Microsoft.WindowsAppSDK.InteractiveExperiences": "1.8.260708001"
+        },
+        "compile": {
+          "lib/net6.0-windows10.0.17763.0/Microsoft.WinUI.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0-windows10.0.17763.0/Microsoft.WinUI.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/Microsoft.WindowsAppSDK.WinUI.props": {},
+          "buildTransitive/Microsoft.WindowsAppSDK.WinUI.targets": {}
+        }
+      },
+      "PDFsharp-GDI/6.2.4": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
+          "System.Security.Cryptography.Pkcs": "8.0.1"
+        },
+        "compile": {
+          "lib/net10.0-windows7.0/PdfSharp-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.BarCodes-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Charting-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Cryptography.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Quality-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Shared.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Snippets-gdi.dll": {
+            "related": ".pdb"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.System.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.WPFonts.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0-windows7.0/PdfSharp-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.BarCodes-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Charting-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Cryptography.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Quality-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Shared.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.Snippets-gdi.dll": {
+            "related": ".pdb"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.System.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/PdfSharp.WPFonts.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.WindowsDesktop.App.WindowsForms"
+        ]
+      },
+      "PDFsharp-MigraDoc-GDI/6.2.4": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.3",
+          "PDFsharp-GDI": "6.2.4",
+          "System.Security.Cryptography.Pkcs": "8.0.1"
+        },
+        "compile": {
+          "lib/net10.0-windows7.0/MigraDoc.DocumentObjectModel.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/MigraDoc.Rendering-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/MigraDoc.RtfRendering-gdi.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0-windows7.0/MigraDoc.DocumentObjectModel.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/MigraDoc.Rendering-gdi.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0-windows7.0/MigraDoc.RtfRendering-gdi.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.WindowsDesktop.App.WindowsForms"
+        ]
+      },
+      "SQLitePCLRaw.bundle_e_sqlite3/2.1.12": {
+        "type": "package",
+        "dependencies": {
+          "SQLitePCLRaw.lib.e_sqlite3": "2.1.12",
+          "SQLitePCLRaw.provider.e_sqlite3": "2.1.12"
+        },
+        "compile": {
+          "lib/netstandard2.0/SQLitePCLRaw.batteries_v2.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/SQLitePCLRaw.batteries_v2.dll": {}
+        }
+      },
+      "SQLitePCLRaw.core/2.1.12": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/SQLitePCLRaw.core.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/SQLitePCLRaw.core.dll": {}
+        }
+      },
+      "SQLitePCLRaw.lib.e_sqlite3/2.1.12": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/_._": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/_._": {}
+        },
+        "native": {
+          "runtimes/win-x86/native/e_sqlite3.dll": {}
+        },
+        "build": {
+          "buildTransitive/net9.0/SQLitePCLRaw.lib.e_sqlite3.targets": {}
+        }
+      },
+      "SQLitePCLRaw.provider.e_sqlite3/2.1.12": {
+        "type": "package",
+        "dependencies": {
+          "SQLitePCLRaw.core": "2.1.12"
+        },
+        "compile": {
+          "lib/net6.0-windows7.0/SQLitePCLRaw.provider.e_sqlite3.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0-windows7.0/SQLitePCLRaw.provider.e_sqlite3.dll": {}
+        }
+      },
+      "System.Numerics.Tensors/9.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net9.0/System.Numerics.Tensors.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/System.Numerics.Tensors.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
+        }
+      },
+      "System.Security.Cryptography.Pkcs/8.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/System.Security.Cryptography.Pkcs.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "runtimes/win/lib/net8.0/System.Security.Cryptography.Pkcs.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net6.0/_._": {}
+        }
+      },
+      "PaceAtlas.Core/0.17.5": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
         "dependencies": {
@@ -954,6 +2362,111 @@
         "lib/netstandard2.0/Microsoft.Data.Sqlite.xml",
         "microsoft.data.sqlite.core.10.0.12.nupkg.sha512",
         "microsoft.data.sqlite.core.nuspec"
+      ]
+    },
+    "Microsoft.Extensions.DependencyInjection.Abstractions/8.0.2": {
+      "sha512": "3iE7UF7MQkCv1cxzCahz+Y/guQbTqieyxyaWKhrRO91itI9cOKO76OHeQDahqG4MmW5umr3CcCvGmK92lWNlbg==",
+      "type": "package",
+      "path": "microsoft.extensions.dependencyinjection.abstractions/8.0.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/Microsoft.Extensions.DependencyInjection.Abstractions.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net6.0/_._",
+        "buildTransitive/netcoreapp2.0/Microsoft.Extensions.DependencyInjection.Abstractions.targets",
+        "lib/net462/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/net462/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
+        "lib/net6.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/net6.0/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
+        "lib/net7.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/net7.0/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
+        "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
+        "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
+        "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
+        "microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",
+        "microsoft.extensions.dependencyinjection.abstractions.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    },
+    "Microsoft.Extensions.Logging.Abstractions/8.0.3": {
+      "sha512": "dL0QGToTxggRLMYY4ZYX5AMwBb+byQBd/5dMiZE07Nv73o6I5Are3C7eQTh7K2+A4ct0PVISSr7TZANbiNb2yQ==",
+      "type": "package",
+      "path": "microsoft.extensions.logging.abstractions/8.0.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "analyzers/dotnet/roslyn3.11/cs/Microsoft.Extensions.Logging.Generators.dll",
+        "analyzers/dotnet/roslyn3.11/cs/cs/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/de/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/es/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/fr/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/it/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/ja/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/ko/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/pl/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/pt-BR/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/ru/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/tr/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/zh-Hans/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/zh-Hant/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/Microsoft.Extensions.Logging.Generators.dll",
+        "analyzers/dotnet/roslyn4.0/cs/cs/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/de/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/es/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/fr/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/it/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/ja/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/ko/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/pl/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/pt-BR/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/ru/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/tr/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/zh-Hans/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/zh-Hant/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/Microsoft.Extensions.Logging.Generators.dll",
+        "analyzers/dotnet/roslyn4.4/cs/cs/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/de/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/es/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/fr/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/it/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/ja/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/ko/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/pl/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/pt-BR/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/ru/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/tr/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/zh-Hans/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/zh-Hant/Microsoft.Extensions.Logging.Generators.resources.dll",
+        "buildTransitive/net461/Microsoft.Extensions.Logging.Abstractions.targets",
+        "buildTransitive/net462/Microsoft.Extensions.Logging.Abstractions.targets",
+        "buildTransitive/net6.0/Microsoft.Extensions.Logging.Abstractions.targets",
+        "buildTransitive/netcoreapp2.0/Microsoft.Extensions.Logging.Abstractions.targets",
+        "buildTransitive/netstandard2.0/Microsoft.Extensions.Logging.Abstractions.targets",
+        "lib/net462/Microsoft.Extensions.Logging.Abstractions.dll",
+        "lib/net462/Microsoft.Extensions.Logging.Abstractions.xml",
+        "lib/net6.0/Microsoft.Extensions.Logging.Abstractions.dll",
+        "lib/net6.0/Microsoft.Extensions.Logging.Abstractions.xml",
+        "lib/net7.0/Microsoft.Extensions.Logging.Abstractions.dll",
+        "lib/net7.0/Microsoft.Extensions.Logging.Abstractions.xml",
+        "lib/net8.0/Microsoft.Extensions.Logging.Abstractions.dll",
+        "lib/net8.0/Microsoft.Extensions.Logging.Abstractions.xml",
+        "lib/netstandard2.0/Microsoft.Extensions.Logging.Abstractions.dll",
+        "lib/netstandard2.0/Microsoft.Extensions.Logging.Abstractions.xml",
+        "microsoft.extensions.logging.abstractions.8.0.3.nupkg.sha512",
+        "microsoft.extensions.logging.abstractions.nuspec",
+        "useSharedDesignerContext.txt"
       ]
     },
     "Microsoft.Web.WebView2/1.0.3179.45": {
@@ -2847,6 +4360,172 @@
         "tools/x86/GenXbf.dll"
       ]
     },
+    "PDFsharp-GDI/6.2.4": {
+      "sha512": "uFISTR77hAJP8g7B9VX3yg38+9GiblcO3eEjkI9cQaPodE/wElqbvpuZNmo9exIW9aZnYFW51z7zjizqt/aEtA==",
+      "type": "package",
+      "path": "pdfsharp-gdi/6.2.4",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "images/PDFsharp-128x128.png",
+        "lib/net10.0-windows7.0/PdfSharp-gdi.dll",
+        "lib/net10.0-windows7.0/PdfSharp-gdi.pdb",
+        "lib/net10.0-windows7.0/PdfSharp-gdi.xml",
+        "lib/net10.0-windows7.0/PdfSharp.BarCodes-gdi.dll",
+        "lib/net10.0-windows7.0/PdfSharp.BarCodes-gdi.pdb",
+        "lib/net10.0-windows7.0/PdfSharp.BarCodes-gdi.xml",
+        "lib/net10.0-windows7.0/PdfSharp.Charting-gdi.dll",
+        "lib/net10.0-windows7.0/PdfSharp.Charting-gdi.pdb",
+        "lib/net10.0-windows7.0/PdfSharp.Charting-gdi.xml",
+        "lib/net10.0-windows7.0/PdfSharp.Cryptography.dll",
+        "lib/net10.0-windows7.0/PdfSharp.Cryptography.pdb",
+        "lib/net10.0-windows7.0/PdfSharp.Cryptography.xml",
+        "lib/net10.0-windows7.0/PdfSharp.Quality-gdi.dll",
+        "lib/net10.0-windows7.0/PdfSharp.Quality-gdi.pdb",
+        "lib/net10.0-windows7.0/PdfSharp.Quality-gdi.xml",
+        "lib/net10.0-windows7.0/PdfSharp.Shared.dll",
+        "lib/net10.0-windows7.0/PdfSharp.Shared.pdb",
+        "lib/net10.0-windows7.0/PdfSharp.Shared.xml",
+        "lib/net10.0-windows7.0/PdfSharp.Snippets-gdi.dll",
+        "lib/net10.0-windows7.0/PdfSharp.Snippets-gdi.pdb",
+        "lib/net10.0-windows7.0/PdfSharp.System.dll",
+        "lib/net10.0-windows7.0/PdfSharp.System.pdb",
+        "lib/net10.0-windows7.0/PdfSharp.System.xml",
+        "lib/net10.0-windows7.0/PdfSharp.WPFonts.dll",
+        "lib/net10.0-windows7.0/PdfSharp.WPFonts.pdb",
+        "lib/net10.0-windows7.0/PdfSharp.WPFonts.xml",
+        "lib/net462/PdfSharp-gdi.dll",
+        "lib/net462/PdfSharp-gdi.pdb",
+        "lib/net462/PdfSharp-gdi.xml",
+        "lib/net462/PdfSharp.BarCodes-gdi.dll",
+        "lib/net462/PdfSharp.BarCodes-gdi.pdb",
+        "lib/net462/PdfSharp.BarCodes-gdi.xml",
+        "lib/net462/PdfSharp.Charting-gdi.dll",
+        "lib/net462/PdfSharp.Charting-gdi.pdb",
+        "lib/net462/PdfSharp.Charting-gdi.xml",
+        "lib/net462/PdfSharp.Cryptography.dll",
+        "lib/net462/PdfSharp.Cryptography.pdb",
+        "lib/net462/PdfSharp.Cryptography.xml",
+        "lib/net462/PdfSharp.Quality-gdi.dll",
+        "lib/net462/PdfSharp.Quality-gdi.pdb",
+        "lib/net462/PdfSharp.Quality-gdi.xml",
+        "lib/net462/PdfSharp.Shared.dll",
+        "lib/net462/PdfSharp.Shared.pdb",
+        "lib/net462/PdfSharp.Shared.xml",
+        "lib/net462/PdfSharp.Snippets-gdi.dll",
+        "lib/net462/PdfSharp.Snippets-gdi.pdb",
+        "lib/net462/PdfSharp.System.dll",
+        "lib/net462/PdfSharp.System.pdb",
+        "lib/net462/PdfSharp.System.xml",
+        "lib/net462/PdfSharp.WPFonts.dll",
+        "lib/net462/PdfSharp.WPFonts.pdb",
+        "lib/net462/PdfSharp.WPFonts.xml",
+        "lib/net8.0-windows7.0/PdfSharp-gdi.dll",
+        "lib/net8.0-windows7.0/PdfSharp-gdi.pdb",
+        "lib/net8.0-windows7.0/PdfSharp-gdi.xml",
+        "lib/net8.0-windows7.0/PdfSharp.BarCodes-gdi.dll",
+        "lib/net8.0-windows7.0/PdfSharp.BarCodes-gdi.pdb",
+        "lib/net8.0-windows7.0/PdfSharp.BarCodes-gdi.xml",
+        "lib/net8.0-windows7.0/PdfSharp.Charting-gdi.dll",
+        "lib/net8.0-windows7.0/PdfSharp.Charting-gdi.pdb",
+        "lib/net8.0-windows7.0/PdfSharp.Charting-gdi.xml",
+        "lib/net8.0-windows7.0/PdfSharp.Cryptography.dll",
+        "lib/net8.0-windows7.0/PdfSharp.Cryptography.pdb",
+        "lib/net8.0-windows7.0/PdfSharp.Cryptography.xml",
+        "lib/net8.0-windows7.0/PdfSharp.Quality-gdi.dll",
+        "lib/net8.0-windows7.0/PdfSharp.Quality-gdi.pdb",
+        "lib/net8.0-windows7.0/PdfSharp.Quality-gdi.xml",
+        "lib/net8.0-windows7.0/PdfSharp.Shared.dll",
+        "lib/net8.0-windows7.0/PdfSharp.Shared.pdb",
+        "lib/net8.0-windows7.0/PdfSharp.Shared.xml",
+        "lib/net8.0-windows7.0/PdfSharp.Snippets-gdi.dll",
+        "lib/net8.0-windows7.0/PdfSharp.Snippets-gdi.pdb",
+        "lib/net8.0-windows7.0/PdfSharp.System.dll",
+        "lib/net8.0-windows7.0/PdfSharp.System.pdb",
+        "lib/net8.0-windows7.0/PdfSharp.System.xml",
+        "lib/net8.0-windows7.0/PdfSharp.WPFonts.dll",
+        "lib/net8.0-windows7.0/PdfSharp.WPFonts.pdb",
+        "lib/net8.0-windows7.0/PdfSharp.WPFonts.xml",
+        "lib/net9.0-windows7.0/PdfSharp-gdi.dll",
+        "lib/net9.0-windows7.0/PdfSharp-gdi.pdb",
+        "lib/net9.0-windows7.0/PdfSharp-gdi.xml",
+        "lib/net9.0-windows7.0/PdfSharp.BarCodes-gdi.dll",
+        "lib/net9.0-windows7.0/PdfSharp.BarCodes-gdi.pdb",
+        "lib/net9.0-windows7.0/PdfSharp.BarCodes-gdi.xml",
+        "lib/net9.0-windows7.0/PdfSharp.Charting-gdi.dll",
+        "lib/net9.0-windows7.0/PdfSharp.Charting-gdi.pdb",
+        "lib/net9.0-windows7.0/PdfSharp.Charting-gdi.xml",
+        "lib/net9.0-windows7.0/PdfSharp.Cryptography.dll",
+        "lib/net9.0-windows7.0/PdfSharp.Cryptography.pdb",
+        "lib/net9.0-windows7.0/PdfSharp.Cryptography.xml",
+        "lib/net9.0-windows7.0/PdfSharp.Quality-gdi.dll",
+        "lib/net9.0-windows7.0/PdfSharp.Quality-gdi.pdb",
+        "lib/net9.0-windows7.0/PdfSharp.Quality-gdi.xml",
+        "lib/net9.0-windows7.0/PdfSharp.Shared.dll",
+        "lib/net9.0-windows7.0/PdfSharp.Shared.pdb",
+        "lib/net9.0-windows7.0/PdfSharp.Shared.xml",
+        "lib/net9.0-windows7.0/PdfSharp.Snippets-gdi.dll",
+        "lib/net9.0-windows7.0/PdfSharp.Snippets-gdi.pdb",
+        "lib/net9.0-windows7.0/PdfSharp.System.dll",
+        "lib/net9.0-windows7.0/PdfSharp.System.pdb",
+        "lib/net9.0-windows7.0/PdfSharp.System.xml",
+        "lib/net9.0-windows7.0/PdfSharp.WPFonts.dll",
+        "lib/net9.0-windows7.0/PdfSharp.WPFonts.pdb",
+        "lib/net9.0-windows7.0/PdfSharp.WPFonts.xml",
+        "pdfsharp-gdi.6.2.4.nupkg.sha512",
+        "pdfsharp-gdi.nuspec"
+      ]
+    },
+    "PDFsharp-MigraDoc-GDI/6.2.4": {
+      "sha512": "xhwVEuULZI7xskoOtsqJ9/wE1mbPg2sqxvTbcRKR7dmWNCbWJDSEwd9nV+FuXn7wSdIWC8Mrmu19FF3Lu3gRSA==",
+      "type": "package",
+      "path": "pdfsharp-migradoc-gdi/6.2.4",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "images/MigraDoc-128x128.png",
+        "lib/net10.0-windows7.0/MigraDoc.DocumentObjectModel.dll",
+        "lib/net10.0-windows7.0/MigraDoc.DocumentObjectModel.pdb",
+        "lib/net10.0-windows7.0/MigraDoc.DocumentObjectModel.xml",
+        "lib/net10.0-windows7.0/MigraDoc.Rendering-gdi.dll",
+        "lib/net10.0-windows7.0/MigraDoc.Rendering-gdi.pdb",
+        "lib/net10.0-windows7.0/MigraDoc.Rendering-gdi.xml",
+        "lib/net10.0-windows7.0/MigraDoc.RtfRendering-gdi.dll",
+        "lib/net10.0-windows7.0/MigraDoc.RtfRendering-gdi.pdb",
+        "lib/net10.0-windows7.0/MigraDoc.RtfRendering-gdi.xml",
+        "lib/net462/MigraDoc.DocumentObjectModel.dll",
+        "lib/net462/MigraDoc.DocumentObjectModel.pdb",
+        "lib/net462/MigraDoc.DocumentObjectModel.xml",
+        "lib/net462/MigraDoc.Rendering-gdi.dll",
+        "lib/net462/MigraDoc.Rendering-gdi.pdb",
+        "lib/net462/MigraDoc.Rendering-gdi.xml",
+        "lib/net462/MigraDoc.RtfRendering-gdi.dll",
+        "lib/net462/MigraDoc.RtfRendering-gdi.pdb",
+        "lib/net462/MigraDoc.RtfRendering-gdi.xml",
+        "lib/net8.0-windows7.0/MigraDoc.DocumentObjectModel.dll",
+        "lib/net8.0-windows7.0/MigraDoc.DocumentObjectModel.pdb",
+        "lib/net8.0-windows7.0/MigraDoc.DocumentObjectModel.xml",
+        "lib/net8.0-windows7.0/MigraDoc.Rendering-gdi.dll",
+        "lib/net8.0-windows7.0/MigraDoc.Rendering-gdi.pdb",
+        "lib/net8.0-windows7.0/MigraDoc.Rendering-gdi.xml",
+        "lib/net8.0-windows7.0/MigraDoc.RtfRendering-gdi.dll",
+        "lib/net8.0-windows7.0/MigraDoc.RtfRendering-gdi.pdb",
+        "lib/net8.0-windows7.0/MigraDoc.RtfRendering-gdi.xml",
+        "lib/net9.0-windows7.0/MigraDoc.DocumentObjectModel.dll",
+        "lib/net9.0-windows7.0/MigraDoc.DocumentObjectModel.pdb",
+        "lib/net9.0-windows7.0/MigraDoc.DocumentObjectModel.xml",
+        "lib/net9.0-windows7.0/MigraDoc.Rendering-gdi.dll",
+        "lib/net9.0-windows7.0/MigraDoc.Rendering-gdi.pdb",
+        "lib/net9.0-windows7.0/MigraDoc.Rendering-gdi.xml",
+        "lib/net9.0-windows7.0/MigraDoc.RtfRendering-gdi.dll",
+        "lib/net9.0-windows7.0/MigraDoc.RtfRendering-gdi.pdb",
+        "lib/net9.0-windows7.0/MigraDoc.RtfRendering-gdi.xml",
+        "pdfsharp-migradoc-gdi.6.2.4.nupkg.sha512",
+        "pdfsharp-migradoc-gdi.nuspec"
+      ]
+    },
     "SQLitePCLRaw.bundle_e_sqlite3/2.1.12": {
       "sha512": "mAgscpQMLw5/nfA1Q5oJVAT29yROUo1ifZGbbTpx/lwZpSxMUGoYbKfmvdm8oXER+RzxqBmmQzeBEVKfeHv2nw==",
       "type": "package",
@@ -2962,7 +4641,44 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "PaceAtlas.Core/0.17.1": {
+    "System.Security.Cryptography.Pkcs/8.0.1": {
+      "sha512": "CoCRHFym33aUSf/NtWSVSZa99dkd0Hm7OCZUxORBjRB16LNhIEOf8THPqzIYlvKM0nNDAPTRBa1FxEECrgaxxA==",
+      "type": "package",
+      "path": "system.security.cryptography.pkcs/8.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/System.Security.Cryptography.Pkcs.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net6.0/_._",
+        "buildTransitive/netcoreapp2.0/System.Security.Cryptography.Pkcs.targets",
+        "lib/net462/System.Security.Cryptography.Pkcs.dll",
+        "lib/net462/System.Security.Cryptography.Pkcs.xml",
+        "lib/net6.0/System.Security.Cryptography.Pkcs.dll",
+        "lib/net6.0/System.Security.Cryptography.Pkcs.xml",
+        "lib/net7.0/System.Security.Cryptography.Pkcs.dll",
+        "lib/net7.0/System.Security.Cryptography.Pkcs.xml",
+        "lib/net8.0/System.Security.Cryptography.Pkcs.dll",
+        "lib/net8.0/System.Security.Cryptography.Pkcs.xml",
+        "lib/netstandard2.0/System.Security.Cryptography.Pkcs.dll",
+        "lib/netstandard2.0/System.Security.Cryptography.Pkcs.xml",
+        "lib/netstandard2.1/System.Security.Cryptography.Pkcs.dll",
+        "lib/netstandard2.1/System.Security.Cryptography.Pkcs.xml",
+        "runtimes/win/lib/net6.0/System.Security.Cryptography.Pkcs.dll",
+        "runtimes/win/lib/net6.0/System.Security.Cryptography.Pkcs.xml",
+        "runtimes/win/lib/net7.0/System.Security.Cryptography.Pkcs.dll",
+        "runtimes/win/lib/net7.0/System.Security.Cryptography.Pkcs.xml",
+        "runtimes/win/lib/net8.0/System.Security.Cryptography.Pkcs.dll",
+        "runtimes/win/lib/net8.0/System.Security.Cryptography.Pkcs.xml",
+        "system.security.cryptography.pkcs.8.0.1.nupkg.sha512",
+        "system.security.cryptography.pkcs.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    },
+    "PaceAtlas.Core/0.17.5": {
       "type": "project",
       "path": "../PaceAtlas.Core/PaceAtlas.Core.csproj",
       "msbuildProject": "../PaceAtlas.Core/PaceAtlas.Core.csproj"
@@ -2971,7 +4687,8 @@
   "projectFileDependencyGroups": {
     "net10.0-windows10.0.26100.0": [
       "Microsoft.WindowsAppSDK >= 1.8.260921001",
-      "PaceAtlas.Core >= 0.17.1"
+      "PDFsharp-MigraDoc-GDI >= 6.2.4",
+      "PaceAtlas.Core >= 0.17.5"
     ]
   },
   "packageFolders": {
@@ -2979,7 +4696,7 @@
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
-    "version": "0.17.1",
+    "version": "0.17.5",
     "restore": {
       "projectUniqueName": "L:\\source\\repos\\PaceAtlas\\PaceAtlas.WinUI\\PaceAtlas.WinUI.csproj",
       "projectName": "PaceAtlas.WinUI",
@@ -3033,6 +4750,10 @@
           "Microsoft.WindowsAppSDK": {
             "target": "Package",
             "version": "[1.8.260921001, )"
+          },
+          "PDFsharp-MigraDoc-GDI": {
+            "target": "Package",
+            "version": "[6.2.4, )"
           }
         },
         "imports": [
@@ -3048,8 +4769,44 @@
         "warn": true,
         "downloadDependencies": [
           {
+            "name": "Microsoft.AspNetCore.App.Runtime.win-arm64",
+            "version": "[10.0.12, 10.0.12]"
+          },
+          {
+            "name": "Microsoft.AspNetCore.App.Runtime.win-x64",
+            "version": "[10.0.12, 10.0.12]"
+          },
+          {
+            "name": "Microsoft.AspNetCore.App.Runtime.win-x86",
+            "version": "[10.0.12, 10.0.12]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Runtime.win-arm64",
+            "version": "[10.0.12, 10.0.12]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Runtime.win-x64",
+            "version": "[10.0.12, 10.0.12]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Runtime.win-x86",
+            "version": "[10.0.12, 10.0.12]"
+          },
+          {
             "name": "Microsoft.Windows.SDK.NET.Ref",
             "version": "[10.0.26100.57, 10.0.26100.57]"
+          },
+          {
+            "name": "Microsoft.WindowsDesktop.App.Runtime.win-arm64",
+            "version": "[10.0.12, 10.0.12]"
+          },
+          {
+            "name": "Microsoft.WindowsDesktop.App.Runtime.win-x64",
+            "version": "[10.0.12, 10.0.12]"
+          },
+          {
+            "name": "Microsoft.WindowsDesktop.App.Runtime.win-x86",
+            "version": "[10.0.12, 10.0.12]"
           }
         ],
         "frameworkReferences": {
@@ -3338,7 +5095,13 @@
       }
     },
     "runtimes": {
+      "win-arm64": {
+        "#import": []
+      },
       "win-x64": {
+        "#import": []
+      },
+      "win-x86": {
         "#import": []
       }
     }

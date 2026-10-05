@@ -27,6 +27,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260921001" />
+    <PackageReference Include="PDFsharp-MigraDoc-GDI" Version="6.2.4" />
     <ProjectReference Include="..\PaceAtlas.Core\PaceAtlas.Core.csproj" />
     <EmbeddedResource Include="..\PaceAtlas\Resources\Pacing*.wav" LogicalName="PaceAtlas.Resources.%(Filename)%(Extension)" />
     <EmbeddedResource Include="..\PaceAtlas\app.ico" LogicalName="PaceAtlas.WinUI.app.ico" />

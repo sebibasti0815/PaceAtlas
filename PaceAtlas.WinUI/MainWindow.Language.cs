@@ -109,6 +109,10 @@ public sealed partial class MainWindow
         ["KI"] = "AI", ["Automatische Einordnung"] = "Automated assessment",
         ["Verlauf"] = "Trend",
         ["Einzelsymptom"] = "Single symptom", ["Mehrfachsymptome"] = "Multiple symptoms",
+        ["Arztbericht"] = "Medical report", ["Arztbericht als PDF"] = "Medical report as PDF",
+        ["Arztbericht erstellen ..."] = "Create medical report ...",
+        ["Ein kompakter Überblick über Zustand, Symptome, Belastung und PEM. Ernährung, Einnahmeplan, Notizen und ein kurzer Verlauf können vor dem Export ausgewählt werden. Fehlende Angaben bleiben unbekannt; zeitliche Nähe belegt keine Ursache."] =
+            "A concise overview of condition, symptoms, activity and PEM. Nutrition, medication, notes and a short history can be selected before export. Missing data remain unknown; timing does not prove causation.",
         ["Am stärksten einschränkende Symptome"] = "Most limiting symptoms",
         ["Prägende Symptome"] = "Prominent symptoms", ["Eigene Einschätzung"] = "Your own assessment",
         ["Heatmap · Tage"] = "Heatmap · days", ["Heatmap · Wochendurchschnitt"] = "Heatmap · weekly average",

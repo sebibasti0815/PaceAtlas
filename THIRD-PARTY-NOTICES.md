@@ -16,3 +16,10 @@ und vorgenommene Änderungen anzugeben. Diese Lizenzangabe bezieht sich auf
 die BLS-Daten; persönliche Einträge der Nutzer gehören nicht zu diesem
 Datensatz. Die Nutzung bedeutet keine Unterstützung oder Billigung durch
 das Max Rubner-Institut.
+
+## PDFsharp & MigraDoc
+
+Der PDF-Export des Arztberichts verwendet PDFsharp und MigraDoc 6.2.4
+(PDFsharp-MigraDoc-GDI), Copyright © empira Software GmbH.
+Lizenz: MIT. Projekt und Lizenztext:
+https://github.com/empira/PDFsharp
