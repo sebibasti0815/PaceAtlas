@@ -1,0 +1,141 @@
+{
+  "name": "paceatlas",
+  "title": "PaceAtlas",
+  "description": "Lokale PaceAtlas-Steuerung",
+  "version": "0.22.7.3",
+  "author": "local",
+  "license": "UNLICENSED",
+  "platforms": [
+    "Windows"
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint"
+  },
+  "dependencies": {
+    "@raycast/api": "latest",
+    "@raycast/utils": "latest"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "latest",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.0.0"
+  },
+  "commands": [
+    {
+      "name": "status",
+      "title": "Zustand erfassen",
+      "description": "Aktuellen Zustand eintragen",
+      "mode": "view"
+    },
+    {
+      "name": "activities",
+      "title": "Aktivitäten",
+      "description": "Aktivitäten starten und beenden",
+      "mode": "view"
+    },
+    {
+      "name": "medications",
+      "title": "Medikamente bestätigen",
+      "description": "Offene Einnahmen bestätigen",
+      "mode": "view"
+    },
+    {
+      "name": "measures",
+      "title": "Sofortmaßnahme erfassen",
+      "description": "Maßnahme mit Gründen und Notizen dokumentieren",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Bisheriger Verlauf",
+      "description": "Zustände, Aktivitäten, Ruhephasen und Maßnahmen ansehen",
+      "mode": "view"
+    },
+    {
+      "name": "rest",
+      "title": "Ruhephasen",
+      "description": "Ruhe starten und beenden",
+      "mode": "view"
+    },
+    {
+      "name": "pacing",
+      "title": "Pacing-Timer",
+      "description": "Timerstatus und Steuerung",
+      "mode": "view"
+    },
+    {
+      "name": "day",
+      "title": "Tagesstatus",
+      "description": "Heutige Einträge und Belastungszeiten",
+      "mode": "view"
+    },
+    {
+      "name": "quick",
+      "title": "Schnellaktionen",
+      "description": "Kontextabhängige Aktionen",
+      "mode": "view"
+    },
+    {
+      "name": "notes",
+      "title": "Schnellnotiz",
+      "description": "Beobachtung ohne vollständige Zustandserfassung",
+      "mode": "view"
+    },
+    {
+      "name": "food",
+      "title": "Lebensmittel prüfen",
+      "description": "GL und hinterlegte Ernährungsregeln",
+      "mode": "view"
+    },
+    {
+      "name": "symptom-trend",
+      "title": "Symptomverlauf",
+      "description": "Symptombewertungen der letzten Tage ansehen",
+      "mode": "view"
+    },
+    {
+      "name": "next-medication",
+      "title": "Nächste Medikamenteneinnahme",
+      "description": "Nächste offene Einnahme ansehen",
+      "mode": "view"
+    },
+    {
+      "name": "activity-note",
+      "title": "Aktivitätsnotiz ergänzen",
+      "description": "Notiz zu einer laufenden Aktivität hinzufügen",
+      "mode": "view"
+    },
+    {
+      "name": "pacing-load",
+      "title": "Belastungsübersicht",
+      "description": "Dokumentierte Belastungen der letzten 48 Stunden",
+      "mode": "view"
+    },
+    {
+      "name": "protection-recent",
+      "title": "Schutzmaßnahmen – Verlauf",
+      "description": "Dokumentierte Schutzmaßnahmen anzeigen",
+      "mode": "view"
+    },
+    {
+      "name": "protection-add",
+      "title": "Schutzmaßnahmen ergänzen",
+      "description": "Schutzmaßnahmen einer laufenden Aktivität hinzufügen",
+      "mode": "view"
+    }
+  ],
+  "icon": "icon.png",
+  "preferences": [
+    {
+      "name": "applicationPath",
+      "title": "Pfad zur PaceAtlas-Anwendung",
+      "description": "Optional: Vollständiger Pfad zur PaceAtlas.WinUI.exe. Ohne Angabe wird die installierte Version gesucht.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "C:\\Program Files\\PaceAtlas\\PaceAtlas.WinUI.exe"
+    }
+  ]
+}

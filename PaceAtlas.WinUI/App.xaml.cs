@@ -6,6 +6,8 @@ namespace PaceAtlas.WinUI;
 public partial class App : Application
 {
     private Window? window;
+    private PaceAtlas.IPC.PipeServer? ipcServer;
+    private readonly PaceAtlas.IPC.DataChangeNotifier dataChanges = new();
 
     public App()
     {
@@ -24,8 +26,14 @@ public partial class App : Application
         {
             var mainWindow = new MainWindow();
             window = mainWindow;
+            mainWindow.AttachIpcNotifications(dataChanges);
+            ipcServer = new PaceAtlas.IPC.PipeServer(new PaceAtlas.IPC.PaceAtlasApi(new PaceAtlas.Store(), dataChanges, mainWindow.HandlePacingIpc));
+            ipcServer.Start();
             var constructionMs = startup.ElapsedMilliseconds;
-            window.Activate();
+            if (Program.StartHiddenInTray)
+                mainWindow.HideForBackgroundLaunch();
+            else
+                window.Activate();
             if (Program.ConsumePendingActivation())
                 mainWindow.ShowFromSecondLaunch();
             var totalMs = Program.StartupElapsedMilliseconds;

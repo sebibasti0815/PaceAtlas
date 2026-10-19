@@ -270,14 +270,17 @@ public sealed partial class MainWindow
         {
             var level = symptom ? Math.Max(0, index - 1) : bars ? index + 1 : index;
             var marker = symptom && index == 0 ? "?" : bars
-                ? new string('▰', level) + new string('▱', 4 - level)
+                ? ActivityIntensityVisual.Marker(level)
                 : new string('●', level) + new string('○', 4 - level);
             var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 9 };
-            row.Children.Add(new TextBlock { Text = marker,
-                Foreground = symptom && index == 0
-                    ? new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(255, 110, 120, 130))
-                    : VisualScaleBrush(level, bars),
-                VerticalAlignment = VerticalAlignment.Center, FontSize = 13 });
+            if (bars)
+                row.Children.Add(ActivityIntensityVisual.Create(level));
+            else
+                row.Children.Add(new TextBlock { Text = marker,
+                    Foreground = symptom && index == 0
+                        ? new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(255, 110, 120, 130))
+                        : VisualScaleBrush(level),
+                    VerticalAlignment = VerticalAlignment.Center, FontSize = 13 });
             row.Children.Add(new TextBlock { Text = T(value), VerticalAlignment = VerticalAlignment.Center });
             return row;
         }).ToArray();

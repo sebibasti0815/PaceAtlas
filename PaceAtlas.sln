@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaceAtlas.WinUI", "PaceAtla
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaceAtlas.Core", "PaceAtlas.Core\PaceAtlas.Core.csproj", "{1F6F2AF9-06F4-4ED7-AC64-66A5E6838935}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaceAtlas.IPC", "PaceAtlas.IPC\PaceAtlas.IPC.csproj", "{BDB62A39-06AC-48E9-9A81-27E3D1B7CA51}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -13,6 +15,13 @@ Global
 		Installer|x64 = Installer|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+
+		{BDB62A39-06AC-48E9-9A81-27E3D1B7CA51}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BDB62A39-06AC-48E9-9A81-27E3D1B7CA51}.Debug|x64.Build.0 = Debug|Any CPU
+		{BDB62A39-06AC-48E9-9A81-27E3D1B7CA51}.Release|x64.ActiveCfg = Release|Any CPU
+		{BDB62A39-06AC-48E9-9A81-27E3D1B7CA51}.Release|x64.Build.0 = Release|Any CPU
+		{BDB62A39-06AC-48E9-9A81-27E3D1B7CA51}.Installer|x64.ActiveCfg = Release|Any CPU
+		{BDB62A39-06AC-48E9-9A81-27E3D1B7CA51}.Installer|x64.Build.0 = Release|Any CPU
 		{1F6F2AF9-06F4-4ED7-AC64-66A5E6838935}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{1F6F2AF9-06F4-4ED7-AC64-66A5E6838935}.Debug|x64.Build.0 = Debug|Any CPU
 		{1F6F2AF9-06F4-4ED7-AC64-66A5E6838935}.Release|x64.ActiveCfg = Release|Any CPU

@@ -156,6 +156,31 @@ public sealed partial class MainWindow
         if (pacingRunning) StopPacing(); else StartPacing();
     }
     private void PacingBreak_Click(object sender, RoutedEventArgs e) => TogglePacingBreak();
+    internal object HandlePacingIpc(string action)
+    {
+        var completion = new System.Threading.Tasks.TaskCompletionSource<object>(System.Threading.Tasks.TaskCreationOptions.RunContinuationsAsynchronously);
+        if (!DispatcherQueue.TryEnqueue(() =>
+        {
+            try
+            {
+                switch (action)
+                {
+                    case "status": break;
+                    case "start": StartPacing(); break;
+                    case "stop": StopPacing(); break;
+                    case "toggleBreak": TogglePacingBreak(); break;
+                    default: throw new ArgumentException("Unknown pacing action");
+                }
+                completion.TrySetResult(new { running = pacingRunning, resting = pacingResting,
+                    activeMinutes, pauseMinutes,
+                    remainingSeconds = pacingRunning ? Math.Max(0, (int)Math.Ceiling((pacingDeadline - DateTimeOffset.UtcNow).TotalSeconds)) : 0 });
+            }
+            catch (Exception ex) { completion.TrySetException(ex); }
+        })) throw new InvalidOperationException("Pacing UI dispatcher unavailable");
+        if (!completion.Task.Wait(TimeSpan.FromSeconds(4))) throw new TimeoutException("Pacing UI did not respond");
+        return completion.Task.GetAwaiter().GetResult();
+    }
+
     private void StartPacing()
     {
         if (pacingRunning) return;
@@ -317,6 +342,11 @@ public sealed partial class MainWindow
         hiddenToTray = true;
         // Hiding the actual HWND removes its taskbar button, including in Release builds.
         HidePacingWindow(WinRT.Interop.WindowNative.GetWindowHandle(this), 0); // SW_HIDE
+    }
+    internal void HideForBackgroundLaunch()
+    {
+        // Do not Activate(): the window must never become visible or steal focus.
+        HideToPacingTray();
     }
     private void HideMinimizedToPacingTray()
     {

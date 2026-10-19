@@ -1,4 +1,4 @@
-using Microsoft.Data.Sqlite;
+﻿using Microsoft.Data.Sqlite;
 using System.Text;
 using System.Text.Json;
 
@@ -99,10 +99,29 @@ public sealed partial class Store
         using var command = db.CreateCommand();
         command.CommandText = "CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY, kind TEXT NOT NULL, start TEXT NOT NULL, end TEXT, data TEXT NOT NULL, note TEXT NOT NULL DEFAULT ''); CREATE INDEX IF NOT EXISTS ix_entries_start ON entries(start); CREATE TABLE IF NOT EXISTS medication_plan (id INTEGER PRIMARY KEY, time TEXT NOT NULL, name TEXT NOT NULL, dose TEXT NOT NULL, form TEXT NOT NULL DEFAULT '', quantity TEXT NOT NULL DEFAULT '', goals TEXT NOT NULL DEFAULT '[]', product_id INTEGER NOT NULL DEFAULT 0); CREATE TABLE IF NOT EXISTS goal_options(name TEXT PRIMARY KEY); CREATE TABLE IF NOT EXISTS app_settings(key TEXT PRIMARY KEY, value TEXT NOT NULL); CREATE TABLE IF NOT EXISTS medication_products(id INTEGER PRIMARY KEY, name TEXT NOT NULL COLLATE NOCASE, dose TEXT NOT NULL COLLATE NOCASE, form TEXT NOT NULL COLLATE NOCASE, manufacturer TEXT NOT NULL DEFAULT '', supplier TEXT NOT NULL DEFAULT '', pack_units REAL NOT NULL DEFAULT 0, pack_price REAL NOT NULL DEFAULT 0, UNIQUE(name,dose,form)); CREATE TABLE IF NOT EXISTS stock_movements(id INTEGER PRIMARY KEY, product_id INTEGER NOT NULL, day TEXT NOT NULL, kind TEXT NOT NULL, units REAL NOT NULL, packages REAL NOT NULL DEFAULT 0, total_cost REAL NOT NULL DEFAULT 0); CREATE INDEX IF NOT EXISTS ix_stock_product ON stock_movements(product_id);";
         command.ExecuteNonQuery();
+        // Idempotent metadata migration. Existing rows receive WinUI / Full; no clinical values change.
+        foreach (var column in new[] { (Name: "capture_source", Default: "WinUI"), (Name: "capture_mode", Default: "Full") })
+        {
+            using var info = db.CreateCommand();
+            info.CommandText = "PRAGMA table_info(entries)";
+            var exists = false;
+            using (var columnReader = info.ExecuteReader())
+                while (columnReader.Read()) if (string.Equals(columnReader.GetString(1), column.Name, StringComparison.OrdinalIgnoreCase)) exists = true;
+            if (!exists)
+            {
+                using var migrateCapture = db.CreateCommand();
+                migrateCapture.CommandText = $"ALTER TABLE entries ADD COLUMN {column.Name} TEXT NOT NULL DEFAULT '{column.Default}'";
+                migrateCapture.ExecuteNonQuery();
+            }
+        }
         using var analyses = db.CreateCommand();
         analyses.CommandText = "CREATE TABLE IF NOT EXISTS ai_analyses (id INTEGER PRIMARY KEY, period INTEGER NOT NULL, language TEXT NOT NULL, model TEXT NOT NULL, snapshot_hash TEXT NOT NULL, created TEXT NOT NULL, response TEXT NOT NULL); CREATE INDEX IF NOT EXISTS ix_ai_analyses_lookup ON ai_analyses(period,language,id DESC)";
         analyses.ExecuteNonQuery();
         InitializeNutrition(db);
+        InitializeSyncIdentities(db);
+        InitializeSyncTracking(db);
+        InitializeSyncInbox(db);
+        InitializeSyncApply(db);
         using var columns = db.CreateCommand();
         columns.CommandText = "PRAGMA table_info(medication_plan)";
         using var reader = columns.ExecuteReader();
@@ -552,21 +571,23 @@ public sealed partial class Store
     {
         var entries = new List<Entry>();
         using var db = Open(); using var command = db.CreateCommand();
-        command.CommandText = "SELECT id,kind,start,end,data,note FROM entries ORDER BY start DESC,id DESC";
+        command.CommandText = "SELECT id,kind,start,end,data,note,capture_source,capture_mode FROM entries ORDER BY start DESC,id DESC";
         using var reader = command.ExecuteReader();
-        while (reader.Read()) entries.Add(new Entry { Id = reader.GetInt64(0), Kind = reader.GetString(1), Start = DateTime.Parse(reader.GetString(2), null, System.Globalization.DateTimeStyles.RoundtripKind), End = reader.IsDBNull(3) ? null : DateTime.Parse(reader.GetString(3), null, System.Globalization.DateTimeStyles.RoundtripKind), Data = reader.GetString(4), Note = reader.GetString(5) });
+        while (reader.Read()) entries.Add(new Entry { Id = reader.GetInt64(0), Kind = reader.GetString(1), Start = DateTime.Parse(reader.GetString(2), null, System.Globalization.DateTimeStyles.RoundtripKind), End = reader.IsDBNull(3) ? null : DateTime.Parse(reader.GetString(3), null, System.Globalization.DateTimeStyles.RoundtripKind), Data = reader.GetString(4), Note = reader.GetString(5), CaptureSource = reader.GetString(6), CaptureMode = reader.GetString(7) });
         return entries;
     }
     public void Save(Entry entry)
     {
         using var db = Open(); using var command = db.CreateCommand();
-        command.CommandText = entry.Id == 0 ? "INSERT INTO entries(kind,start,end,data,note) VALUES($kind,$start,$end,$data,$note)" : "UPDATE entries SET kind=$kind,start=$start,end=$end,data=$data,note=$note WHERE id=$id";
+        command.CommandText = entry.Id == 0 ? "INSERT INTO entries(kind,start,end,data,note,capture_source,capture_mode) VALUES($kind,$start,$end,$data,$note,$source,$mode)" : "UPDATE entries SET kind=$kind,start=$start,end=$end,data=$data,note=$note,capture_source=$source,capture_mode=$mode WHERE id=$id";
         command.Parameters.AddWithValue("$id", entry.Id);
         command.Parameters.AddWithValue("$kind", entry.Kind);
         command.Parameters.AddWithValue("$start", entry.Start.ToString("O"));
         command.Parameters.AddWithValue("$end", entry.End is null ? DBNull.Value : entry.End.Value.ToString("O"));
         command.Parameters.AddWithValue("$data", entry.Data);
         command.Parameters.AddWithValue("$note", entry.Note);
+        command.Parameters.AddWithValue("$source", entry.CaptureSource);
+        command.Parameters.AddWithValue("$mode", entry.CaptureMode);
         command.ExecuteNonQuery();
     }
     public void Delete(long id)

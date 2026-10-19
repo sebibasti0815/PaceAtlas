@@ -134,24 +134,28 @@ public sealed partial class MainWindow
             HorizontalContentAlignment = HorizontalAlignment.Center,
             VerticalContentAlignment = VerticalAlignment.Center };
         later.Click += (_, _) => CloseReminderPopup();
-        var buttons = new Grid { ColumnSpacing = 12, Width = 362,
-            Margin = new Thickness(0, 12, 0, 0) };
-        buttons.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(175) });
-        buttons.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(175) });
+        // Stretch both buttons inside the content width instead of using a fixed
+        // 362-pixel grid that can exceed the available layout width at high DPI.
+        var buttons = new Grid { ColumnSpacing = 12,
+            Margin = new Thickness(0, 8, 0, 0),
+            HorizontalAlignment = HorizontalAlignment.Stretch };
+        buttons.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        buttons.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         record.HorizontalAlignment = HorizontalAlignment.Stretch;
         later.HorizontalAlignment = HorizontalAlignment.Stretch;
         buttons.Children.Add(record);
         Grid.SetColumn(later, 1);
         buttons.Children.Add(later);
-        var body = new StackPanel { Spacing = 14, Margin = new Thickness(22, 20, 18, 28) };
+
+        var body = new StackPanel { Spacing = 12, Margin = new Thickness(26, 24, 26, 30),
+            HorizontalAlignment = HorizontalAlignment.Stretch };
         body.Children.Add(title);
         body.Children.Add(description);
         body.Children.Add(buttons);
-        var panel = new Grid { Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 31, 43, 62)) };
-        panel.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(5) });
-        panel.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        panel.Children.Add(new Border { Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 55, 181, 188)) });
-        Grid.SetColumn(body, 1);
+        // The root paints the *entire* client surface. A separate accent strip
+        // previously exposed the underlying window at its edges on some DPI setups.
+        var panel = new Grid {
+            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 31, 43, 62)) };
         panel.Children.Add(body);
         var popup = new Window { Content = panel, Title = english ? "Condition reminder" : "Zustandserinnerung" };
         popup.Closed += (_, _) =>
@@ -174,11 +178,15 @@ public sealed partial class MainWindow
         var popupHandle = WinRT.Interop.WindowNative.GetWindowHandle(popup);
         // AppWindow uses physical pixels; XAML content is measured in effective pixels.
         popup.AppWindow.Move(new PointInt32(work.X + 18, work.Y + 18));
-        double scale = Math.Max(1, GetDpiForWindow(popupHandle)) / 96.0;
-        int width = Math.Min((int)Math.Ceiling(430 * scale), Math.Max(1, work.Width - 36));
+        double scale = Math.Max(96, GetDpiForWindow(popupHandle)) / 96.0;
+        // AppWindow dimensions are physical pixels, while XAML layout uses DIPs.
+        // Explicit extra vertical room prevents the bottom buttons from being
+        // clipped by non-client/window rounding on mixed-DPI monitor setups.
+        int width = Math.Min((int)Math.Ceiling(450 * scale), Math.Max(1, work.Width - 36));
         panel.Measure(new Windows.Foundation.Size(width / scale, double.PositiveInfinity));
         int height = Math.Min(Math.Max(1, work.Height - 36),
-            Math.Max(230, (int)Math.Ceiling(panel.DesiredSize.Height * scale)));
+            Math.Max((int)Math.Ceiling(260 * scale),
+                (int)Math.Ceiling((panel.DesiredSize.Height + 20) * scale)));
         popup.AppWindow.MoveAndResize(new RectInt32(work.X + work.Width - width - 18,
             work.Y + 18, width, height));
         reminderPopup = popup;

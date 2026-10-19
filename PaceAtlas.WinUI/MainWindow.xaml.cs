@@ -16,6 +16,376 @@ namespace PaceAtlas.WinUI;
 
 public sealed partial class MainWindow : Window
 {
+    // Diagnostic display is deliberately read-only and bounded. No health payloads are logged here.
+    private static string DiagnosticsLogPath => System.IO.Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "PaceAtlas", "Logs", "ipc-diagnostics.log");
+
+    private readonly DispatcherTimer diagnosticsTimer = new() { Interval = TimeSpan.FromSeconds(2) };
+    private bool diagnosticsPaused;
+    private bool diagnosticsTimerInitialized;
+
+    private void InitializeDiagnosticsTimer()
+    {
+        if (diagnosticsTimerInitialized) return;
+        diagnosticsTimerInitialized = true;
+        diagnosticsTimer.Tick += (_, _) =>
+        {
+            if (DiagnosticsEvents is null || DiagnosticsStatus is null) return;
+            UpdateDiagnosticsControls();
+            if (!diagnosticsPaused && DiagnosticsTab?.IsSelected == true)
+                RefreshDiagnostics();
+        };
+        diagnosticsTimer.Start();
+        UpdateDiagnosticsControls();
+    }
+
+    private void UpdateDiagnosticsControls()
+    {
+        if (DiagnosticsModeButton is null || DiagnosticsPauseButton is null || DiagnosticsModeStatus is null) return;
+        var active = PaceAtlas.IPC.PipeServer.IsVerboseDiagnosticsActive;
+        DiagnosticsModeButton.Content = active ? "Diagnose beenden" : "15 Min. ausführlich";
+        DiagnosticsPauseButton.Content = diagnosticsPaused ? "Fortsetzen" : "Pause";
+        DiagnosticsModeStatus.Text = active ? "● Ausführliche Diagnose aktiv" : "● Normalbetrieb";
+        DiagnosticsModeStatus.Foreground = new SolidColorBrush(active ? Windows.UI.Color.FromArgb(255, 0, 110, 70) : Windows.UI.Color.FromArgb(255, 90, 100, 110));
+    }
+
+    private void DiagnosticsMode_Click(object sender, RoutedEventArgs e)
+    {
+        if (PaceAtlas.IPC.PipeServer.IsVerboseDiagnosticsActive)
+            PaceAtlas.IPC.PipeServer.DisableVerboseDiagnostics();
+        else
+            PaceAtlas.IPC.PipeServer.EnableVerboseDiagnostics(TimeSpan.FromMinutes(15));
+        UpdateDiagnosticsControls();
+        RefreshDiagnostics();
+    }
+
+    private void DiagnosticsPause_Click(object sender, RoutedEventArgs e)
+    {
+        diagnosticsPaused = !diagnosticsPaused;
+        UpdateDiagnosticsControls();
+        if (!diagnosticsPaused) RefreshDiagnostics();
+    }
+
+    private void RefreshDiagnostics_Click(object sender, RoutedEventArgs e) => RefreshDiagnostics();
+    private void DiagnosticsFilter_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (DiagnosticsEvents is not null && DiagnosticsStatus is not null) ShowDiagnosticEvents();
+    }
+
+    private sealed record DiagnosticEvent(string Timestamp, string Status, string Method, long Duration, string CorrelationId, string Raw);
+    private readonly List<DiagnosticEvent> diagnosticEvents = new();
+    private string lastDiagnosticSnapshot = "";
+    private string lastRenderedDiagnosticKeys = "";
+
+    private void DiagnosticsSearch_Changed(object sender, TextChangedEventArgs e)
+    {
+        if (DiagnosticsEvents is not null) ShowDiagnosticEvents();
+    }
+
+    private void DiagnosticsSort_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (DiagnosticsEvents is not null) ShowDiagnosticEvents();
+    }
+
+    private static string DiagnosticField(string line, string name)
+    {
+        var marker = name + "=";
+        var start = line.IndexOf(marker, StringComparison.Ordinal);
+        if (start < 0) return "";
+        start += marker.Length;
+        var end = line.IndexOf(' ', start);
+        return (end < 0 ? line[start..] : line[start..end]).Trim();
+    }
+
+    private void ShowDiagnosticEvents()
+    {
+        if (DiagnosticsEvents is null) return;
+        var selected = (DiagnosticsFilter?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "ALL";
+        var search = DiagnosticsSearch?.Text?.Trim() ?? "";
+        IEnumerable<DiagnosticEvent> entries = diagnosticEvents.Where(e =>
+            (selected != "ERROR" || e.Status == "ERROR") &&
+            (selected != "SLOW" || (e.Duration >= 500 && e.Status != "ERROR")) &&
+            (search.Length == 0 || e.Method.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+             e.CorrelationId.Contains(search, StringComparison.OrdinalIgnoreCase)));
+        var order = (DiagnosticsSort?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "NEW";
+        entries = order switch
+        {
+            "OLD" => entries.OrderBy(e => e.Timestamp, StringComparer.Ordinal),
+            "DURATION" => entries.OrderByDescending(e => e.Duration),
+            "METHOD" => entries.OrderBy(e => e.Method, StringComparer.CurrentCultureIgnoreCase),
+            _ => entries.OrderByDescending(e => e.Timestamp, StringComparer.Ordinal)
+        };
+        var visible = entries.Take(300).ToArray();
+        // Stable, incremental update: keep existing containers and selection whenever possible.
+        var keys = string.Join("\n", visible.Select(e => e.Raw));
+        if (keys == lastRenderedDiagnosticKeys) return;
+        lastRenderedDiagnosticKeys = keys;
+        var selectedRaw = (DiagnosticsEvents.SelectedItem as ListViewItem)?.Tag as string;
+        var existing = DiagnosticsEvents.Items.OfType<ListViewItem>()
+            .Where(i => i.Tag is string).GroupBy(i => (string)i.Tag, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
+        var target = new List<ListViewItem>();
+        foreach (var entry in visible)
+        {
+            if (existing.TryGetValue(entry.Raw, out var oldItem))
+            {
+                target.Add(oldItem);
+                continue;
+            }
+            var row = new Grid { ColumnSpacing = 8, Padding = new Thickness(4, 3, 4, 3) };
+            foreach (var width in new[] { "165", "90", "*", "90", "300" })
+                row.ColumnDefinitions.Add(new ColumnDefinition { Width = width == "*" ? new GridLength(1, GridUnitType.Star) : new GridLength(double.Parse(width, CultureInfo.InvariantCulture)) });
+            var cells = new[] { entry.Timestamp.Replace('T', ' ').TrimEnd('Z'), entry.Status, entry.Method, entry.Duration + " ms", entry.CorrelationId };
+            for (var i = 0; i < cells.Length; i++)
+            {
+                var block = new TextBlock { Text = cells[i], TextTrimming = TextTrimming.CharacterEllipsis, VerticalAlignment = VerticalAlignment.Center, FontSize = 12 };
+                if (i == 1) block.Foreground = new SolidColorBrush(entry.Status == "ERROR" ? Windows.UI.Color.FromArgb(255, 185, 40, 40) : Windows.UI.Color.FromArgb(255, 0, 115, 75));
+                Grid.SetColumn(block, i);
+                row.Children.Add(block);
+            }
+            var item = new ListViewItem { Content = row, Tag = entry.Raw };
+            ToolTipService.SetToolTip(item, entry.Raw);
+            target.Add(item);
+        }
+        // Move only rows whose position changed; don't recreate the entire ListView.
+        for (int i = 0; i < target.Count; i++)
+        {
+            if (i < DiagnosticsEvents.Items.Count && ReferenceEquals(DiagnosticsEvents.Items[i], target[i])) continue;
+            var previous = DiagnosticsEvents.Items.IndexOf(target[i]);
+            if (previous >= 0) DiagnosticsEvents.Items.RemoveAt(previous);
+            DiagnosticsEvents.Items.Insert(i, target[i]);
+        }
+        while (DiagnosticsEvents.Items.Count > target.Count)
+            DiagnosticsEvents.Items.RemoveAt(DiagnosticsEvents.Items.Count - 1);
+        if (selectedRaw is not null)
+            DiagnosticsEvents.SelectedItem = target.FirstOrDefault(i => (string)i.Tag == selectedRaw);
+        DiagnosticsStatus.Text = $"{visible.Length} Ereignisse angezeigt (maximal 300; letzte 256 KiB).";
+    }
+
+    private void RefreshDiagnostics()
+    {
+        InitializeDiagnosticsTimer();
+        try
+        {
+            if (!System.IO.File.Exists(DiagnosticsLogPath))
+            {
+                if (lastDiagnosticSnapshot.Length == 0) return;
+                lastDiagnosticSnapshot = "";
+                lastRenderedDiagnosticKeys = "";
+                diagnosticEvents.Clear();
+                DiagnosticsEvents?.Items.Clear();
+                DiagnosticsStatistics.Text = "Noch keine Messwerte.";
+                DiagnosticsStatus.Text = "Noch keine IPC-Diagnoseereignisse vorhanden.";
+                return;
+            }
+            using var stream = new System.IO.FileStream(DiagnosticsLogPath, System.IO.FileMode.Open,
+                System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite | System.IO.FileShare.Delete);
+            const int maxBytes = 256 * 1024;
+            if (stream.Length > maxBytes) stream.Seek(-maxBytes, System.IO.SeekOrigin.End);
+            using var reader = new System.IO.StreamReader(stream);
+            if (stream.Position != 0) reader.ReadLine();
+            var snapshot = reader.ReadToEnd();
+            if (snapshot == lastDiagnosticSnapshot) return;
+            lastDiagnosticSnapshot = snapshot;
+            diagnosticEvents.Clear();
+            var lines = snapshot.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in lines)
+            {
+                var duration = DiagnosticField(line, "durationMs");
+                if (!long.TryParse(duration, NumberStyles.None, CultureInfo.InvariantCulture, out var ms)) continue;
+                var stamp = line.Split(' ', 2)[0].Trim();
+                var status = line.Contains(" ERROR ", StringComparison.Ordinal) ? "ERROR" : "OK";
+                diagnosticEvents.Add(new DiagnosticEvent(stamp, status, DiagnosticField(line, "method"), ms, DiagnosticField(line, "correlationId"), line.Trim()));
+            }
+            if (diagnosticEvents.Count > 0)
+            {
+                var durations = diagnosticEvents.Select(e => e.Duration).OrderBy(v => v).ToArray();
+                var errors = diagnosticEvents.Count(e => e.Status == "ERROR");
+                var slow = diagnosticEvents.Count(e => e.Duration >= 500);
+                var p95 = durations[(int)Math.Ceiling(durations.Length * 0.95) - 1];
+                DiagnosticsStatistics.Text = $"Letzte {diagnosticEvents.Count} protokollierte Anfragen  ·  Fehler: {errors}  ·  ≥ 500 ms: {slow}  ·  Ø {durations.Average():F0} ms  ·  P95 {p95} ms";
+            }
+            else DiagnosticsStatistics.Text = "Noch keine auswertbaren IPC-Messwerte.";
+            ShowDiagnosticEvents();
+        }
+        catch (Exception ex)
+        {
+            DiagnosticsStatus.Text = "Diagnoseprotokoll kann derzeit nicht gelesen werden: " + ex.Message;
+            DiagnosticsStatistics.Text = "Statistik nicht verfügbar.";
+        }
+    }
+
+    private async void DatabaseDiagnostics_Click(object sender, RoutedEventArgs e)
+    {
+        if (DatabaseDiagnosticsStatus is null) return;
+        DatabaseDiagnosticsStatus.Text = "Datenbank wird geprüft …";
+        try
+        {
+            var report = await System.Threading.Tasks.Task.Run(() =>
+            {
+                var path = Store.Database;
+                if (!System.IO.File.Exists(path)) return "Datenbank nicht gefunden.";
+                var size = new System.IO.FileInfo(path).Length;
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                using var db = new Microsoft.Data.Sqlite.SqliteConnection(
+                    new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder
+                    { DataSource = path, Mode = Microsoft.Data.Sqlite.SqliteOpenMode.ReadOnly }.ToString());
+                db.Open();
+                using var cmd = db.CreateCommand();
+                cmd.CommandText = "PRAGMA quick_check;";
+                var check = Convert.ToString(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) ?? "unbekannt";
+                cmd.CommandText = "PRAGMA user_version;";
+                var version = Convert.ToString(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) ?? "?";
+                watch.Stop();
+                return $"SQLite: {check}  ·  Größe: {size / 1024.0 / 1024.0:F2} MiB  ·  Schema-Version: {version}  ·  Prüfung: {watch.ElapsedMilliseconds} ms";
+            });
+            DatabaseDiagnosticsStatus.Text = report;
+        }
+        catch (Exception ex)
+        {
+            DatabaseDiagnosticsStatus.Text = "Datenbankprüfung nicht möglich: " + ex.Message;
+        }
+    }
+
+    private async void DatabaseVacuum_Click(object sender, RoutedEventArgs e)
+    {
+        if (databaseMaintenanceRunning || DatabaseVacuumButton is null) return;
+        var confirm = new ContentDialog
+        {
+            Title = "Datenbank komprimieren?",
+            Content = "SQLite baut die Datenbank neu auf. Das kann einen Moment dauern. Bitte währenddessen keine Einträge erfassen. Vorher wird eine Sicherheitskopie angelegt.",
+            PrimaryButtonText = "Komprimieren",
+            CloseButtonText = "Abbrechen",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = DatabaseVacuumButton.XamlRoot
+        };
+        if (await confirm.ShowAsync() != ContentDialogResult.Primary) return;
+        databaseMaintenanceRunning = true;
+        DatabaseVacuumButton.IsEnabled = false;
+        DatabaseDiagnosticsStatus.Text = "Datenbank wird gesichert und komprimiert …";
+        try
+        {
+            var report = await System.Threading.Tasks.Task.Run(() =>
+            {
+                var path = Store.Database;
+                if (!System.IO.File.Exists(path)) throw new System.IO.FileNotFoundException("Datenbank nicht gefunden.", path);
+                var originalSize = new System.IO.FileInfo(path).Length;
+                var drive = new System.IO.DriveInfo(System.IO.Path.GetPathRoot(System.IO.Path.GetFullPath(path))!);
+                // SQLite VACUUM may require up to roughly twice the database size in temporary space.
+                // Include headroom for the consistent backup created before maintenance.
+                var required = Math.Max(originalSize * 4L, 64L * 1024 * 1024);
+                if (drive.AvailableFreeSpace < required)
+                    throw new System.IO.IOException("Zu wenig freier Speicherplatz für Sicherung und Komprimierung.");
+                var backup = path + ".before-vacuum-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture) + ".bak";
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                using (var db = new Microsoft.Data.Sqlite.SqliteConnection(new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder
+                       { DataSource = path, Mode = Microsoft.Data.Sqlite.SqliteOpenMode.ReadWrite }.ToString()))
+                {
+                    db.Open();
+                    using (var backupDb = new Microsoft.Data.Sqlite.SqliteConnection(new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder
+                           { DataSource = backup, Mode = Microsoft.Data.Sqlite.SqliteOpenMode.ReadWriteCreate }.ToString()))
+                    {
+                        backupDb.Open();
+                        db.BackupDatabase(backupDb);
+                    }
+                    using var cmd = db.CreateCommand();
+                    cmd.CommandTimeout = 60;
+                    cmd.CommandText = "PRAGMA busy_timeout=5000;";
+                    cmd.ExecuteNonQuery();
+                    cmd.CommandText = "VACUUM;";
+                    cmd.ExecuteNonQuery();
+                    cmd.CommandText = "PRAGMA quick_check;";
+                    var result = Convert.ToString(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
+                    if (result != "ok") throw new System.IO.IOException("Integritätsprüfung nach VACUUM: " + result);
+                }
+                watch.Stop();
+                var newSize = new System.IO.FileInfo(path).Length;
+                return $"Komprimierung abgeschlossen · {originalSize / 1048576.0:F2} → {newSize / 1048576.0:F2} MiB · {watch.ElapsedMilliseconds} ms · Sicherung: {System.IO.Path.GetFileName(backup)}";
+            });
+            DatabaseDiagnosticsStatus.Text = report;
+        }
+        catch (Exception ex)
+        {
+            DatabaseDiagnosticsStatus.Text = "Komprimierung nicht abgeschlossen: " + ex.Message;
+        }
+        finally
+        {
+            databaseMaintenanceRunning = false;
+            DatabaseVacuumButton.IsEnabled = true;
+        }
+    }
+
+    private void SystemStatus_Click(object sender, RoutedEventArgs e)
+    {
+        if (DatabaseDiagnosticsStatus is null) return;
+        try
+        {
+            using var process = System.Diagnostics.Process.GetCurrentProcess();
+            var db = Store.Database;
+            var raycast = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                ".config", "raycast", "extensions", "paceatlas");
+            var artifactCount = new[] { "plugin.json", "status.js", "activities.js", "medications.js", "measures.js" }
+                .Count(file => System.IO.File.Exists(System.IO.Path.Combine(raycast, file)));
+            DatabaseDiagnosticsStatus.Text = $"Prozess: PID {process.Id} · RAM: {process.WorkingSet64 / 1048576.0:F1} MiB · " +
+                $"Datenbank: {(System.IO.File.Exists(db) ? "vorhanden" : "fehlt")} · " +
+                $"Raycast: {artifactCount}/5 Build-Dateien · IPC-Diagnose: {(PaceAtlas.IPC.PipeServer.IsVerboseDiagnosticsActive ? "ausführlich" : "normal")}";
+        }
+        catch (Exception ex)
+        {
+            DatabaseDiagnosticsStatus.Text = "Systemstatus nicht verfügbar: " + ex.Message;
+        }
+    }
+
+    private async void ExportDiagnostics_Click(object sender, RoutedEventArgs e)
+    {
+        // Export is intentionally an allowlist, not a ZIP of application files or raw logs.
+        // Only known IPC metadata fields are included; no request payloads or user data.
+        if (DatabaseDiagnosticsStatus is null) return;
+        DatabaseDiagnosticsStatus.Text = "Diagnosepaket wird erstellt …";
+        try
+        {
+            var eventsSnapshot = diagnosticEvents.TakeLast(300).ToArray();
+            var destination = await System.Threading.Tasks.Task.Run(() =>
+            {
+                var folder = System.IO.Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "PaceAtlas-Diagnose");
+                System.IO.Directory.CreateDirectory(folder);
+                var file = System.IO.Path.Combine(folder,
+                    "PaceAtlas-Diagnose-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture) + ".zip");
+                using var archive = System.IO.Compression.ZipFile.Open(file, System.IO.Compression.ZipArchiveMode.Create);
+                var info = archive.CreateEntry("system.txt");
+                using (var writer = new System.IO.StreamWriter(info.Open()))
+                {
+                    writer.WriteLine("PaceAtlas Diagnosepaket (nur technische Metadaten)");
+                    writer.WriteLine("UTC: " + DateTime.UtcNow.ToString("O", CultureInfo.InvariantCulture));
+                    writer.WriteLine("Version: " + typeof(MainWindow).Assembly.GetName().Version);
+                    writer.WriteLine("OS: " + Environment.OSVersion.VersionString);
+                    writer.WriteLine("Runtime: " + System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
+                    writer.WriteLine("IPC verbose: " + PaceAtlas.IPC.PipeServer.IsVerboseDiagnosticsActive);
+                }
+                var logEntry = archive.CreateEntry("ipc-diagnostics.csv");
+                using (var writer = new System.IO.StreamWriter(logEntry.Open()))
+                {
+                    writer.WriteLine("timestamp,status,method,durationMs,correlationId");
+                    // Reparse the bounded, already loaded diagnostic entries rather than copying raw logs.
+                    foreach (var entry in eventsSnapshot)
+                    {
+                        static string Safe(string value) => new string(value.Where(c =>
+                            char.IsAsciiLetterOrDigit(c) || c is '.' or '-' or '_' or ':' or '+' or 'T' or 'Z').Take(100).ToArray());
+                        writer.WriteLine($"{Safe(entry.Timestamp)},{Safe(entry.Status)},{Safe(entry.Method)},{entry.Duration},{Safe(entry.CorrelationId)}");
+                    }
+                }
+                return file;
+            });
+            DatabaseDiagnosticsStatus.Text = "Diagnosepaket erstellt: " + destination;
+        }
+        catch (Exception ex)
+        {
+            DatabaseDiagnosticsStatus.Text = "Diagnosepaket konnte nicht erstellt werden: " + ex.Message;
+        }
+    }
+
     private bool aboutOpen;
     private bool databaseMaintenanceRunning;
     private readonly DispatcherTimer todaySummaryTimer = new() { Interval = TimeSpan.FromMinutes(1) };
@@ -166,9 +536,9 @@ public sealed partial class MainWindow : Window
 
     private static SolidColorBrush VisualScaleBrush(int level, bool intensity = false)
     {
-        var colors = intensity
-            ? new[] { "#187C90", "#187C90", "#A66A16", "#B75125" }
-            : new[] { "#418066", "#638663", "#A66A16", "#B75125", "#BD3844" };
+        if (intensity)
+            return ActivityIntensityVisual.Brush(level);
+        var colors = new[] { "#418066", "#638663", "#A66A16", "#B75125", "#BD3844" };
         return new SolidColorBrush(Windows.UI.Color.FromArgb(255,
             Convert.ToByte(colors[Math.Clamp(level, 0, colors.Length - 1)][1..3], 16),
             Convert.ToByte(colors[Math.Clamp(level, 0, colors.Length - 1)][3..5], 16),
@@ -176,7 +546,7 @@ public sealed partial class MainWindow : Window
     }
 
     private static string CircleScale(int level) => new string('●', Math.Clamp(level, 0, 4)) + new string('○', 4 - Math.Clamp(level, 0, 4));
-    private static string BarScale(int level) => new string('▰', Math.Clamp(level, 0, 4)) + new string('▱', 4 - Math.Clamp(level, 0, 4));
+    private static string BarScale(int level) => ActivityIntensityVisual.Marker(level);
     private static readonly string[] ActivityNames =
         ["Körperlich", "Kognitiv", "Sozial", "Akustisch", "Visuell", "Emotional/Stress", "Fahrt/Transport"];
     private static readonly string[] RestNames = ["Hingelegt", "Reizarm", "Augen geschlossen", "Geschlafen"];
@@ -441,6 +811,7 @@ public sealed partial class MainWindow : Window
             startup.Restart();
         }
         InitializeComponent();
+        InitializeDiagnosticsTimer();
         Mark("XAML");
         MigrateWinUiSettings();
         SetInitialWindowSize();
@@ -594,7 +965,7 @@ public sealed partial class MainWindow : Window
 
     private Grid TableRow((string Text, int Width)[] cells, bool header = false, bool compact = false, string? table = null,
         IReadOnlyList<(string Symbol, SolidColorBrush Brush)>? badges = null, string? contentDescription = null,
-        string? contentForm = null, int recoveryLevel = -1)
+        string? contentForm = null, int recoveryLevel = -1, int activityIntensity = 0)
     {
         var grid = new Grid { MinHeight = header ? 30 : 27 };
         foreach (var (value, width) in cells)
@@ -622,7 +993,24 @@ public sealed partial class MainWindow : Window
                 ToolTipService.SetToolTip(label, contentDescription ?? value);
                 Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(label, contentDescription ?? value);
             }
-            if (table == "entries" && index == 3 && recoveryLevel >= 0)
+            // Activity history uses the same visual indicator as the activity editor.
+            // Do not render intensity as a glyph: font fallback can discard the tint.
+            if (table == "entries" && index == 3 && activityIntensity is >= 1 and <= 4)
+            {
+                var content = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6,
+                    VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 8, 0) };
+                if (badges is { Count: > 1 })
+                    content.Children.Add(new TextBlock { Text = "◷", Foreground = VisualScaleBrush(3),
+                        VerticalAlignment = VerticalAlignment.Center });
+                content.Children.Add(ActivityIntensityVisual.Create(activityIntensity));
+                content.Children.Add(new TextBlock { Text = T(value), VerticalAlignment = VerticalAlignment.Center,
+                    TextTrimming = TextTrimming.CharacterEllipsis });
+                ToolTipService.SetToolTip(content, contentDescription ?? value);
+                Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(content, contentDescription ?? value);
+                Grid.SetColumn(content, index);
+                grid.Children.Add(content);
+            }
+            else if (table == "entries" && index == 3 && recoveryLevel >= 0)
             {
                 var content = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6,
                     VerticalAlignment = VerticalAlignment.Center };
@@ -1986,6 +2374,10 @@ public sealed partial class MainWindow : Window
             symptoms.Add(name, choice);
             choice.SelectionChanged += (_, _) => RefreshLimitingSymptomOptions();
         }
+        // Rebuilding the fields after editing symptom or pain choices must restore
+        // the visual severity items as well as the selected values.
+        foreach (var choice in symptoms.Values)
+            SelectVisual(choice, Severities, false, symptom: true);
         RefreshLimitingSymptomOptions();
 
         for (int i = 0; i < PainNames.Length; i++)
@@ -2240,6 +2632,11 @@ public sealed partial class MainWindow : Window
             if (meal is not null) EditMeal(meal);
             return;
         }
+        if (entry.Kind == "Notiz")
+        {
+            _ = EditQuickNoteAsync(entry);
+            return;
+        }
         SetEntriesExpanded(false);
         if (entry.Kind == "Einnahme")
         {
@@ -2339,6 +2736,42 @@ public sealed partial class MainWindow : Window
             else if (entry.Kind is "Aktivität" or "Ruhe" or "Schlaf")
             { IntervalStartTime.Focus(FocusState.Programmatic); IntervalFormScroller.ChangeView(null, 0, null); }
         });
+    }
+
+    private async Task EditQuickNoteAsync(Entry entry)
+    {
+        var textBox = new TextBox
+        {
+            Text = entry.Note,
+            AcceptsReturn = true,
+            TextWrapping = TextWrapping.Wrap,
+            MinHeight = 130,
+            MaxLength = 10000
+        };
+        var dialog = new ContentDialog
+        {
+            Title = N("Schnellnotiz bearbeiten", "Edit quick note"),
+            Content = textBox,
+            PrimaryButtonText = N("Speichern", "Save"),
+            CloseButtonText = N("Abbrechen", "Cancel"),
+            XamlRoot = (Content as FrameworkElement)?.XamlRoot
+        };
+        if (await ShowTranslatedDialogAsync(dialog) != ContentDialogResult.Primary) return;
+        if (string.IsNullOrWhiteSpace(textBox.Text))
+        {
+            Status.Text = N("Die Schnellnotiz darf nicht leer sein.", "The quick note cannot be empty.");
+            return;
+        }
+        try
+        {
+            entry.Note = textBox.Text.Trim();
+            store.Save(entry);
+            LoadEntries();
+        }
+        catch (Exception ex)
+        {
+            Status.Text = N("Speichern fehlgeschlagen: ", "Save failed: ") + ex.Message;
+        }
     }
 
     private void SetHearingProtection(IEnumerable<string>? protection)
@@ -2583,6 +3016,16 @@ public sealed partial class MainWindow : Window
                 visibleEntries.Add(MealEntryRow(entry, meal));
                 continue;
             }
+            if (entry.Kind == "Notiz")
+            {
+                displayedEntries.Add(entry);
+                visibleEntries.Add(TableRow(
+                    [(entry.Start.ToString("dd.MM.yyyy HH:mm"), 180), ("", 180),
+                     (N("Schnellnotiz", "Quick note"), 115),
+                     (entry.Note, 400), ("", 340)],
+                    compact: true, table: "entries", contentDescription: entry.Note));
+                continue;
+            }
             if (entry.Kind == "Einnahme")
             {
                 PaceAtlas.IntakeData? intake;
@@ -2659,14 +3102,15 @@ public sealed partial class MainWindow : Window
                     badges: entry.Kind is "Schlaf" or "Ruhe"
                         ? entry.End is null ? [("◷", VisualScaleBrush(3))] : null
                         : entry.End is null
-                            ? [("◷", VisualScaleBrush(3)), (BarScale(intensityLevel), VisualScaleBrush(intensityLevel - 1, true))]
-                            : [(BarScale(intensityLevel), VisualScaleBrush(intensityLevel - 1, true))],
+                            ? [("◷", VisualScaleBrush(3)), (BarScale(intensityLevel), ActivityIntensityVisual.Brush(intensityLevel))]
+                            : [(BarScale(intensityLevel), ActivityIntensityVisual.Brush(intensityLevel))],
                     contentDescription: entry.Kind is "Schlaf" or "Ruhe" ?
                         details + " · " + RecoveryDescription(recoveryLevel) :
                         (details.Length == 0 ? "" : details + " · ") +
                         (selectedLanguage == "en" ? "Intensity: " : "Intensität: ") +
                         T(new[] { "gering", "mittel", "hoch", "sehr hoch" }[intensityLevel - 1]),
-                    recoveryLevel: recoveryLevel);
+                    recoveryLevel: recoveryLevel,
+                    activityIntensity: entry.Kind == "Aktivität" ? intensityLevel : 0);
                 if (entry.End is null)
                     intervalRow.Background = (Microsoft.UI.Xaml.Media.Brush)
                         ((FrameworkElement)Content).Resources["RunningIntervalBrush"];
@@ -2732,6 +3176,7 @@ public sealed partial class MainWindow : Window
                     JsonSerializer.Deserialize<IntervalData>(entry.Data)?.Dimensions ?? []),
                 "Zustand" => (JsonSerializer.Deserialize<StateData>(entry.Data)?.Overall ?? -1).ToString(),
                 "Mahlzeit" => entry.Data,
+                "Notiz" => entry.Note,
                 _ => ""
             };
         }

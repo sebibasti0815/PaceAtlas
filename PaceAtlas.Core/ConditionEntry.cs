@@ -10,6 +10,9 @@ public sealed class Entry
     public DateTime? End { get; set; }
     public string Data { get; set; } = "{}";
     public string Note { get; set; } = "";
+    // Legacy entries are explicitly classified as WinUI / Full by the schema migration.
+    public string CaptureSource { get; set; } = "WinUI";
+    public string CaptureMode { get; set; } = "Full";
 }
 
 public sealed class StateData

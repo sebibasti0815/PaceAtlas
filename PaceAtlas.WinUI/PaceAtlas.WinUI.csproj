@@ -28,7 +28,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260921001" />
     <PackageReference Include="PDFsharp-MigraDoc-GDI" Version="6.2.4" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
     <ProjectReference Include="..\PaceAtlas.Core\PaceAtlas.Core.csproj" />
+    <ProjectReference Include="..\PaceAtlas.IPC\PaceAtlas.IPC.csproj" />
     <EmbeddedResource Include="..\PaceAtlas\Resources\Pacing*.wav" LogicalName="PaceAtlas.Resources.%(Filename)%(Extension)" />
     <EmbeddedResource Include="..\PaceAtlas\app.ico" LogicalName="PaceAtlas.WinUI.app.ico" />
     <Compile Include="..\PaceAtlas\Localization.cs" Link="Shared\Localization.cs" />

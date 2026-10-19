@@ -217,6 +217,57 @@ public sealed partial class Store
         transaction.Commit();
     }
 
+    // Bounded, read-only search: never materialize the complete BLS/OFF catalogue for IPC.
+    public List<FoodItem> SearchFoods(string? query, int limit = 30, long? id = null)
+    {
+        if (id is null && (string.IsNullOrWhiteSpace(query) || query.Trim().Length < 2)) return new();
+        limit = Math.Clamp(limit, 1, 30);
+        using var db = Open();
+        using var command = db.CreateCommand();
+        command.CommandText = """
+            WITH candidates AS (
+                SELECT f.id AS id, f.name AS name,
+                    COALESCE(f.carbs,b.carbs,o.carbs) AS carbs, f.gi AS gi,
+                    COALESCE(f.gl, CASE WHEN f.gi IS NOT NULL AND COALESCE(f.carbs,b.carbs,o.carbs) IS NOT NULL
+                        THEN ROUND(f.gi * COALESCE(f.carbs,b.carbs,o.carbs) / 100.0,1) END) AS gl,
+                    f.source AS source, f.note AS note, COALESCE(f.bls_code,'') AS bls_code,
+                    0 AS is_bls, COALESCE(f.off_code,'') AS off_code, 0 AS is_off
+                FROM foods f LEFT JOIN bls_foods b ON b.code=f.bls_code
+                             LEFT JOIN off_foods o ON o.code=f.off_code
+                WHERE ($id IS NOT NULL AND f.id=$id) OR ($id IS NULL AND f.name LIKE $pattern ESCAPE '\')
+                UNION ALL
+                SELECT -b.id,b.name,b.carbs,NULL,NULL,'BLS 4.0 · Max Rubner-Institut · CC BY 4.0','',b.code,1,'',0
+                FROM bls_foods b
+                WHERE (($id IS NOT NULL AND -b.id=$id) OR ($id IS NULL AND b.name LIKE $pattern ESCAPE '\'))
+                  AND NOT EXISTS (SELECT 1 FROM foods f WHERE f.bls_code=b.code OR f.name=b.name COLLATE NOCASE)
+                UNION ALL
+                SELECT -1000000000-o.id,o.name,o.carbs,NULL,NULL,
+                    'Open Food Facts · ODbL 1.0 · Barcode ' || o.code,'','',0,o.code,1
+                FROM off_foods o
+                WHERE (($id IS NOT NULL AND -1000000000-o.id=$id) OR ($id IS NULL AND o.name LIKE $pattern ESCAPE '\'))
+                  AND NOT EXISTS (SELECT 1 FROM foods f WHERE f.off_code=o.code OR f.name=o.name COLLATE NOCASE)
+                  AND NOT EXISTS (SELECT 1 FROM bls_foods b WHERE b.name=o.name COLLATE NOCASE)
+            )
+            SELECT * FROM candidates ORDER BY name COLLATE NOCASE LIMIT $limit
+            """;
+        var escaped = (query ?? "").Trim().Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_");
+        command.Parameters.AddWithValue("$pattern", "%" + escaped + "%");
+        command.Parameters.AddWithValue("$id", (object?)id ?? DBNull.Value);
+        command.Parameters.AddWithValue("$limit", limit);
+        var result = new List<FoodItem>();
+        using var reader = command.ExecuteReader();
+        while (reader.Read()) result.Add(new FoodItem {
+            Id = reader.GetInt64(0), Name = reader.GetString(1),
+            CarbsPer100G = reader.IsDBNull(2) ? null : reader.GetDouble(2),
+            GlycemicIndex = reader.IsDBNull(3) ? null : reader.GetDouble(3),
+            GlycemicLoadPer100G = reader.IsDBNull(4) ? null : reader.GetDouble(4),
+            Source = reader.GetString(5), Note = reader.GetString(6),
+            BlsCode = reader.GetString(7), IsBlsBase = reader.GetInt32(8) != 0,
+            OffCode = reader.GetString(9), IsOffBase = reader.GetInt32(10) != 0
+        });
+        return result;
+    }
+
     public List<FoodItem> Foods()
     {
         var result = new List<FoodItem>();

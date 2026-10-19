@@ -9,6 +9,7 @@ internal static class Program
 {
     private const string InstanceName = @"Local\PaceAtlas.WinUI.Instance";
     private static int pendingActivation;
+    internal static bool StartHiddenInTray { get; private set; }
     private static readonly Stopwatch startupClock = new();
     private static LoadingSplash? loadingSplash;
     internal static long StartupElapsedMilliseconds => startupClock.ElapsedMilliseconds;
@@ -20,16 +21,18 @@ internal static class Program
     {
         try
         {
+            StartHiddenInTray = Environment.GetCommandLineArgs().Skip(1).Any(a =>
+                string.Equals(a, "--tray", StringComparison.OrdinalIgnoreCase));
             using var instance = new Mutex(true, InstanceName, out var firstInstance);
             using var activation = new EventWaitHandle(false, EventResetMode.AutoReset, InstanceName + ".Activate");
             if (!firstInstance)
             {
-                activation.Set();
+                if (!StartHiddenInTray) activation.Set();
                 return;
             }
 
             startupClock.Start();
-            loadingSplash = LoadingSplash.Start();
+            if (!StartHiddenInTray) loadingSplash = LoadingSplash.Start();
             WinRT.ComWrappersSupport.InitializeComWrappers();
             Application.Start(unused =>
             {

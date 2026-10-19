@@ -377,7 +377,7 @@
                         </TabViewItem>
                         <TabViewItem x:Name="StockTab" Header="Packungen und Vorrat" IsClosable="False">
                           <Grid>
-                            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                             <TextBlock Text="Packungen und Vorrat" FontSize="20" FontWeight="SemiBold" Margin="0,8,0,8" />
                             <Border x:Name="StockEditingBanner" Grid.Row="1" Visibility="Collapsed" Background="#E2F2F4" CornerRadius="5" Padding="10,6" Margin="0,0,0,8">
                               <TextBlock x:Name="StockEditingText" Foreground="#174B57" TextWrapping="Wrap" />
@@ -880,6 +880,53 @@
                           <TextBlock x:Name="MedicalReportStatus" Foreground="#316073" TextWrapping="Wrap" />
                         </StackPanel>
                       </ScrollViewer>
+                    </TabViewItem>
+                    <TabViewItem x:Name="DiagnosticsTab" Header="System &amp; Diagnose" IsClosable="False">
+                      <Grid Padding="16" RowSpacing="12">
+                        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                          <TextBlock Text="IPC-Diagnose" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+                          <Button Content="Aktualisieren" Click="RefreshDiagnostics_Click" />
+                          <Button x:Name="DiagnosticsPauseButton" Content="Pause" Click="DiagnosticsPause_Click" />
+                          <Button x:Name="DiagnosticsModeButton" Content="15 Min. ausführlich" Click="DiagnosticsMode_Click" />
+                          <TextBlock x:Name="DiagnosticsModeStatus" Text="● Normalbetrieb" VerticalAlignment="Center" />
+                          <ComboBox x:Name="DiagnosticsFilter" Width="170" SelectionChanged="DiagnosticsFilter_Changed" SelectedIndex="0">
+                            <ComboBoxItem Content="Alle Ereignisse" Tag="ALL" />
+                            <ComboBoxItem Content="Fehler" Tag="ERROR" />
+                            <ComboBoxItem Content="Langsame Anfragen" Tag="SLOW" />
+                          </ComboBox>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="12">
+                          <Button Content="Datenbank prüfen" Click="DatabaseDiagnostics_Click" />
+                          <Button x:Name="DatabaseVacuumButton" Content="Datenbank komprimieren" Click="DatabaseVacuum_Click" />
+                          <Button Content="Systemstatus" Click="SystemStatus_Click" />
+                          <Button Content="Diagnosepaket erstellen" Click="ExportDiagnostics_Click" />
+                          <TextBlock x:Name="DatabaseDiagnosticsStatus" Text="Datenbankdiagnose noch nicht ausgeführt." TextWrapping="Wrap" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock x:Name="DiagnosticsStatus" Grid.Row="2" Text="Noch keine Diagnose geladen. Aktualisieren wählen." TextWrapping="Wrap" />
+                        <TextBlock x:Name="DiagnosticsStatistics" Grid.Row="3" Text="Noch keine Messwerte." TextWrapping="Wrap" Foreground="#316073" />
+                        <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="10">
+                          <TextBox x:Name="DiagnosticsSearch" Width="290" PlaceholderText="Methode oder Korrelations-ID suchen" TextChanged="DiagnosticsSearch_Changed" />
+                          <ComboBox x:Name="DiagnosticsSort" Width="190" SelectedIndex="0" SelectionChanged="DiagnosticsSort_Changed">
+                            <ComboBoxItem Content="Neueste zuerst" Tag="NEW" />
+                            <ComboBoxItem Content="Älteste zuerst" Tag="OLD" />
+                            <ComboBoxItem Content="Dauer absteigend" Tag="DURATION" />
+                            <ComboBoxItem Content="Methode A–Z" Tag="METHOD" />
+                          </ComboBox>
+                        </StackPanel>
+                        <Grid Grid.Row="5" RowSpacing="4">
+                          <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                          <Grid ColumnSpacing="8" Padding="8,6">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="165"/><ColumnDefinition Width="90"/><ColumnDefinition Width="*"/><ColumnDefinition Width="90"/><ColumnDefinition Width="300"/></Grid.ColumnDefinitions>
+                            <TextBlock Text="Zeitpunkt" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="1" Text="Status" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="2" Text="Methode" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="3" Text="Dauer" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="4" Text="Korrelations-ID" FontWeight="SemiBold"/>
+                          </Grid>
+                          <ListView x:Name="DiagnosticsEvents" Grid.Row="1" SelectionMode="Single" IsItemClickEnabled="False" />
+                        </Grid>
+                      </Grid>
                     </TabViewItem>
                 </TabView>
             </Border>
