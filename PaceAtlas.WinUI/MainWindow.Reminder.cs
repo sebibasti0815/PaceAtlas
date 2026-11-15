@@ -102,7 +102,7 @@ public sealed partial class MainWindow
                 : "Ein kurzer Eintrag hilft dir, Veränderungen im Verlauf zu erkennen.";
             reminderRecord!.Content = english ? "Record condition" : "Zustand erfassen";
             reminderLater!.Content = english ? "Later" : "Später";
-            reminderPopup.AppWindow.Show(false);
+            ShowReminderWithoutActivation(reminderPopup);
             reminderVisible = true;
             reminderDismiss.Start();
             return;
@@ -194,9 +194,7 @@ public sealed partial class MainWindow
         reminderDescription = description;
         reminderRecord = record;
         reminderLater = later;
-        // Do not take focus on appearance; a subsequent click may activate the window
-        // normally so WinUI can dispatch Button.Click to either action.
-        popup.AppWindow.Show(false);
+        ShowReminderWithoutActivation(popup);
         reminderVisible = true;
         reminderDismiss.Start();
     }
@@ -224,6 +222,17 @@ public sealed partial class MainWindow
         reminderVisible = false;
         reminderPopup?.AppWindow.Hide();
     }
+
+    private static void ShowReminderWithoutActivation(Window popup)
+    {
+        // SW_SHOWNOACTIVATE avoids stealing focus only while showing the window.
+        // A later mouse click can activate it and dispatch the WinUI button event.
+        ShowReminderWindow(WinRT.Interop.WindowNative.GetWindowHandle(popup), 4);
+    }
+
+    [DllImport("user32.dll", EntryPoint = "ShowWindow")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool ShowReminderWindow(IntPtr hwnd, int command);
 
     private async void ConfigureReminderInterval()
     {

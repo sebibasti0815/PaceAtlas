@@ -168,7 +168,7 @@
           "lib/net6.0-windows7.0/SQLitePCLRaw.provider.e_sqlite3.dll": {}
         }
       },
-      "PaceAtlas.Core/0.22.7.3": {
+      "PaceAtlas.Core/0.22.7.6": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
         "dependencies": {
@@ -262,7 +262,7 @@
           "lib/net6.0-windows7.0/SQLitePCLRaw.provider.e_sqlite3.dll": {}
         }
       },
-      "PaceAtlas.Core/0.22.7.3": {
+      "PaceAtlas.Core/0.22.7.6": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
         "dependencies": {
@@ -396,7 +396,7 @@
         "sqlitepclraw.provider.e_sqlite3.nuspec"
       ]
     },
-    "PaceAtlas.Core/0.22.7.3": {
+    "PaceAtlas.Core/0.22.7.6": {
       "type": "project",
       "path": "../PaceAtlas.Core/PaceAtlas.Core.csproj",
       "msbuildProject": "../PaceAtlas.Core/PaceAtlas.Core.csproj"
@@ -404,7 +404,7 @@
   },
   "projectFileDependencyGroups": {
     "net10.0-windows": [
-      "PaceAtlas.Core >= 0.22.7.3"
+      "PaceAtlas.Core >= 0.22.7.6"
     ]
   },
   "packageFolders": {
@@ -412,7 +412,7 @@
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
-    "version": "0.22.7.3",
+    "version": "0.22.7.6",
     "restore": {
       "projectUniqueName": "L:\\source\\repos\\PaceAtlas\\PaceAtlas.IPC\\PaceAtlas.IPC.csproj",
       "projectName": "PaceAtlas.IPC",

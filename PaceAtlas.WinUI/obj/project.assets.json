@@ -670,7 +670,7 @@
           }
         }
       },
-      "PaceAtlas.Core/0.22.7.3": {
+      "PaceAtlas.Core/0.22.7.6": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
         "dependencies": {
@@ -683,11 +683,11 @@
           "bin/placeholder/PaceAtlas.Core.dll": {}
         }
       },
-      "PaceAtlas.IPC/0.22.7.3": {
+      "PaceAtlas.IPC/0.22.7.6": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
         "dependencies": {
-          "PaceAtlas.Core": "0.22.7.3"
+          "PaceAtlas.Core": "0.22.7.6"
         },
         "compile": {
           "bin/placeholder/PaceAtlas.IPC.dll": {}
@@ -1232,7 +1232,7 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
-      "PaceAtlas.Core/0.22.7.3": {
+      "PaceAtlas.Core/0.22.7.6": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
         "dependencies": {
@@ -1245,11 +1245,11 @@
           "bin/placeholder/PaceAtlas.Core.dll": {}
         }
       },
-      "PaceAtlas.IPC/0.22.7.3": {
+      "PaceAtlas.IPC/0.22.7.6": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
         "dependencies": {
-          "PaceAtlas.Core": "0.22.7.3"
+          "PaceAtlas.Core": "0.22.7.6"
         },
         "compile": {
           "bin/placeholder/PaceAtlas.IPC.dll": {}
@@ -3605,12 +3605,12 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "PaceAtlas.Core/0.22.7.3": {
+    "PaceAtlas.Core/0.22.7.6": {
       "type": "project",
       "path": "../PaceAtlas.Core/PaceAtlas.Core.csproj",
       "msbuildProject": "../PaceAtlas.Core/PaceAtlas.Core.csproj"
     },
-    "PaceAtlas.IPC/0.22.7.3": {
+    "PaceAtlas.IPC/0.22.7.6": {
       "type": "project",
       "path": "../PaceAtlas.IPC/PaceAtlas.IPC.csproj",
       "msbuildProject": "../PaceAtlas.IPC/PaceAtlas.IPC.csproj"
@@ -3620,8 +3620,8 @@
     "net10.0-windows10.0.26100.0": [
       "Microsoft.WindowsAppSDK >= 1.8.260921001",
       "PDFsharp-MigraDoc-GDI >= 6.2.4",
-      "PaceAtlas.Core >= 0.22.7.3",
-      "PaceAtlas.IPC >= 0.22.7.3",
+      "PaceAtlas.Core >= 0.22.7.6",
+      "PaceAtlas.IPC >= 0.22.7.6",
       "System.Security.Cryptography.Pkcs >= 10.0.13"
     ]
   },
@@ -3630,7 +3630,7 @@
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
-    "version": "0.22.7.3",
+    "version": "0.22.7.6",
     "restore": {
       "projectUniqueName": "L:\\source\\repos\\PaceAtlas\\PaceAtlas.WinUI\\PaceAtlas.WinUI.csproj",
       "projectName": "PaceAtlas.WinUI",

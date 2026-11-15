@@ -352,3 +352,20 @@ Während des Imports zeigt die Oberfläche die Zahl der geprüften Zeilen und
 einen Abbruchknopf. Ein Abbruch verwirft die laufende Transaktion; der bisherige
 Katalog bleibt erhalten. Beim Schließen während des Imports fragt die Anwendung
 nach und wartet vor dem Beenden auf diesen kontrollierten Abbruch.
+
+
+## Versionshistorien
+
+- [CONSOLIDATION](CONSOLIDATION.md)
+- [DIAGNOSE](DIAGNOSE.md)
+- [HISTORY](HISTORY.md)
+- [INSTALLER](INSTALLER.md)
+- [IPC](IPC.md)
+- [QUICK-NOTES](QUICK-NOTES.md)
+- [RAYCAST](RAYCAST.md)
+- [REMINDER](REMINDER.md)
+- [SYNC](SYNC.md)
+- [SYSTEM-DIAGNOSE](SYSTEM-DIAGNOSE.md)
+- [UI-INTENSITY](UI-INTENSITY.md)
+
+Die ursprünglichen Einzeldateien liegen im [Archiv](docs/archiv/versionsnotizen/).
