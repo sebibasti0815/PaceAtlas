@@ -368,4 +368,3 @@ nach und wartet vor dem Beenden auf diesen kontrollierten Abbruch.
 - [SYSTEM-DIAGNOSE](SYSTEM-DIAGNOSE.md)
 - [UI-INTENSITY](UI-INTENSITY.md)
 
-Die ursprünglichen Einzeldateien liegen im [Archiv](docs/archiv/versionsnotizen/).

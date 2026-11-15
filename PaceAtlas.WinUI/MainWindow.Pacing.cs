@@ -16,7 +16,7 @@ public sealed partial class MainWindow
     private readonly List<(Window Window, TextBlock Countdown)> pacingOverlays = new();
     private PacingTrayIcon? pacingTray;
     private bool pacingRunning, pacingResting, settingPacingControls;
-    private bool hiddenToTray, restoringFromTray, startInTray, wasMaximized, foregroundRequested;
+    private bool hiddenToTray, restoringFromTray, startInTray, wasMaximized;
     private bool exitRequestedFromTray, closeAfterChoice, closingDialogOpen;
     private int activeMinutes = 60, pauseMinutes = 30;
     private DateTimeOffset pacingDeadline;
@@ -67,19 +67,7 @@ public sealed partial class MainWindow
         pacingClock.Tick += (_, _) => TickPacing();
         UpdatePacingDisplay();
 
-        try
-        {
-            if (File.Exists(TraySettingsPath))
-                startInTray = JsonSerializer.Deserialize<TraySettings>(File.ReadAllText(TraySettingsPath))?.StartInTray == true;
-            else
-            {
-                var previous = Path.Combine(Store.Folder, "window.json");
-                if (File.Exists(previous))
-                    startInTray = JsonDocument.Parse(File.ReadAllText(previous)).RootElement
-                        .TryGetProperty("StartInTray", out var value) && value.GetBoolean();
-            }
-        }
-        catch (Exception) { startInTray = false; }
+        startInTray = ReadStartInTraySetting();
 
         try
         {
@@ -118,11 +106,6 @@ public sealed partial class MainWindow
                 DispatcherQueue.TryEnqueue(HideMinimizedToPacingTray);
         };
         AppWindow.Closing += PacingWindow_Closing;
-        if (startInTray && pacingTray is not null)
-            (Content as FrameworkElement)!.Loaded += (_, _) =>
-            {
-                if (!foregroundRequested) HideToPacingTray();
-            };
         Closed += (_, _) =>
         {
             pacingClock.Stop();
@@ -130,6 +113,25 @@ public sealed partial class MainWindow
             ClosePacingOverlays();
             pacingTray?.Dispose();
         };
+    }
+
+    internal static bool ReadStartInTraySetting()
+    {
+        // Read before the splash or any window is shown, including migrated settings.
+        MigrateWinUiSettings();
+        try
+        {
+            if (File.Exists(TraySettingsPath))
+                return JsonSerializer.Deserialize<TraySettings>(File.ReadAllText(TraySettingsPath))?.StartInTray == true;
+            var previous = Path.Combine(Store.Folder, "window.json");
+            if (!File.Exists(previous)) return false;
+            using var settings = JsonDocument.Parse(File.ReadAllText(previous));
+            return settings.RootElement.TryGetProperty("StartInTray", out var value) && value.GetBoolean();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException)
+        {
+            return false;
+        }
     }
 
     private sealed class TraySettings { public bool StartInTray { get; set; } }
@@ -343,10 +345,12 @@ public sealed partial class MainWindow
         // Hiding the actual HWND removes its taskbar button, including in Release builds.
         HidePacingWindow(WinRT.Interop.WindowNative.GetWindowHandle(this), 0); // SW_HIDE
     }
-    internal void HideForBackgroundLaunch()
+    internal bool HideForBackgroundLaunch()
     {
+        if (pacingTray is null) return false;
         // Do not Activate(): the window must never become visible or steal focus.
         HideToPacingTray();
+        return true;
     }
     private void HideMinimizedToPacingTray()
     {
@@ -378,7 +382,6 @@ public sealed partial class MainWindow
 
     internal void ShowFromSecondLaunch()
     {
-        foregroundRequested = true;
         RestoreFromPacingTray();
     }
     private void PacingWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)

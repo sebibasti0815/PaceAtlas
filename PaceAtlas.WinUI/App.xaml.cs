@@ -30,9 +30,7 @@ public partial class App : Application
             ipcServer = new PaceAtlas.IPC.PipeServer(new PaceAtlas.IPC.PaceAtlasApi(new PaceAtlas.Store(), dataChanges, mainWindow.HandlePacingIpc));
             ipcServer.Start();
             var constructionMs = startup.ElapsedMilliseconds;
-            if (Program.StartHiddenInTray)
-                mainWindow.HideForBackgroundLaunch();
-            else
+            if (!Program.StartHiddenInTray || !mainWindow.HideForBackgroundLaunch())
                 window.Activate();
             if (Program.ConsumePendingActivation())
                 mainWindow.ShowFromSecondLaunch();

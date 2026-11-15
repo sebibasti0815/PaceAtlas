@@ -2,6 +2,12 @@
 
 Die neuesten Versionen stehen zuerst. Die bisherigen Änderungsnotizen sind vollständig übernommen.
 
+## Version 0.22.7.7
+
+- „Starten im Tray“ wird vor dem Ladebildschirm und der Fensteraktivierung ausgewertet. Das Hauptfenster wird beim Start nicht erst eingeblendet und anschließend versteckt.
+- Ein erneuter normaler Programmstart öffnet weiterhin das bereits laufende Fenster. Ohne verfügbares Tray-Symbol wird das Hauptfenster angezeigt.
+- Die archivierten Versionsnotizen wurden nach Prüfung der vollständigen Übernahme entfernt.
+
 <a id="system-diagnose-0-21-16"></a>
 
 ## Version 0.21.16

@@ -31,6 +31,9 @@ internal static class Program
                 return;
             }
 
+            // A second explicit launch still opens the existing window; the saved
+            // preference only controls the first instance's initial visibility.
+            StartHiddenInTray |= MainWindow.ReadStartInTraySetting();
             startupClock.Start();
             if (!StartHiddenInTray) loadingSplash = LoadingSplash.Start();
             WinRT.ComWrappersSupport.InitializeComWrappers();

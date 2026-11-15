@@ -168,101 +168,7 @@
           "lib/net6.0-windows7.0/SQLitePCLRaw.provider.e_sqlite3.dll": {}
         }
       },
-      "PaceAtlas.Core/0.22.7.6": {
-        "type": "project",
-        "framework": ".NETCoreApp,Version=v10.0",
-        "dependencies": {
-          "Microsoft.Data.Sqlite": "10.0.12"
-        },
-        "compile": {
-          "bin/placeholder/PaceAtlas.Core.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/PaceAtlas.Core.dll": {}
-        }
-      }
-    },
-    "net10.0-windows/win-x64": {
-      "Microsoft.Data.Sqlite/10.0.12": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.Data.Sqlite.Core": "10.0.12",
-          "SQLitePCLRaw.bundle_e_sqlite3": "2.1.12",
-          "SQLitePCLRaw.core": "2.1.12"
-        },
-        "compile": {
-          "lib/netstandard2.0/_._": {}
-        },
-        "runtime": {
-          "lib/netstandard2.0/_._": {}
-        }
-      },
-      "Microsoft.Data.Sqlite.Core/10.0.12": {
-        "type": "package",
-        "dependencies": {
-          "SQLitePCLRaw.core": "2.1.12"
-        },
-        "compile": {
-          "lib/net8.0/Microsoft.Data.Sqlite.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/net8.0/Microsoft.Data.Sqlite.dll": {
-            "related": ".xml"
-          }
-        }
-      },
-      "SQLitePCLRaw.bundle_e_sqlite3/2.1.12": {
-        "type": "package",
-        "dependencies": {
-          "SQLitePCLRaw.lib.e_sqlite3": "2.1.12",
-          "SQLitePCLRaw.provider.e_sqlite3": "2.1.12"
-        },
-        "compile": {
-          "lib/netstandard2.0/SQLitePCLRaw.batteries_v2.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard2.0/SQLitePCLRaw.batteries_v2.dll": {}
-        }
-      },
-      "SQLitePCLRaw.core/2.1.12": {
-        "type": "package",
-        "compile": {
-          "lib/netstandard2.0/SQLitePCLRaw.core.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard2.0/SQLitePCLRaw.core.dll": {}
-        }
-      },
-      "SQLitePCLRaw.lib.e_sqlite3/2.1.12": {
-        "type": "package",
-        "compile": {
-          "lib/netstandard2.0/_._": {}
-        },
-        "runtime": {
-          "lib/netstandard2.0/_._": {}
-        },
-        "native": {
-          "runtimes/win-x64/native/e_sqlite3.dll": {}
-        },
-        "build": {
-          "buildTransitive/net9.0/SQLitePCLRaw.lib.e_sqlite3.targets": {}
-        }
-      },
-      "SQLitePCLRaw.provider.e_sqlite3/2.1.12": {
-        "type": "package",
-        "dependencies": {
-          "SQLitePCLRaw.core": "2.1.12"
-        },
-        "compile": {
-          "lib/net6.0-windows7.0/SQLitePCLRaw.provider.e_sqlite3.dll": {}
-        },
-        "runtime": {
-          "lib/net6.0-windows7.0/SQLitePCLRaw.provider.e_sqlite3.dll": {}
-        }
-      },
-      "PaceAtlas.Core/0.22.7.6": {
+      "PaceAtlas.Core/0.22.7.7": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
         "dependencies": {
@@ -396,7 +302,7 @@
         "sqlitepclraw.provider.e_sqlite3.nuspec"
       ]
     },
-    "PaceAtlas.Core/0.22.7.6": {
+    "PaceAtlas.Core/0.22.7.7": {
       "type": "project",
       "path": "../PaceAtlas.Core/PaceAtlas.Core.csproj",
       "msbuildProject": "../PaceAtlas.Core/PaceAtlas.Core.csproj"
@@ -404,7 +310,7 @@
   },
   "projectFileDependencyGroups": {
     "net10.0-windows": [
-      "PaceAtlas.Core >= 0.22.7.6"
+      "PaceAtlas.Core >= 0.22.7.7"
     ]
   },
   "packageFolders": {
@@ -412,7 +318,7 @@
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
-    "version": "0.22.7.6",
+    "version": "0.22.7.7",
     "restore": {
       "projectUniqueName": "L:\\source\\repos\\PaceAtlas\\PaceAtlas.IPC\\PaceAtlas.IPC.csproj",
       "projectName": "PaceAtlas.IPC",
@@ -753,11 +659,6 @@
           "System.Xml.XPath": "(,4.3.32767]",
           "System.Xml.XPath.XDocument": "(,5.0.32767]"
         }
-      }
-    },
-    "runtimes": {
-      "win-x64": {
-        "#import": []
       }
     }
   }
