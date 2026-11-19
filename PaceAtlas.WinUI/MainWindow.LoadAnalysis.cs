@@ -197,6 +197,7 @@ public sealed partial class MainWindow
                         var current = loadSort[section];
                         loadSort[section] = (column, current.Column == column ? !current.Descending : false);
                         RefreshLoadAnalysis();
+                        SaveAnalysisDisplay();
                     };
                     cell = heading;
                 }

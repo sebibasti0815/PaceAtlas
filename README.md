@@ -16,6 +16,8 @@ SQLite database.
 
 ## What you can do with Pace Atlas
 
+- **Compare intervention periods:** In Analysis → Intervention analysis, choose an existing intervention or phase and freely select baseline and comparison dates. Compare symptoms, recorded activity and later PEM with daily ranges and visible gaps. See [method and limitations](docs/intervention-analysis.md).
+
 - **Record your condition and symptoms:** Document your overall condition, PEM,
   crashes, pulse, individual symptoms, and pain locations.
 - **Keep track of exertion and recovery:** Record activities, rest, and sleep,

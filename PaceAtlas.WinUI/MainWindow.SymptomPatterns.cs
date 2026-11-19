@@ -11,11 +11,11 @@ public sealed partial class MainWindow
     private bool updatingPatternChoices;
     private void PatternSymptom_Changed(object sender, SelectionChangedEventArgs e)
     {
-        if (!updatingPatternChoices) RefreshSymptomPatterns();
+        if (!updatingPatternChoices) { RefreshSymptomPatterns(); SaveAnalysisDisplay(); }
     }
     private void PatternSort_Changed(object sender, SelectionChangedEventArgs e)
     {
-        if (!updatingPatternChoices) RefreshSymptomPatterns();
+        if (!updatingPatternChoices) { RefreshSymptomPatterns(); SaveAnalysisDisplay(); }
     }
     private void PatternTrendViewport_SizeChanged(object sender, SizeChangedEventArgs e)
     {

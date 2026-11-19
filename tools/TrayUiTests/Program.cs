@@ -9,7 +9,7 @@ using System.Windows.Automation;
 using System.Drawing;
 using System.Drawing.Imaging;
 
-internal static class Program
+internal static partial class Program
 {
     static string output = "";
     static Process? app;
@@ -18,6 +18,7 @@ internal static class Program
     static int Main(string[] args)
     {
         SetThreadDpiAwarenessContext(new IntPtr(-4));
+        if(args.Length>0 && args[0]=="--interventions") return InterventionSuite(args);
         if(args.Length>0 && args[0]=="--host-cold-suite") return HostColdSuite(args);
         if(args.Length>0 && args[0]=="--live-action") return LiveAction(args);
         if(args.Length!=2) throw new ArgumentException("Expected app path and result folder.");

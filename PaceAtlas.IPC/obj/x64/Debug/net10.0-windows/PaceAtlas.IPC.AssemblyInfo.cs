@@ -12,11 +12,11 @@ using System.Reflection;
 
 [assembly: System.Reflection.AssemblyCompanyAttribute("PaceAtlas.IPC")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
-[assembly: System.Reflection.AssemblyFileVersionAttribute("0.22.7.15")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("0.22.7.15+90baeba966a9ff9a1c135b09a597674dc811673a")]
+[assembly: System.Reflection.AssemblyFileVersionAttribute("0.22.7.18")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("0.22.7.18+494003ab7c77502dde3d2db96a39b4649035d841")]
 [assembly: System.Reflection.AssemblyProductAttribute("PaceAtlas.IPC")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PaceAtlas.IPC")]
-[assembly: System.Reflection.AssemblyVersionAttribute("0.22.7.15")]
+[assembly: System.Reflection.AssemblyVersionAttribute("0.22.7.18")]
 [assembly: System.Runtime.Versioning.TargetPlatformAttribute("Windows7.0")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("Windows7.0")]
 

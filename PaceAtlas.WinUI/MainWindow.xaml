@@ -6,6 +6,7 @@
     <Grid Background="#EEF3F8">
         <Grid.Resources>
             <SolidColorBrush x:Key="RunningIntervalBrush" Color="#FFEEED" />
+            <SolidColorBrush x:Key="MeasurePhaseBrush" Color="#F3EDFC" />
         </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -235,7 +236,7 @@
                             </StackPanel>
                         </Grid>
                     </TabViewItem>
-                    <TabViewItem x:Name="MeasureTab" Header="Sofortmaßnahme" IsClosable="False">
+                    <TabViewItem x:Name="MeasureTab" Header="Maßnahmen" IsClosable="False">
                         <Grid>
                             <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
                             <ScrollViewer x:Name="MeasureFormScroller" Grid.Row="0" VerticalScrollBarVisibility="Auto">
@@ -270,8 +271,9 @@
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="Anderer Grund (optional):" VerticalAlignment="Center" />
                                         <TextBox x:Name="MeasureReasonOther" Grid.Column="1" PlaceholderText="Nur wenn kein Symptom passt" />
-                                        <CheckBox x:Name="MeasureTrack" Grid.Column="2" Content="Verlauf beobachten" Checked="MeasureTrack_Changed" Unchecked="MeasureTrack_Changed" />
                                     </Grid>
+                                    <CheckBox x:Name="MeasureTrack" Content="Ziel und Rückblick festhalten" Checked="MeasureTrack_Changed" Unchecked="MeasureTrack_Changed" />
+                                    <TextBlock Text="Hier hältst du dein Ziel, die Ausgangslage und deine persönliche Einschätzung im Rückblick fest. Phasen beschreiben dagegen, wann du die Maßnahme wie angewendet oder pausiert hast." TextWrapping="Wrap" />
                                     <StackPanel x:Name="MeasureTrackingFields" Spacing="10" Visibility="Collapsed">
                                         <TextBox x:Name="MeasureGoal" Header="Ziel / Problem" PlaceholderText="Was soll sich verbessern?" />
                                         <TextBox x:Name="MeasureBaseline" Header="Ausgangslage (optional)" PlaceholderText="Wie war es vor Beginn der Maßnahme?" AcceptsReturn="True" TextWrapping="Wrap" Height="72" />
@@ -300,6 +302,12 @@
                                     </StackPanel>
                                     <TextBox x:Name="MeasureNote" Header="Notiz zur Maßnahme" PlaceholderText="Was ist dir sonst aufgefallen?"
                                              AcceptsReturn="True" TextWrapping="Wrap" Height="100" />
+                                    <TextBlock Text="Phasen" FontSize="18" FontWeight="SemiBold" />
+                                    <TextBlock Text="Eine Phase ist ein Zeitabschnitt, in dem du eine Maßnahme auf die gleiche Weise anwendest." TextWrapping="Wrap" />
+                                    <TextBlock Text="Beispiel zur Dokumentation: Maßnahme „Nikotinpflaster ausprobieren“ – Phase 1: 1.–7. November mit 7 mg; Phase 2: 8.–14. November Pause; Phase 3: ab 15. November wieder mit 7 mg." TextWrapping="Wrap" />
+                                    <TextBlock Text="So kannst du diese Abschnitte später in der Interventionsanalyse vergleichen. Phasen sind optional und werden mit der Maßnahme gespeichert." TextWrapping="Wrap" />
+                                    <StackPanel x:Name="MeasurePhaseRows" Spacing="8" />
+                                    <Button Content="Phase hinzufügen" Click="AddMeasurePhase_Click" />
                                     <TextBlock Text="Laufende Maßnahmen" FontSize="18" FontWeight="SemiBold" Margin="0,12,0,0" />
                                     <StackPanel x:Name="OngoingMeasures" Spacing="5" />
                                 </StackPanel>
@@ -684,7 +692,7 @@
                                       SelectionChanged="CarryDuration_Changed" />
                             <TextBlock x:Name="AnalysisCounts" Grid.Column="4" VerticalAlignment="Center" TextWrapping="Wrap" />
                           </Grid>
-                          <TabView x:Name="AnalysisVisualTabs" Grid.Row="1" IsAddTabButtonVisible="False">
+                          <TabView x:Name="AnalysisVisualTabs" Grid.Row="1" IsAddTabButtonVisible="False" SelectionChanged="AnalysisView_Changed">
                           <TabViewItem Header="Verlauf" IsClosable="False">
                           <Grid RowSpacing="8">
                             <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
@@ -840,11 +848,72 @@
                               </StackPanel>
                             </ScrollViewer>
                           </TabViewItem>
+                          <TabViewItem x:Name="InterventionAnalysisTab" Header="Interventionsanalyse" IsClosable="False">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="8,4,24,8">
+                              <StackPanel Spacing="12">
+                                <TextBlock Text="Maßnahmen vergleichen" FontSize="20" FontWeight="SemiBold" />
+                                <TextBlock Text="Beschreibender Vergleich deiner Einträge; zeitliche Zusammenhänge belegen keine Wirkung. Diese Zeiträume sind unabhängig vom Zeitraum oben." TextWrapping="Wrap" />
+                                <Grid ColumnSpacing="20" RowSpacing="8" Margin="0,8,0,0">
+                                  <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                  <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                                  <TextBlock Text="Maßnahme" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                  <ComboBox x:Name="InterventionMeasure" Grid.Row="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" AutomationProperties.Name="Maßnahme" SelectionChanged="InterventionMeasure_Changed" />
+                                </Grid>
+                                <Border Background="#F2F3F5" CornerRadius="6" Padding="18" Margin="0,8,0,8">
+                                  <Grid x:Name="InterventionContext" ColumnSpacing="24">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                    <StackPanel x:Name="InterventionContextLeft" Spacing="18" />
+                                    <Border Grid.Column="1" Width="1" Background="#D2D5D8" />
+                                    <StackPanel x:Name="InterventionContextRight" Grid.Column="2" Spacing="18" />
+                                  </Grid>
+                                </Border>
+                                <Grid ColumnSpacing="20" RowSpacing="8">
+                                  <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                  <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                                  <TextBlock Text="Ausgangszeitraum (einschließlich)" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                  <TextBlock Grid.Column="1" Text="Vergleichszeitraum (einschließlich)" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                  <ComboBox x:Name="InterventionBaselinePhase" Grid.Row="1" Header="Phase" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" SelectionChanged="InterventionPhase_Changed" />
+                                  <ComboBox x:Name="InterventionFollowPhase" Grid.Row="1" Grid.Column="1" Header="Phase" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" SelectionChanged="InterventionPhase_Changed" />
+                                  <TextBlock x:Name="InterventionBaselinePhaseHint" Grid.Row="2" TextWrapping="Wrap" Opacity="0.75" />
+                                  <TextBlock x:Name="InterventionFollowPhaseHint" Grid.Row="2" Grid.Column="1" TextWrapping="Wrap" Opacity="0.75" />
+                                  <Grid Grid.Row="3" ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                    <CalendarDatePicker x:Name="InterventionBaselineFrom" Header="Von" MinWidth="0" HorizontalAlignment="Stretch" DateChanged="InterventionDate_Changed" />
+                                    <CalendarDatePicker x:Name="InterventionBaselineTo" Grid.Column="1" Header="Bis" MinWidth="0" HorizontalAlignment="Stretch" DateChanged="InterventionDate_Changed" />
+                                  </Grid>
+                                  <Grid Grid.Row="3" Grid.Column="1" ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                    <CalendarDatePicker x:Name="InterventionFollowFrom" Header="Von" MinWidth="0" HorizontalAlignment="Stretch" DateChanged="InterventionDate_Changed" />
+                                    <CalendarDatePicker x:Name="InterventionFollowTo" Grid.Column="1" Header="Bis" MinWidth="0" HorizontalAlignment="Stretch" DateChanged="InterventionDate_Changed" />
+                                  </Grid>
+                                </Grid>
+                                <TextBlock Text="Die Phasenauswahl übernimmt den Zeitraum. Für einen eigenen Zeitraum wähle „Freier Zeitraum“. Offene Phasen werden bis heute ausgewertet." TextWrapping="Wrap" />
+                                <TextBlock x:Name="InterventionMessage" TextWrapping="Wrap" />
+                                <StackPanel x:Name="InterventionResults" Spacing="12" />
+                                <Border BorderBrush="#D5E2EA" BorderThickness="1" CornerRadius="8" Padding="16">
+                                <StackPanel Spacing="12">
+                                  <TextBlock Text="PEM nach Aktivität" FontSize="20" FontWeight="SemiBold" />
+                                  <ComboBox x:Name="InterventionLag" Header="PEM-Zeitfenster nach Aktivitätsende" SelectedIndex="1" Width="240" SelectionChanged="InterventionLag_Changed">
+                                    <ComboBoxItem Content="24–48 h" /><ComboBoxItem Content="24–72 h" /><ComboBoxItem Content="0–24 h" />
+                                  </ComboBox>
+                                <Expander Header="Wofür ist das PEM-Zeitfenster?" IsExpanded="False" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                  <StackPanel Spacing="10">
+                                    <TextBlock Text="Das Zeitfenster bestimmt, wann nach einer abgeschlossenen Aktivität nach Zustandseinträgen mit „PEM erkannt“ oder „Crash“ gesucht wird. Beispiel: Ende am Montag um 14 Uhr und Auswahl 24–72 h → Einträge von Dienstag 14 Uhr bis Donnerstag 14 Uhr werden betrachtet." TextWrapping="Wrap" />
+                                    <TextBlock Text="Die Einstellung betrifft nur „PEM nach Aktivität“, nicht die Symptom- oder Aktivitätsmittelwerte. Ohne abgeschlossene Aktivitäten oder passende spätere Zustandseinträge ist kein PEM-Vergleich möglich. Verschiedene Zeitfenster können auch dasselbe Ergebnis liefern. Änderungen werden automatisch ausgewertet. Zeitliche Nähe belegt keine Ursache; bereits bestehende PEM wird ebenfalls mitgezählt." TextWrapping="Wrap" />
+                                  </StackPanel>
+                                </Expander>
+                                  <StackPanel x:Name="InterventionPemResults" Spacing="8" />
+                                </StackPanel>
+                                </Border>
+                                <StackPanel x:Name="InterventionDetails" Spacing="12" />
+                              </StackPanel>
+                            </ScrollViewer>
+                          </TabViewItem>
                           <TabViewItem Header="Automatische Einordnung" IsClosable="False">
                         <Border BorderBrush="#D5E2EA" BorderThickness="1" CornerRadius="8" Padding="12">
                           <Grid RowSpacing="10">
                             <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                            <TabView x:Name="AnalysisTabs" Grid.Row="0" IsAddTabButtonVisible="False">
+                            <TabView x:Name="AnalysisTabs" Grid.Row="0" IsAddTabButtonVisible="False" SelectionChanged="AnalysisView_Changed">
                               <TabViewItem Header="Lokal" IsClosable="False">
                                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                                   <TextBlock x:Name="LocalAssessment" TextWrapping="Wrap" Margin="8" />

@@ -67,7 +67,27 @@ public sealed partial class MainWindow
         ["Ohrgeräusche"] = "Tinnitus",
         ["Aktiv (Min.):"] = "Active (min):", ["Pause (Min.):"] = "Break (min):",
         ["Zeitraum erfassen"] = "Record interval", ["Maßnahme erfassen"] = "Record intervention",
-        ["Sofortmaßnahme"] = "Immediate intervention",
+        ["Maßnahmen"] = "Interventions",
+        ["Interventionsanalyse"] = "Intervention analysis",
+        ["Maßnahmen vergleichen"] = "Compare interventions",
+        ["Phasen"] = "Phases", ["Phase hinzufügen"] = "Add phase",
+        ["Phase"] = "Phase",
+        ["Von"] = "From", ["Bis"] = "To", ["TT.MM.JJJJ"] = "DD.MM.YYYY",
+        ["Gemeinsames Auftreten"] = "Co-occurrence", ["Kohlenhydratzufuhr"] = "Carbohydrate intake",
+        ["Die Phasenauswahl übernimmt den Zeitraum. Für einen eigenen Zeitraum wähle „Freier Zeitraum“. Offene Phasen werden bis heute ausgewertet."] = "Selecting a phase copies its date range. Choose ‘Custom period’ to enter your own dates. Ongoing phases are evaluated through today.",
+        ["Eine Phase ist ein Zeitabschnitt, in dem du eine Maßnahme auf die gleiche Weise anwendest."] = "A phase is a period during which you use an intervention in the same way.",
+        ["Beispiel zur Dokumentation: Maßnahme „Nikotinpflaster ausprobieren“ – Phase 1: 1.–7. November mit 7 mg; Phase 2: 8.–14. November Pause; Phase 3: ab 15. November wieder mit 7 mg."] = "Recording example: intervention ‘Trying nicotine patches’ – phase 1: November 1–7 with 7 mg; phase 2: November 8–14 pause; phase 3: from November 15 with 7 mg again.",
+        ["So kannst du diese Abschnitte später in der Interventionsanalyse vergleichen. Phasen sind optional und werden mit der Maßnahme gespeichert."] = "You can compare these periods later in Intervention analysis. Phases are optional and saved with the intervention.",
+        ["Beschreibender Vergleich deiner Einträge; zeitliche Zusammenhänge belegen keine Wirkung. Diese Zeiträume sind unabhängig vom Zeitraum oben."] = "Descriptive comparison of your records; temporal associations do not establish an effect. These periods are independent of the period above.",
+        ["Phase (setzt einen Zeitraum als Vorschlag)"] = "Phase (suggests a period)",
+        ["Ausgangszeitraum (einschließlich)"] = "Baseline period (inclusive)",
+        ["Vergleichszeitraum (einschließlich)"] = "Comparison period (inclusive)",
+        ["PEM-Zeitfenster nach Aktivitätsende"] = "PEM window after activity ends",
+        ["PEM nach Aktivität"] = "PEM after activity",
+        ["Wofür ist das PEM-Zeitfenster?"] = "What is the PEM window for?",
+        ["Das Zeitfenster bestimmt, wann nach einer abgeschlossenen Aktivität nach Zustandseinträgen mit „PEM erkannt“ oder „Crash“ gesucht wird. Beispiel: Ende am Montag um 14 Uhr und Auswahl 24–72 h → Einträge von Dienstag 14 Uhr bis Donnerstag 14 Uhr werden betrachtet."] = "The window determines when to look for condition records marked ‘recognized PEM’ or ‘crash’ after a completed activity. Example: an activity ends on Monday at 2 pm and you select 24–72 h → records from Tuesday at 2 pm to Thursday at 2 pm are considered.",
+        ["Die Einstellung betrifft nur „PEM nach Aktivität“, nicht die Symptom- oder Aktivitätsmittelwerte. Ohne abgeschlossene Aktivitäten oder passende spätere Zustandseinträge ist kein PEM-Vergleich möglich. Verschiedene Zeitfenster können auch dasselbe Ergebnis liefern. Änderungen werden automatisch ausgewertet. Zeitliche Nähe belegt keine Ursache; bereits bestehende PEM wird ebenfalls mitgezählt."] = "This setting affects only ‘PEM after activity’, not symptom or activity averages. Without completed activities or suitable follow-up condition records, PEM cannot be compared. Different windows can also produce the same result. Changes are evaluated automatically. Temporal association does not establish a cause; pre-existing PEM is also counted.",
+        ["Zeiträume vergleichen"] = "Compare periods",
         ["Aktivität und Ruhe"] = "Activity and rest", ["Aktivität:"] = "Activity:",
         ["Aktivitäten verwalten"] = "Manage activities", ["Ruhequalität"] = "Rest quality",
         ["Belastungsarten"] = "Activity types",
@@ -81,7 +101,8 @@ public sealed partial class MainWindow
         ["Anderer Grund (optional)"] = "Other reason (optional)",
         ["Anderer Grund (optional):"] = "Other reason (optional):",
         ["Nur wenn kein Symptom passt"] = "Only if no symptom fits",
-        ["Verlauf beobachten"] = "Track progress", ["Ziel / Problem"] = "Goal / issue",
+        ["Ziel und Rückblick festhalten"] = "Record goal and review", ["Ziel / Problem"] = "Goal / issue",
+        ["Hier hältst du dein Ziel, die Ausgangslage und deine persönliche Einschätzung im Rückblick fest. Phasen beschreiben dagegen, wann du die Maßnahme wie angewendet oder pausiert hast."] = "Record your goal, starting situation and personal assessment in hindsight here. Phases describe when and how you used or paused the intervention.",
         ["Was soll sich verbessern?"] = "What should improve?",
         ["Ausgangslage (optional)"] = "Baseline (optional)",
         ["Wie war es vor Beginn der Maßnahme?"] = "How was it before starting?",
@@ -228,6 +249,8 @@ public sealed partial class MainWindow
             datePicker.Header = Localized(datePicker, dateHeader);
         if (node is TabViewItem tab && tab.Header is string tabHeader)
             tab.Header = Localized(tab, tabHeader);
+        if (node is Expander expander && expander.Header is string expanderHeader)
+            expander.Header = Localized(expander, expanderHeader);
         if (node is TextBox box)
         {
             if (box.Header is string boxHeader) box.Header = Localized(box, boxHeader);

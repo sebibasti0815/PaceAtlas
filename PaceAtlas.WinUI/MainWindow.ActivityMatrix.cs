@@ -17,7 +17,7 @@ public sealed partial class MainWindow
 
     private void ActivityMatrixLag_Changed(object sender, SelectionChangedEventArgs e)
     {
-        if (!updatingActivityMatrixLag) RefreshActivityMatrix();
+        if (!updatingActivityMatrixLag) { RefreshActivityMatrix(); SaveAnalysisDisplay(); }
     }
 
     private void RefreshActivityMatrix()
@@ -154,6 +154,7 @@ public sealed partial class MainWindow
                     activityMatrixSortDescending = activityMatrixSortKey == key ? !activityMatrixSortDescending : key != "Symptom";
                     activityMatrixSortKey = key;
                     RefreshActivityMatrix();
+                    SaveAnalysisDisplay();
                 };
                 cell = heading;
             }

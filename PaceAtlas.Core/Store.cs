@@ -61,6 +61,7 @@ public sealed class StockMovement
 }
 public sealed class MeasureData
 {
+    public List<InterventionPhase> Phases { get; set; } = new();
     public string Name { get; set; } = "";
     public string Dose { get; set; } = "";
     public bool TrackProgress { get; set; }

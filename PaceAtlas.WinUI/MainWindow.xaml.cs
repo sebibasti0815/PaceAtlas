@@ -853,7 +853,7 @@ public sealed partial class MainWindow : Window
         AttachStatusLocalization();
         ApplyUiLanguage(initialLoad: true);
         UpdateEditingIndicators();
-        todaySummaryTimer.Tick += (_, _) => { RefreshTodaySummary(); RefreshMedicationDueIndicators(); RefreshMealDueIndicators(); };
+        todaySummaryTimer.Tick += (_, _) => { RefreshPhaseHistory(); RefreshTodaySummary(); RefreshMedicationDueIndicators(); RefreshMealDueIndicators(); };
         todaySummaryTimer.Start();
         Mark("Sprache/Status");
         StartupConstructorMs = measured;
@@ -1375,11 +1375,12 @@ public sealed partial class MainWindow : Window
             var hovered = ReferenceEquals(hoveredListRow, row);
             var red = original is SolidColorBrush brush && brush.Color.R > brush.Color.G + 12 &&
                 brush.Color.R > brush.Color.B + 12;
+            var phased = ReferenceEquals(original, ((FrameworkElement)Content).Resources["MeasurePhaseBrush"]);
             row.Background = selected
-                ? new SolidColorBrush(red ? Windows.UI.Color.FromArgb(255, 255, 195, 195) :
+                ? new SolidColorBrush(phased ? Windows.UI.Color.FromArgb(255, 224, 210, 244) : red ? Windows.UI.Color.FromArgb(255, 255, 195, 195) :
                     Windows.UI.Color.FromArgb(255, 216, 234, 243))
                 : hovered
-                    ? new SolidColorBrush(red ? Windows.UI.Color.FromArgb(255, 255, 216, 216) :
+                    ? new SolidColorBrush(phased ? Windows.UI.Color.FromArgb(255, 239, 231, 250) : red ? Windows.UI.Color.FromArgb(255, 255, 216, 216) :
                         Windows.UI.Color.FromArgb(255, 239, 246, 250))
                     : original ?? new SolidColorBrush(Microsoft.UI.Colors.Transparent);
         }
@@ -1574,9 +1575,12 @@ public sealed partial class MainWindow : Window
         if (tracking && status == "completed" && outcome.Length == 0)
         { MeasureStatus.Text = "Bitte beim Abschluss das beobachtete Ergebnis auswählen."; return; }
         var previous = editingEntryKind == "Maßnahme" ? entries.FirstOrDefault(item => item.Id == editingEntryId) : null;
+        if (InterventionAnalysis.ValidatePhases(measurePhaseDraft) is not null)
+        { MeasureStatus.Text = N("Bitte Phasen prüfen: Name, Ende nach Beginn und keine Überschneidungen.", "Check phases: name, end after start and no overlaps."); return; }
         MeasureData? oldData = previous is null ? null : JsonSerializer.Deserialize<MeasureData>(previous.Data);
         var data = new MeasureData
         {
+            Phases = measurePhaseDraft.ToList(),
             Name = name, Dose = MeasureDose.Text.Trim(), TrackProgress = tracking,
             ReasonSymptoms = measureReasonChecks.Where(check => check.IsChecked == true)
                 .Select(check => check.Tag?.ToString() ?? "").ToList(),
@@ -1598,6 +1602,8 @@ public sealed partial class MainWindow : Window
 
     private void ResetMeasure_Click(object sender, RoutedEventArgs e)
     {
+        measurePhaseDraft.Clear();
+        RenderMeasurePhases();
         ClearEditing();
         MeasureDate.Date = DateTimeOffset.Now;
         MeasureTime.Text = DateTime.Now.ToString("HH:mm", CultureInfo.InvariantCulture);
@@ -1629,10 +1635,10 @@ public sealed partial class MainWindow : Window
             string.Join(", ", reasons);
     }
 
-    private static string MeasureOutcomeLabel(string outcome) => outcome switch
+    private string MeasureOutcomeLabel(string outcome) => outcome switch
     {
-        "much" => "deutlich geholfen", "some" => "etwas geholfen", "unchanged" => "unverändert",
-        "worse" => "verschlechtert", "unclear" => "unklar", _ => ""
+        "much" => N("deutlich geholfen", "helped a lot"), "some" => N("etwas geholfen", "helped somewhat"), "unchanged" => N("unverändert", "unchanged"),
+        "worse" => N("verschlechtert", "worsened"), "unclear" => N("unklar", "unclear"), _ => ""
     };
 
     private void RenderOngoingMeasures()
@@ -2683,6 +2689,8 @@ public sealed partial class MainWindow : Window
             }
             MeasureName.SelectedItem = data.Name;
             MeasureDose.Text = data.Dose;
+            measurePhaseDraft = (data.Phases ?? []).ToList();
+            RenderMeasurePhases();
             MeasureNote.Text = entry.Note;
             RenderMeasureReasons(data.ReasonSymptoms ?? []);
             MeasureReasonOther.Text = data.ReasonOther ?? "";
@@ -2987,6 +2995,7 @@ public sealed partial class MainWindow : Window
 
     private void DisplayEntries()
     {
+        phaseHistorySignature = PhaseHistorySignature();
         long selectedId = SelectedEntry()?.Id ?? 0;
         visibleEntries.Clear();
         displayedEntries.Clear();
@@ -3006,8 +3015,8 @@ public sealed partial class MainWindow : Window
             entry.End?.ToString("dd.MM.yyyy HH:mm") ?? "", T(entry.Kind == "Schlaf" ? "Ruhe" : entry.Kind),
             EntryContent(entry), entry.Note));
         var sorted = descending
-            ? source.OrderByDescending(IsRunningEntry).ThenByDescending(SortKey, StringComparer.CurrentCultureIgnoreCase)
-            : source.OrderByDescending(IsRunningEntry).ThenBy(SortKey, StringComparer.CurrentCultureIgnoreCase);
+            ? source.OrderByDescending(e => IsRunningEntry(e) || e.Kind == "Maßnahme" && InterventionAnalysis.ActivePhase(InterventionAnalysis.Read<MeasureData>(e), DateTime.Now) is not null).ThenByDescending(SortKey, StringComparer.CurrentCultureIgnoreCase)
+            : source.OrderByDescending(e => IsRunningEntry(e) || e.Kind == "Maßnahme" && InterventionAnalysis.ActivePhase(InterventionAnalysis.Read<MeasureData>(e), DateTime.Now) is not null).ThenBy(SortKey, StringComparer.CurrentCultureIgnoreCase);
         foreach (var entry in sorted)
         {
             if (entry.Kind == "Mahlzeit")
@@ -3052,19 +3061,33 @@ public sealed partial class MainWindow : Window
                 try { measure = JsonSerializer.Deserialize<MeasureData>(entry.Data); }
                 catch (JsonException) { measure = null; }
                 var runningMeasure = measure?.TrackProgress == true && measure.Status == "active";
+                var hasPhases = measure?.Phases?.Count > 0;
+                var activePhase = InterventionAnalysis.ActivePhase(measure, DateTime.Now);
                 var measureContent = MeasureDescription(measure) +
-                    (measure?.TrackProgress == true ? " · " + (measure.Status == "completed" ? "abgeschlossen" :
-                        measure.Status == "paused" ? "pausiert" : "läuft") +
-                        (!string.IsNullOrEmpty(measure.Outcome) ? " · " + MeasureOutcomeLabel(measure.Outcome) : "") : "");
-                var measureEnd = runningMeasure ? "läuft" :
-                    measure?.TrackProgress == true && measure.Status == "paused" ? "pausiert" : "";
+                    (measure?.TrackProgress == true ? " · " + (measure.Status == "completed" ? N("abgeschlossen", "completed") :
+                        measure.Status == "paused" ? N("pausiert", "paused") : N("läuft", "ongoing")) +
+                        (!string.IsNullOrEmpty(measure.Outcome) ? " · " + MeasureOutcomeLabel(measure.Outcome) : "") : "") +
+                    (hasPhases ? " · " + MeasurePhaseHistoryText(measure) : "");
+                var measureEnd = runningMeasure ? N("läuft", "ongoing") :
+                    measure?.TrackProgress == true && measure.Status == "paused" ? N("pausiert", "paused") : "";
                 var measureRow = TableRow([(entry.Start.ToString("dd.MM.yyyy HH:mm"), 180), (measureEnd, 180),
                     ("Maßnahme", 115), (measureContent, 400),
                     (string.Join(" · ", new[] { entry.Note, measure?.ReviewNote }.Where(text => !string.IsNullOrWhiteSpace(text))), 340)],
                     compact: true, table: "entries",
-                    badges: runningMeasure ? [("◷", VisualScaleBrush(3))] : null,
+                    badges: hasPhases ? [(activePhase is null ? "◇" : "◷", new SolidColorBrush(Windows.UI.Color.FromArgb(255, 112, 71, 160)))] :
+                        runningMeasure ? [("◷", VisualScaleBrush(3))] : null,
                     contentDescription: measureContent);
-                if (measure?.TrackProgress == true && measure.Status != "completed")
+                if (hasPhases)
+                {
+                    measureRow.Background = (Brush)((FrameworkElement)Content).Resources["MeasurePhaseBrush"];
+                    if (measureRow.Children.OfType<TextBlock>().FirstOrDefault(label => Grid.GetColumn(label) == 3) is { } phaseLabel)
+                    {
+                        phaseLabel.TextWrapping = TextWrapping.Wrap;
+                        phaseLabel.TextTrimming = TextTrimming.None;
+                        phaseLabel.Margin = new Thickness(8, 4, 8, 4);
+                    }
+                }
+                else if (measure?.TrackProgress == true && measure.Status != "completed")
                     measureRow.Background = new SolidColorBrush(measure.Status == "paused"
                         ? Windows.UI.Color.FromArgb(255, 255, 244, 216)
                         : Windows.UI.Color.FromArgb(255, 226, 244, 232));
@@ -3165,13 +3188,14 @@ public sealed partial class MainWindow : Window
         RefreshTodaySummary();
     }
 
-    private static string EntryContent(Entry entry)
+    private string EntryContent(Entry entry)
     {
         try
         {
             return entry.Kind switch
             {
-                "Maßnahme" => JsonSerializer.Deserialize<MeasureData>(entry.Data)?.Name ?? "",
+                "Maßnahme" => (JsonSerializer.Deserialize<MeasureData>(entry.Data)?.Name ?? "") + " · " +
+                    MeasurePhaseHistoryText(InterventionAnalysis.Read<MeasureData>(entry)),
                 "Einnahme" => JsonSerializer.Deserialize<PaceAtlas.IntakeData>(entry.Data)?.Name ?? "",
                 "Schlaf" => "Schlaf",
                 "Aktivität" or "Ruhe" => string.Join(", ",

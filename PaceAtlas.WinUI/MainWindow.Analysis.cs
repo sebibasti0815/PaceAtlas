@@ -20,11 +20,15 @@ public sealed partial class MainWindow
     private static readonly string[] CarryDurations = ["24 Stunden", "48 Stunden"];
     private readonly List<(DateTime Start, StateData Data)> analysisStates = new();
     private bool analysisDisplayInitialized;
+    private AnalysisPreferences analysisPreferences = new();
+    private bool restoringAnalysisPreferences;
+    private bool analysisChoicesRestored;
     private string aiModel = "gpt-6-sol";
     private bool aiBusy;
 
     private void InitializeAnalysis()
     {
+        analysisPreferences = AnalysisPreferences.Load(AnalysisDisplayPath);
         try
         {
             if (File.Exists(AiModelPath))
@@ -35,9 +39,10 @@ public sealed partial class MainWindow
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException) { }
         AnalysisPeriod.ItemsSource = AnalysisPeriods;
-        AnalysisPeriod.SelectedIndex = 1;
+        AnalysisPeriod.SelectedIndex = analysisPreferences.Period;
         CarryDuration.ItemsSource = CarryDurations.Select(T).ToArray();
-        CarryDuration.SelectedIndex = 0;
+        CarryDuration.SelectedIndex = analysisPreferences.Hours == 48 ? 1 : 0;
+        CarryCondition.IsChecked = analysisPreferences.Enabled;
         try
         {
             if (File.Exists(AnalysisDisplayPath))
@@ -86,8 +91,53 @@ public sealed partial class MainWindow
 
     private void SaveAnalysisDisplay()
     {
-        try { File.WriteAllText(AnalysisDisplayPath, JsonSerializer.Serialize(new { Enabled = CarryEnabled, Hours = CarryHours })); }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+        if (!analysisDisplayInitialized || restoringAnalysisPreferences || applyingLanguage || !analysisChoicesRestored) return;
+        analysisPreferences.Enabled = CarryEnabled; analysisPreferences.Hours = CarryHours;
+        if (AnalysisPeriod.SelectedIndex >= 0) analysisPreferences.Period = AnalysisPeriod.SelectedIndex;
+        if (PatternSymptom.SelectedIndex >= 0 && PatternSymptom.SelectedIndex < SymptomNames.Length)
+            analysisPreferences.Symptom = SymptomNames[PatternSymptom.SelectedIndex];
+        if (PatternActivity.SelectedIndex >= 0 && PatternActivity.SelectedIndex < patternActivityNames.Count)
+            analysisPreferences.Activity = patternActivityNames[PatternActivity.SelectedIndex];
+        if (PatternSort.SelectedIndex >= 0) analysisPreferences.SymptomSort = PatternSort.SelectedIndex;
+        if (ActivityMatrixLag.SelectedIndex >= 0) analysisPreferences.ActivityWindow = ActivityMatrixLag.SelectedIndex;
+        analysisPreferences.VisualTab = AnalysisVisualTabs.SelectedIndex;
+        analysisPreferences.AssessmentTab = AnalysisTabs.SelectedIndex;
+        analysisPreferences.MatrixSort = activityMatrixSortKey;
+        analysisPreferences.MatrixDescending = activityMatrixSortDescending;
+        analysisPreferences.LoadSort = loadSort.ToDictionary(p => p.Key, p => new AnalysisSortPreference {Column = p.Value.Column, Descending = p.Value.Descending});
+        analysisPreferences.Save(AnalysisDisplayPath);
+    }
+
+    private void RestoreAnalysisChoices()
+    {
+        if (!analysisDisplayInitialized || analysisChoicesRestored) return;
+        restoringAnalysisPreferences = true;
+        analysisChoicesRestored = true;
+        try
+        {
+            int symptom = Array.IndexOf(SymptomNames, analysisPreferences.Symptom);
+            if (symptom >= 0 && symptom < PatternSymptom.Items.Count) PatternSymptom.SelectedIndex = symptom;
+            int activity = patternActivityNames.IndexOf(analysisPreferences.Activity ?? "");
+            if (activity >= 0 && activity < PatternActivity.Items.Count) PatternActivity.SelectedIndex = activity;
+            if (PatternSort.Items.Count > analysisPreferences.SymptomSort) PatternSort.SelectedIndex = analysisPreferences.SymptomSort;
+            if (ActivityMatrixLag.Items.Count > analysisPreferences.ActivityWindow) ActivityMatrixLag.SelectedIndex = analysisPreferences.ActivityWindow;
+            activityMatrixSortKey = analysisPreferences.MatrixSort; activityMatrixSortDescending = analysisPreferences.MatrixDescending;
+            foreach (var pair in analysisPreferences.LoadSort)
+                if (loadSort.ContainsKey(pair.Key) && pair.Value is {Column: >= 0 and <= 5} sort)
+                    loadSort[pair.Key] = (sort.Column, sort.Descending);
+            if (analysisPreferences.VisualTab >= 0 && analysisPreferences.VisualTab < AnalysisVisualTabs.TabItems.Count)
+                AnalysisVisualTabs.SelectedIndex = analysisPreferences.VisualTab;
+            if (analysisPreferences.AssessmentTab >= 0 && analysisPreferences.AssessmentTab < AnalysisTabs.TabItems.Count)
+                AnalysisTabs.SelectedIndex = analysisPreferences.AssessmentTab;
+            RefreshActivityMatrix(); RefreshLoadAnalysis();
+        }
+        finally { restoringAnalysisPreferences = false; }
+    }
+
+    private void AnalysisView_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        SaveAnalysisDisplay();
+        if (ReferenceEquals(AnalysisVisualTabs?.SelectedItem, InterventionAnalysisTab)) QueueInterventionEvaluation();
     }
 
     private void UpdateCarryPresentation()
@@ -101,7 +151,7 @@ public sealed partial class MainWindow
 
     private void AnalysisPeriod_Changed(object sender, SelectionChangedEventArgs e)
     {
-        if (AnalysisPeriod.SelectedIndex >= 0) RefreshAnalysis();
+        if (AnalysisPeriod.SelectedIndex >= 0) { SaveAnalysisDisplay(); RefreshAnalysis(); }
     }
 
     private DateTime AnalysisThreshold() => AnalysisPeriod.SelectedIndex switch
@@ -112,6 +162,7 @@ public sealed partial class MainWindow
 
     private void RefreshAnalysis()
     {
+        RefreshInterventionMeasures();
         if (AnalysisPeriod is null || AnalysisSummary is null || AnalysisPeriod.SelectedIndex < 0) return;
         var threshold = AnalysisThreshold();
         analysisStates.Clear();
@@ -144,6 +195,7 @@ public sealed partial class MainWindow
         RefreshSymptomTrend();
         RenderFoodCarbChart();
         RenderFoodAnalysis();
+        RestoreAnalysisChoices();
     }
 
     private void UpdateAnalysisSummary()
@@ -183,6 +235,7 @@ public sealed partial class MainWindow
         DispatcherQueue.TryEnqueue(StretchAnalysisLayout);
         if (ReferenceEquals(MainTabs.SelectedItem, NutritionTab))
             _ = EnsureNutritionFoodsLoadedAsync();
+        if (ReferenceEquals(MainTabs.SelectedItem, AnalysisTab)) QueueInterventionEvaluation();
     }
 
     private void StretchAnalysisLayout()

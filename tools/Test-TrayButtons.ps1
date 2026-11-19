@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([switch]$KeepSandbox)
+param([switch]$KeepSandbox, [switch]$Interventions)
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $testRoot = Join-Path $root 'artifacts\tests'
@@ -17,6 +17,9 @@ try {
     }
     & dotnet publish tools/TrayUiTests/TrayUiTests.csproj -c Release -r win-x64 --self-contained true -o $runnerOutput -v:quiet
     if ($LASTEXITCODE -ne 0) { throw 'UI-Testrunner-Build fehlgeschlagen.' }
+    if (!(Get-Command wsb -ErrorAction SilentlyContinue)) {
+        throw 'Windows Sandbox CLI (wsb) ist nicht verfügbar. Testbuild erstellt, aber kein Oberflächentest ausgeführt.'
+    }
     $sandbox = (& wsb start --raw | ConvertFrom-Json).Id
     if (!$sandbox) { throw 'Windows Sandbox konnte nicht gestartet werden.' }
     $sandbox | Set-Content (Join-Path $resultOutput 'sandbox-id.txt')
@@ -24,7 +27,9 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Testordner konnte nicht freigegeben werden.' }
     & wsb connect --id $sandbox
     $relativeResults = 'results\' + (Split-Path $resultOutput -Leaf)
-    $command = "C:\PaceAtlasTest\runtime\runner\TrayUiTests.exe C:\PaceAtlasTest\runtime\app\PaceAtlas.WinUI.exe C:\PaceAtlasTest\$relativeResults"
+    $mode = if ($Interventions) { '--interventions ' } else { '' }
+    $expected = if ($Interventions) { 'PASS interventions' } else { 'PASS 8/8' }
+    $command = "C:\PaceAtlasTest\runtime\runner\TrayUiTests.exe ${mode}C:\PaceAtlasTest\runtime\app\PaceAtlas.WinUI.exe C:\PaceAtlasTest\$relativeResults"
     for ($attempt=0; $attempt -lt 12; $attempt++) {
         & wsb exec --id $sandbox -r ExistingLogin -c $command
         if (Test-Path (Join-Path $resultOutput 'status.txt')) { break }
@@ -35,7 +40,7 @@ try {
     $status = Get-Content $statusPath -Raw
     Write-Host "Ergebnis: $status"
     Write-Host "Protokoll und Screenshots: $resultOutput"
-    if (!$KeepSandbox -and $status.Trim() -eq 'PASS 8/8') {
+    if (!$KeepSandbox -and $status.Trim() -eq $expected) {
         & wsb stop --id $sandbox
         if ($LASTEXITCODE -eq 0) {
             $runtime = Join-Path $testRoot 'runtime'
@@ -47,5 +52,5 @@ try {
             Remove-Item -LiteralPath $resolvedRuntime -Recurse -Force
         }
     }
-    if ($status.Trim() -ne 'PASS 8/8') { throw 'UI-Test fehlgeschlagen; Sandbox zur Diagnose geöffnet gelassen.' }
+    if ($status.Trim() -ne $expected) { throw 'UI-Test fehlgeschlagen; Sandbox zur Diagnose geöffnet gelassen.' }
 } finally { Pop-Location }

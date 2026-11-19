@@ -7,4 +7,5 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
+  <ItemGroup><ProjectReference Include="../../PaceAtlas.Core/PaceAtlas.Core.csproj" /></ItemGroup>
 </Project>

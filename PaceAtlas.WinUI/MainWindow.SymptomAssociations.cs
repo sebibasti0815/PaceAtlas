@@ -12,7 +12,10 @@ public sealed partial class MainWindow
     private void PatternActivity_Changed(object sender, SelectionChangedEventArgs e)
     {
         if (!updatingPatternActivities && PatternSymptom.SelectedIndex >= 0 && PatternSymptom.SelectedIndex < SymptomNames.Length)
+        {
             RefreshSymptomAssociations(SymptomNames[PatternSymptom.SelectedIndex]);
+            SaveAnalysisDisplay();
+        }
     }
 
     private void RefreshSymptomAssociations(string symptom)
