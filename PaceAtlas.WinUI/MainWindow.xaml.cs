@@ -470,12 +470,14 @@ public sealed partial class MainWindow : Window
                 Title = english ? "About Pace Atlas" : "Info zu Pace Atlas",
                 Content = new ScrollViewer { Content = aboutContent, MaxHeight = 520,
                     VerticalScrollBarVisibility = ScrollBarVisibility.Auto },
-                MinWidth = 550,
+                // Three equal-width action buttons need room for the full German labels.
+                MinWidth = Math.Min(650, Math.Max(0, ((FrameworkElement)Content).ActualWidth - 48)),
                 PrimaryButtonText = english ? "Check for updates" : "Auf Updates prüfen",
                 SecondaryButtonText = english ? "Optimize database" : "Datenbank optimieren",
                 IsSecondaryButtonEnabled = !OffImportRunning && !databaseMaintenanceRunning,
                 CloseButtonText = english ? "Close" : "Schließen"
             };
+            dialog.Resources["ContentDialogMaxWidth"] = 720d;
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
                 await CheckForUpdatesAsync(true);

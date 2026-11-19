@@ -1,10 +1,6 @@
-using System.Runtime.InteropServices;
 using System.Text.Json;
-using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
-using Windows.Graphics;
 using PaceAtlas;
 
 namespace PaceAtlas.WinUI;
@@ -19,13 +15,7 @@ public sealed partial class MainWindow
 
     private static string ReminderSettingsPath => System.IO.Path.Combine(Store.Folder, "state-reminder.json");
     private readonly DispatcherTimer reminderClock = new() { Interval = TimeSpan.FromSeconds(10) };
-    private readonly DispatcherTimer reminderDismiss = new() { Interval = TimeSpan.FromSeconds(20) };
-    private Window? reminderPopup;
-    private TextBlock? reminderTitle;
-    private TextBlock? reminderDescription;
-    private Button? reminderRecord;
-    private Button? reminderLater;
-    private bool reminderVisible;
+    private NativeReminderWindow? reminderPopup;
     private DateTimeOffset nextReminder;
     private int reminderMinutes;
     private bool reminderCustom;
@@ -47,7 +37,6 @@ public sealed partial class MainWindow
             reminderMinutes = 0;
         }
         reminderClock.Tick += (_, _) => TickReminder();
-        reminderDismiss.Tick += (_, _) => CloseReminderPopup();
         ScheduleReminder();
     }
 
@@ -86,153 +75,38 @@ public sealed partial class MainWindow
     {
         if (DateTimeOffset.UtcNow < nextReminder || reminderMinutes == 0) return;
         nextReminder = DateTimeOffset.UtcNow.AddMinutes(reminderMinutes);
-        if (reminderVisible) return;
+        if (reminderPopup?.IsVisible == true) return;
         ShowReminderPopup();
     }
 
     private void ShowReminderPopup()
     {
-        bool english = selectedLanguage == "en";
-        if (reminderPopup is not null)
-        {
-            reminderPopup.Title = english ? "Condition reminder" : "Zustandserinnerung";
-            reminderTitle!.Text = english ? "How are you feeling?" : "Wie geht es dir gerade?";
-            reminderDescription!.Text = english
-                ? "A quick entry helps you notice changes over time."
-                : "Ein kurzer Eintrag hilft dir, Veränderungen im Verlauf zu erkennen.";
-            reminderRecord!.Content = english ? "Record condition" : "Zustand erfassen";
-            reminderLater!.Content = english ? "Later" : "Später";
-            ShowReminderWithoutActivation(reminderPopup);
-            reminderVisible = true;
-            reminderDismiss.Start();
-            return;
-        }
-        var title = new TextBlock { Text = english ? "How are you feeling?" : "Wie geht es dir gerade?",
-            FontSize = 19, FontWeight = Microsoft.UI.Text.FontWeights.Bold,
-            Foreground = new SolidColorBrush(Microsoft.UI.Colors.White) };
-        var description = new TextBlock { Text = english
-                ? "A quick entry helps you notice changes over time."
-                : "Ein kurzer Eintrag hilft dir, Veränderungen im Verlauf zu erkennen.",
-            TextWrapping = TextWrapping.Wrap, FontSize = 16,
-            Foreground = new SolidColorBrush(Microsoft.UI.Colors.White) };
-        var record = new Button { Content = english ? "Record condition" : "Zustand erfassen",
-            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 22, 119, 137)),
-            Foreground = new SolidColorBrush(Microsoft.UI.Colors.White),
-            Height = 40, CornerRadius = new CornerRadius(5),
-            HorizontalContentAlignment = HorizontalAlignment.Center,
-            VerticalContentAlignment = VerticalAlignment.Center };
-        record.Click += (_, _) =>
-        {
-            CloseReminderPopup();
-            RestoreFromPacingTray();
-            Reset_Click(this, new RoutedEventArgs());
-            MainTabs.SelectedItem = StateTab;
-            Activate();
-        };
-        var later = new Button { Content = english ? "Later" : "Später",
-            Height = 40, CornerRadius = new CornerRadius(5),
-            HorizontalContentAlignment = HorizontalAlignment.Center,
-            VerticalContentAlignment = VerticalAlignment.Center };
-        later.Click += (_, _) => CloseReminderPopup();
-        // Stretch both buttons inside the content width instead of using a fixed
-        // 362-pixel grid that can exceed the available layout width at high DPI.
-        var buttons = new Grid { ColumnSpacing = 12,
-            Margin = new Thickness(0, 8, 0, 0),
-            HorizontalAlignment = HorizontalAlignment.Stretch };
-        buttons.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        buttons.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        record.HorizontalAlignment = HorizontalAlignment.Stretch;
-        later.HorizontalAlignment = HorizontalAlignment.Stretch;
-        buttons.Children.Add(record);
-        Grid.SetColumn(later, 1);
-        buttons.Children.Add(later);
-
-        var body = new StackPanel { Spacing = 12, Margin = new Thickness(26, 24, 26, 30),
-            HorizontalAlignment = HorizontalAlignment.Stretch };
-        body.Children.Add(title);
-        body.Children.Add(description);
-        body.Children.Add(buttons);
-        // The root paints the *entire* client surface. A separate accent strip
-        // previously exposed the underlying window at its edges on some DPI setups.
-        var panel = new Grid {
-            Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 31, 43, 62)) };
-        panel.Children.Add(body);
-        var popup = new Window { Content = panel, Title = english ? "Condition reminder" : "Zustandserinnerung" };
-        popup.Closed += (_, _) =>
-        {
-            reminderDismiss.Stop();
-            if (ReferenceEquals(reminderPopup, popup))
+        reminderPopup ??= new NativeReminderWindow(
+            () => DispatcherQueue.TryEnqueue(() =>
             {
-                reminderPopup = null;
-                reminderVisible = false;
-            }
-        };
-        if (popup.AppWindow.Presenter is OverlappedPresenter presenter)
+                RestoreFromPacingTray();
+                Reset_Click(this, new RoutedEventArgs());
+                MainTabs.SelectedItem = StateTab;
+                Activate();
+            }),
+            TraceReminderInput,
+            ex => DispatcherQueue.TryEnqueue(() =>
+                PacingStatus.Text = N("Erinnerung nicht verfügbar: ", "Reminder unavailable: ") + ex.Message));
+        reminderPopup.Show(selectedLanguage == "en");
+    }
+
+    private static void TraceReminderInput(string action)
+    {
+        try
         {
-            presenter.SetBorderAndTitleBar(false, false);
-            presenter.IsAlwaysOnTop = true;
-            presenter.IsResizable = false;
+            if (!File.Exists(Path.Combine(WinUiSettingsFolder, "reminder-input-diagnostics.enabled"))) return;
+            File.AppendAllText(Path.Combine(WinUiSettingsFolder, "reminder-input.log"),
+                DateTimeOffset.Now.ToString("O") + " " + action + Environment.NewLine);
         }
-        popup.AppWindow.IsShownInSwitchers = false;
-        var work = PrimaryWorkArea();
-        var popupHandle = WinRT.Interop.WindowNative.GetWindowHandle(popup);
-        // AppWindow uses physical pixels; XAML content is measured in effective pixels.
-        popup.AppWindow.Move(new PointInt32(work.X + 18, work.Y + 18));
-        double scale = Math.Max(96, GetDpiForWindow(popupHandle)) / 96.0;
-        // AppWindow dimensions are physical pixels, while XAML layout uses DIPs.
-        // Explicit extra vertical room prevents the bottom buttons from being
-        // clipped by non-client/window rounding on mixed-DPI monitor setups.
-        int width = Math.Min((int)Math.Ceiling(450 * scale), Math.Max(1, work.Width - 36));
-        panel.Measure(new Windows.Foundation.Size(width / scale, double.PositiveInfinity));
-        int height = Math.Min(Math.Max(1, work.Height - 36),
-            Math.Max((int)Math.Ceiling(260 * scale),
-                (int)Math.Ceiling((panel.DesiredSize.Height + 20) * scale)));
-        popup.AppWindow.MoveAndResize(new RectInt32(work.X + work.Width - width - 18,
-            work.Y + 18, width, height));
-        reminderPopup = popup;
-        reminderTitle = title;
-        reminderDescription = description;
-        reminderRecord = record;
-        reminderLater = later;
-        ShowReminderWithoutActivation(popup);
-        reminderVisible = true;
-        reminderDismiss.Start();
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
     }
 
-    private static RectInt32 PrimaryWorkArea()
-    {
-        RectInt32 work = new(0, 0, 900, 600);
-        MonitorEnum callback = (monitor, hdc, rect, data) =>
-        {
-            var info = new MonitorInfo { cbSize = (uint)Marshal.SizeOf<MonitorInfo>() };
-            if (!GetMonitorInfoW(monitor, ref info) || (info.flags & 1) == 0) return true;
-            work = new RectInt32(info.work.Left, info.work.Top,
-                info.work.Right - info.work.Left, info.work.Bottom - info.work.Top);
-            return false;
-        };
-        EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, callback, IntPtr.Zero);
-        GC.KeepAlive(callback);
-        return work;
-    }
-
-    private void CloseReminderPopup()
-    {
-        reminderDismiss.Stop();
-        if (!reminderVisible) return;
-        reminderVisible = false;
-        reminderPopup?.AppWindow.Hide();
-    }
-
-    private static void ShowReminderWithoutActivation(Window popup)
-    {
-        // SW_SHOWNOACTIVATE avoids stealing focus only while showing the window.
-        // A later mouse click can activate it and dispatch the WinUI button event.
-        ShowReminderWindow(WinRT.Interop.WindowNative.GetWindowHandle(popup), 4);
-    }
-
-    [DllImport("user32.dll", EntryPoint = "ShowWindow")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool ShowReminderWindow(IntPtr hwnd, int command);
+    private void CloseReminderPopup() => reminderPopup?.Hide();
 
     private async void ConfigureReminderInterval()
     {
@@ -260,7 +134,7 @@ public sealed partial class MainWindow
         CloseReminderPopup();
         var popup = reminderPopup;
         reminderPopup = null;
-        popup?.Close();
+        popup?.Dispose();
     }
 
 }

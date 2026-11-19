@@ -5,7 +5,7 @@
   },
   "projects": {
     "L:\\source\\repos\\PaceAtlas\\PaceAtlas.Core\\PaceAtlas.Core.csproj": {
-      "version": "0.22.7.7",
+      "version": "0.22.7.18",
       "restore": {
         "projectUniqueName": "L:\\source\\repos\\PaceAtlas\\PaceAtlas.Core\\PaceAtlas.Core.csproj",
         "projectName": "PaceAtlas.Core",
@@ -349,10 +349,15 @@
             "System.Xml.XPath.XDocument": "(,5.0.32767]"
           }
         }
+      },
+      "runtimes": {
+        "win-x64": {
+          "#import": []
+        }
       }
     },
     "L:\\source\\repos\\PaceAtlas\\PaceAtlas.IPC\\PaceAtlas.IPC.csproj": {
-      "version": "0.22.7.7",
+      "version": "0.22.7.18",
       "restore": {
         "projectUniqueName": "L:\\source\\repos\\PaceAtlas\\PaceAtlas.IPC\\PaceAtlas.IPC.csproj",
         "projectName": "PaceAtlas.IPC",
@@ -693,6 +698,11 @@
             "System.Xml.XPath": "(,4.3.32767]",
             "System.Xml.XPath.XDocument": "(,5.0.32767]"
           }
+        }
+      },
+      "runtimes": {
+        "win-x64": {
+          "#import": []
         }
       }
     }

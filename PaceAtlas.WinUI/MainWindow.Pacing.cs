@@ -94,7 +94,8 @@ public sealed partial class MainWindow
                     HideToPacingTray();
                 },
                 ShowAboutFromTray,
-                () => reminderMinutes, () => reminderCustom, SetReminderInterval, ConfigureReminderInterval);
+                () => reminderMinutes, () => reminderCustom, SetReminderInterval, ConfigureReminderInterval, () =>
+                { CloseReminderPopup(); ShowReminderPopup(); });
         }
         catch (Exception ex) { PacingStatus.Text = N("Tray nicht verfügbar: ", "Tray unavailable: ") + ex.Message; }
         AppWindow.Changed += (_, _) =>

@@ -23,7 +23,7 @@ internal sealed class PacingTrayIcon : IDisposable
     private readonly Func<string> language;
     private readonly Action open, start, pause, stop, toggleStartInTray, exit, minimize, showAbout;
     private readonly Action<int, bool> setReminder;
-    private readonly Action configureReminder;
+    private readonly Action configureReminder, showReminder;
     private NotifyIconData data;
     private bool disposed;
 
@@ -31,7 +31,7 @@ internal sealed class PacingTrayIcon : IDisposable
         Func<bool> startInTray, Func<string> language, Action open, Action start, Action pause, Action stop,
         Action toggleStartInTray, Action exit, Action minimize, Action showAbout,
         Func<int> reminderMinutes, Func<bool> reminderCustom, Action<int, bool> setReminder,
-        Action configureReminder)
+        Action configureReminder, Action showReminder)
     {
         this.hwnd = hwnd;
         this.isRunning = isRunning; this.isResting = isResting; this.startInTray = startInTray;
@@ -39,7 +39,7 @@ internal sealed class PacingTrayIcon : IDisposable
         this.open = open; this.start = start; this.pause = pause; this.stop = stop;
         this.toggleStartInTray = toggleStartInTray; this.exit = exit; this.minimize = minimize; this.showAbout = showAbout;
         this.reminderMinutes = reminderMinutes; this.reminderCustom = reminderCustom;
-        this.setReminder = setReminder; this.configureReminder = configureReminder;
+        this.setReminder = setReminder; this.configureReminder = configureReminder; this.showReminder = showReminder;
         icon = LoadImageW(IntPtr.Zero, iconFile, ImageIcon, 0, 0, LrLoadFromFile | LrDefaultSize);
         ownsIcon = icon != IntPtr.Zero;
         if (icon == IntPtr.Zero) icon = LoadIconW(IntPtr.Zero, (IntPtr)32512);
@@ -120,6 +120,7 @@ internal sealed class PacingTrayIcon : IDisposable
                     (english ? "Custom interval ..." : "Eigenes Intervall ...") +
                     (reminderCustom() ? $" ({reminderMinutes()} " +
                         (english ? "minutes)" : "Minuten)") : ""));
+                AppendMenuW(reminders, MF_STRING, 26, english ? "Show now" : "Jetzt anzeigen");
                 submenuAttached = AppendMenuPopupW(menu, MF_POPUP, reminders,
                     english ? "Condition reminder" : "Zustandserinnerung");
             }
@@ -142,6 +143,7 @@ internal sealed class PacingTrayIcon : IDisposable
                 case 7: showAbout(); break;
                 case >= 20 and <= 24: setReminder(new[] { 0, 15, 30, 60, 120 }[command - 20], false); break;
                 case 25: configureReminder(); break;
+                case 26: showReminder(); break;
             }
         }
         finally
